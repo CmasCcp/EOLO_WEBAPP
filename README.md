@@ -1,6 +1,7 @@
-# Proyecto React con Vite
+# EOLO WEBAPP
 
-Este proyecto fue creado con [Vite](https://vitejs.dev/) y utiliza React como framework principal.
+## TODO: Comenzar maquetado de páginas en carpeta /pages
+Se puede ingresar con las rutas puestas en routes/AppRoute.jsx
 
 ## 🚀 Requisitos
 
@@ -12,6 +13,13 @@ Este proyecto fue creado con [Vite](https://vitejs.dev/) y utiliza React como fr
 ```bash
 git clone https://github.com/CmasCcp/EOLO_WEBAPP
 cd EOLO_WEBAPP
+```
 
+## Instalar paquetes y comenzar servidor de desarrollo 
+```bash
 npm install
 npm run dev
+```
+
+
+
