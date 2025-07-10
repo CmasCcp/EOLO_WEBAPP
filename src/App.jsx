@@ -1,4 +1,4 @@
-import './App.css'
+import './index.css'
 import { AppRoute } from './routes/AppRoute'
 import { BrowserRouter } from 'react-router-dom'
 
