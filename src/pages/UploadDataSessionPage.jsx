@@ -1,5 +1,6 @@
 import React from 'react'
 import { Navbar } from '../components/Navbar'
+import { Link } from 'react-router-dom'
 
 export const UploadDataSessionPage = () => {
   return (
@@ -82,16 +83,16 @@ export const UploadDataSessionPage = () => {
 
 
           {/* Cargar datos sesion SD */}
-          <div className="row">
-            <button type="submit" className="btn btn-secondary w-25 text-center ms-auto">
+          <div className="row mb-2">
+            <Link type="submit" className="btn btn-secondary w-25 text-center ms-auto">
               Cargar Datos SD
-            </button>
+            </Link>
           </div>
           {/* Botón */}
-          <div className="row">
-            <button type="submit" className="btn btn-dark w-25 text-center ms-auto">
-              Agregar Dispositivo
-            </button>
+          <div className="row mb-4">
+            <Link to="/sessions" type="submit" className="btn btn-dark w-25 text-center ms-auto">
+              Agregar Sesión
+            </Link>
           </div>
         </form>
       </div>

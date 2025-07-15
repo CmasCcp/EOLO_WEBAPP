@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react'
 import EoloCard from '../components/EoloCard'
 import { Navbar } from '../components/Navbar'
+import { Link } from 'react-router-dom'
 
 export const DevicesPage = () => {
 
@@ -13,12 +14,18 @@ export const DevicesPage = () => {
 
             <div className="row">
                 <h2 className='w-50'>Dispositivos</h2>
-                <button className='ms-auto btn btn-dark w-25'> Agregar Dispositivo</button>
+                <Link to="/add-device" className='ms-auto btn btn-dark w-25'> Agregar Dispositivo</Link>
             </div>
 
-            <EoloCard titulo="Eolo MP 1" lateral="Modelo 1.0" body="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean et diam ante. Integer nec odio pulvinar, ornare dui ac."/>
-            <EoloCard titulo="Eolo MP 2" lateral="Modelo 1.0" body="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean et diam ante. Integer nec odio pulvinar, ornare dui ac."/>
-            <EoloCard titulo="Eolo MP 3" lateral="Modelo 1.0" body="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean et diam ante. Integer nec odio pulvinar, ornare dui ac."/>
+            <Link to={"/sessions"}>
+                <EoloCard titulo="Eolo MP 1" lateral="Modelo 1.0" body="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean et diam ante. Integer nec odio pulvinar, ornare dui ac."/>
+            </Link>
+            <Link to={"/sessions"}>
+                <EoloCard titulo="Eolo MP 2" lateral="Modelo 1.0" body="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean et diam ante. Integer nec odio pulvinar, ornare dui ac."/>
+            </Link>
+            <Link to={"/sessions"}>
+                <EoloCard titulo="Eolo MP 3" lateral="Modelo 1.0" body="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean et diam ante. Integer nec odio pulvinar, ornare dui ac."/>
+            </Link>
             </div>
 
         </div>

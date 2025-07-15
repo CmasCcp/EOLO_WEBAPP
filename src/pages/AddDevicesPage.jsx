@@ -1,5 +1,6 @@
 import React from 'react'
 import { Navbar } from '../components/Navbar'
+import { Link } from 'react-router-dom'
 
 export const AddDevicesPage = () => {
   return (
@@ -51,9 +52,9 @@ export const AddDevicesPage = () => {
 
           {/* Botón */}
           <div className="row">
-            <button type="submit" className="btn btn-dark w-25 text-center ms-auto">
+            <Link to={"/devices"} type="submit" className="btn btn-dark w-25 text-center ms-auto">
               Agregar Dispositivo
-            </button>
+            </Link>
           </div>
         </form>
       </div>

@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 
 export const LoginPage = () => {
   return (
@@ -19,7 +20,7 @@ export const LoginPage = () => {
               <input type="password" class="form-control" id="contrasena" required />
             </div>
             <div class="mb-3">
-              <button type="submit" class="mx-auto btn w-100 btn-dark ">Iniciar Sesión</button>
+              <Link to={"/devices"} type="submit" class="mx-auto btn w-100 btn-dark ">Iniciar Sesión</Link>
             </div>
 
             <div class="text-center mt-3">
