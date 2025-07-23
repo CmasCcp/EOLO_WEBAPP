@@ -6,7 +6,7 @@ export const Navbar = () => {
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
       <div className="container-fluid">
         <Link className="navbar-brand" to="/">EOLO WEB</Link>
-        <button
+        {/* <button
           className="navbar-toggler"
           type="button"
           data-bs-toggle="collapse"
@@ -43,7 +43,7 @@ export const Navbar = () => {
             </li>
 
           </ul>
-        </div>
+        </div> */}
       </div>
     </nav>
   );

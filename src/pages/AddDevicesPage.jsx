@@ -1,12 +1,17 @@
 import React from 'react'
 import { Navbar } from '../components/Navbar'
 import { Link } from 'react-router-dom'
+import { Breadcrumb } from '../components/Breadcrumb'
 
 export const AddDevicesPage = () => {
   return (
     <>
       <Navbar />
       <div className="container mt-5">
+        <Breadcrumb />
+
+
+
         <h2 className="fw-bold mb-4">Agregar Dispositivo:</h2>
 
         <form>
