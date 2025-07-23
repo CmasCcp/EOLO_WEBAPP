@@ -63,3 +63,23 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+.card-border-bottom-right {
+  position: relative;
+  border-bottom: 1px solid #dee2e6; /* Color de borde similar al de Bootstrap */
+}
+
+.card-border-bottom-right::after {
+  content: "";
+  position: absolute;
+  bottom: -10px; /* Ajusta según el espaciado deseado */
+  right: -10px; /* Ajusta según el espaciado deseado */
+  width: 20px; /* Ajusta el tamaño del borde inferior derecho */
+  height: 20px; /* Ajusta el tamaño del borde inferior derecho */
+  background-color: #dee2e6; /* Color de borde similar al de Bootstrap */
+  transform: rotate(45deg); /* Rotamos el cuadrado para crear un triángulo */
+}
+
+.rounded-bottom{
+  border-bottom-left-radius: 0 !important;
+}

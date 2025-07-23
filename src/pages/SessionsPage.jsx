@@ -3,6 +3,7 @@ import EoloCard from '../components/EoloCard';
 import { Navbar } from '../components/Navbar';
 import { Link, useParams } from 'react-router-dom';
 import { Breadcrumb } from '../components/Breadcrumb';
+import { SessionCard } from '../components/SessionCard';
 
 export const SessionsPage = () => {
   let params = useParams();
@@ -49,7 +50,7 @@ export const SessionsPage = () => {
     <div className='container-fluid p-0'>
       {/* NAVEGADOR */}
       <Navbar />
-      <div className="container mt-5">
+      <div className="container mx-auto px-0 mt-5">
         <Breadcrumb />
 
         <div className="row">
@@ -61,18 +62,32 @@ export const SessionsPage = () => {
             <Link to={"upload-data-sessions"} className='btn btn-dark'>Agregar Sesión</Link>
           </div>
         </div>
+        <div className="d-flex flex-row flex-wrap justify-content-between">
 
         {/* Mostrar las sesiones filtradas */}
         {filteredSessions.map((session, index) => (
-          <Link key={index} to={`/dashboard/${titulo}/Sesión_${session.sesion_id}`}>
-            <EoloCard
-              className="col-md-5"
-              titulo={`Sesión_${session.sesion_id}`}
-              lateral={`${session.dia_inicial}-${session.mes_inicial}-${session.año_inicial} ${session.hora_inicio}`}
-              body={session.descripcion}
-            />
-          </Link>
+          // <Link key={index} to={`/dashboard/${titulo}/Sesión_${session.sesion_id}`}>
+          //   <EoloCard
+          //     className="col-md-5"
+          //     titulo={`Sesión_${session.sesion_id}`}
+          //     lateral={`${session.dia_inicial}-${session.mes_inicial}-${session.año_inicial} ${session.hora_inicio}`}
+          //     body={session.descripcion}
+          //   />
+          // </Link>
+          <SessionCard
+            color={index % 2 === 0 ? "white" : "secondary"}
+            day={session.dia_inicial} 
+            year={session.año_inicial} 
+            month={session.mes_inicial} 
+            hourStart={session.hora_inicio} 
+            body={session.descripcion}
+            final_day={session.dia_final}
+            final_month={session.mes_final}
+            final_year={session.año_final}
+            hourFinal={session.hora_fin}
+          />
         ))}
+        </div>
       </div>
     </div>
   );

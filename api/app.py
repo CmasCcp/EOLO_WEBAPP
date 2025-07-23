@@ -4,6 +4,7 @@ import os
 import json
 from werkzeug.utils import secure_filename
 import pandas as pd
+import requests
 
 app = Flask(__name__)
 
@@ -108,6 +109,41 @@ def upload_file():
         return jsonify({"error": "Archivo no permitido. Solo se permiten archivos .xls y .xlsx"}), 400
 
 
+# Endpoint para obtener coordenadas de una ubicación
+@app.route('/geocode', methods=['GET'])
+def geocode_location():
+    location = request.args.get('location')  # Obtener la ubicación desde los parámetros de la URL
+
+    if not location:
+        return jsonify({"error": "No location provided"}), 400
+
+    try:
+
+        
+        # Agregar el encabezado User-Agent para evitar el bloqueo
+        headers = {
+            'User-Agent': 'EOLO/1.0 (dkressing@udd.cl)'  # Agrega un correo válido o información relevante
+        }
+
+        # Solicitar a la API de Nominatim
+        response = requests.get(f'https://nominatim.openstreetmap.org/search', 
+                                params={'q': location, 'format': 'json'},
+                                headers=headers)
+
+        # response = requests.get('https://nominatim.openstreetmap.org/search?format=json&q=Chile')
+        print(response)
+        data = response.json()
+        if data:
+            # Tomar la primera coincidencia
+            location_data = data[0]
+            lat = location_data['lat']
+            lon = location_data['lon']
+            return jsonify({"lat": lat, "lon": lon}), 200
+        else:
+            return jsonify({"error": "Location not found"}), 404
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 # Endpoint para agregar una nueva sesión
 @app.route('/add-session', methods=['POST'])
