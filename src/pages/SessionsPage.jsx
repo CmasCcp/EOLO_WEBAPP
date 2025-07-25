@@ -57,9 +57,11 @@ export const SessionsPage = () => {
           <h2 className='col-md-3 m-0 p-0'>{titulo}</h2>
 
           <div className="col-md-9 m-0 p-0 d-grid gap-3 d-md-flex justify-content-md-end">
-            <Link to={`/dashboard/${titulo}`} className='btn btn-dark'>Dashboard</Link>
-            <Link to={"/dashboard"} className='btn btn-dark'>Ver Datos Online</Link>
+
+            {/* TODO: DEBE DEPENDER DEL MODELO DEL DISPOSITIVO */}
+            <Link to={`/dashboard/${titulo}`} className='btn btn-dark'>Mediciones del dispositivo</Link>
             <Link to={"upload-data-sessions"} className='btn btn-dark'>Agregar Sesión</Link>
+            {/* <Link to={"/dashboard"} className='btn btn-dark'>Ver Datos Online</Link> */}
           </div>
         </div>
         <div className="d-flex flex-row flex-wrap justify-content-between">
@@ -75,7 +77,11 @@ export const SessionsPage = () => {
           //   />
           // </Link>
           <SessionCard
-            color={index % 2 === 0 ? "white" : "secondary"}
+            index={index}
+            titulo={titulo}
+            session={session}
+            // color={index % 2 === 0 ? "white" : "secondary"}
+            color={"white"}
             day={session.dia_inicial} 
             year={session.año_inicial} 
             month={session.mes_inicial} 
@@ -85,7 +91,7 @@ export const SessionsPage = () => {
             final_month={session.mes_final}
             final_year={session.año_final}
             hourFinal={session.hora_fin}
-          />
+            />
         ))}
         </div>
       </div>

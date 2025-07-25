@@ -1,10 +1,12 @@
 import React from 'react'
+import { Link } from 'react-router-dom';
 
-export const SessionCard = ({color, day="23", month="Ene", year="", hourStart="16:00:00",final_day, final_month, final_year, hourFinal, body}) => {
+export const SessionCard = ({index, titulo, session,color, day="23", month="Ene", year="", hourStart="16:00:00",final_day, final_month, final_year, hourFinal, body}) => {
   const meses = [" ", "Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]  
   
   return (
     <div className="card col-lg-3 col-md-5 col-sm-5 col-10 p-0 shadow-sm mt-3 pb-0 px-0 mx-2">
+      <Link key={index} to={`/dashboard/${titulo}/Sesión_${session.sesion_id}`}>
       {/* Ubicacion  */}
       <div className={`card-header bg-${color} text-${color =="white"? "dark":"white"} p-0`}>
         <p className="m-0 px-4 text-center" 
@@ -31,6 +33,7 @@ export const SessionCard = ({color, day="23", month="Ene", year="", hourStart="1
           <small>{final_year}</small>
         </div>
       </div>
+      </Link>
     </div>
   );
 }

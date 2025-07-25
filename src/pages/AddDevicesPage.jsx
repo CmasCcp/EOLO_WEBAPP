@@ -12,33 +12,42 @@ export const AddDevicesPage = () => {
 
 
 
-        <h2 className="fw-bold mb-4">Agregar Dispositivo:</h2>
+        <h2 className="fw-bold mb-4">Asociar dispositivo</h2>
 
         <form>
           {/* Nombre */}
           <div className="mb-4">
             <label htmlFor="nombre" className="form-label fw-semibold">
-              Nombre:
+              Patente dispositivo:
             </label>
             <input
               type="text"
               className="form-control"
               id="nombre"
-              placeholder="Eolo MP 4"
-              disabled
+              placeholder="ej: 123ABC"
             />
+          </div>
+          <div className="mb-4">
+            <label htmlFor="nombre" className="form-label fw-semibold">
+              Pin dispositivo:
+            </label>
+            <input
+              type="text"
+              className="form-control"
+              id="nombre"
+              placeholder="ej: 12345"
+            />
+          </div>
+          <div className="mb-4 ms-auto">
+            <button className='ms-auto'>Buscar dispositivo</button>
           </div>
 
           {/* Modelo */}
+          {/* TODO: CAMBIAR ESTO A UNA DESCRIPCION DEL DISPOSITIVO QUE TIENE LA PATENTE INSERTADA */}
           <div className="mb-4">
-            <label htmlFor="modelo" className="form-label fw-semibold">
-              Modelo:
-            </label>
             <select className="form-select" id="modelo" disabled>
-
-              <option>Modelo 1.0</option>
               <option>Modelo 2.0</option>
-              <option>Modelo 3.0</option>
+              {/* <option>Modelo 3.0</option> */}
             </select>
           </div>
 
@@ -51,11 +60,14 @@ export const AddDevicesPage = () => {
               className="form-control"
               id="comentarios"
               rows="3"
-              placeholder="Dedicado a recolectar datos en Santiago"
+              placeholder="Puede agregar notas en este campo."
             ></textarea>
           </div>
 
+
           {/* Botón */}
+          {/* TODO: LUEGO DEBE INGRESAR PIN DEL DISPOSITIVO */}
+          {/* TODO: EN CASO DE VALIDAR PIN AGREGAR DISPOSITIVO A BASE DE DATOS */}
           <div className="row">
             <Link to={"/devices"} type="submit" className="btn btn-dark w-25 text-center ms-auto">
               Agregar Dispositivo

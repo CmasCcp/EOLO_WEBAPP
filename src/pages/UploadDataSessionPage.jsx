@@ -3,6 +3,10 @@ import { Navbar } from '../components/Navbar';
 import { Link, useParams } from 'react-router-dom';
 import { Breadcrumb } from '../components/Breadcrumb';
 
+// TODO: 
+// 1. Pasar de .csv a excel
+// 2. Input de ubicación
+
 export const UploadDataSessionPage = () => {
   let params = useParams();
   const fileInputRef = useRef(null); // Ref para el input de archivo
@@ -94,7 +98,7 @@ export const UploadDataSessionPage = () => {
       if (response.ok) {
         const data = await response.json();
         console.log(data.data[0]);
-        setDevice(data.data[0].dispositivo)
+        // setDevice(data.data[0].dispositivo)
         setFechaInicio(`${String(data.data[0].dia_inicial) + "-" + String(data.data[0].mes_inicial) + "-" + String(data.data[0].año_inicial)}`)
         setHoraInicio(`${String(data.data[0].hora_inicial)}`)
         handleLocationChange(data.data[0].ubicacion)
@@ -141,16 +145,6 @@ export const UploadDataSessionPage = () => {
             onChange={handleFileChange}  // Llamar a la función de manejo
           />
 
-          {/* Botón para enviar archivo */}
-          <div className="mb-4">
-            <button
-              type="submit"
-              className="btn m-0 btn-secondary w-25 text-center ms-auto"
-              disabled={uploading}  // Deshabilitar el botón mientras se carga el archivo
-            >
-              Enviar archivo al backend
-            </button>
-          </div>
 
         </div>
 
@@ -168,7 +162,7 @@ export const UploadDataSessionPage = () => {
           {/* Nombre */}
           <div className="mb-4">
             <label htmlFor="nombre" className="form-label fw-semibold">
-              Código de dispositivo:
+              Patente del dispositivo:
             </label>
             <input
               type="text"
@@ -279,6 +273,18 @@ export const UploadDataSessionPage = () => {
           {/* Mostrar errores o el estado de carga */}
           {error && <div className="text-danger mb-3">{error}</div>}
           {uploading && <div>Subiendo archivo...</div>}
+
+          
+          {/* Botón para enviar archivo */}
+          <div className="mb-4">
+            <button
+              type="submit"
+              className="btn m-0 btn-secondary w-25 text-center ms-auto"
+              disabled={uploading}  // Deshabilitar el botón mientras se carga el archivo
+            >
+              Enviar archivo al backend
+            </button>
+          </div>
 
           {/* Botón para agregar sesión */}
           <div className="row mb-4">
