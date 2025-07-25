@@ -42,7 +42,7 @@ export const UploadDataSessionPage = () => {
 
     try {
       // Llamada al backend para obtener las coordenadas de la ubicación
-      const response = await fetch(`http://127.0.0.1:5000/geocode?location=${location}`);
+      const response = await fetch(`${import.meta.env.VITE_REACT_APP_API_URL}/geocode?location=${location}`);
       const data = await response.json();
       
       if (data.lat && data.lon) {
@@ -90,7 +90,7 @@ export const UploadDataSessionPage = () => {
     setUploading(true); // Cambiar el estado a "cargando"
 
     try {
-      const response = await fetch('http://127.0.0.1:5000/upload', {
+      const response = await fetch(import.meta.env.VITE_REACT_APP_API_URL+'/upload', {
         method: 'POST',
         body: formData,
       });

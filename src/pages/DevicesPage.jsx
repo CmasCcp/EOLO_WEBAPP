@@ -14,7 +14,7 @@ export const DevicesPage = () => {
         // Función para obtener las sesiones desde el backend
         const fetchDevices = async () => {
             try {
-                const response = await fetch('http://127.0.0.1:5000/sesiones');  // Endpoint para obtener las sesiones
+                const response = await fetch(import.meta.env.VITE_REACT_APP_API_URL+"/sesiones");  // Endpoint para obtener las sesiones
                 if (!response.ok) {
                     throw new Error('Error al obtener las sesiones');
                 }
