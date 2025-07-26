@@ -5,6 +5,7 @@ import json
 from werkzeug.utils import secure_filename
 import pandas as pd
 import requests
+from functions.cript import generate_pin
 
 app = Flask(__name__)
 
@@ -12,9 +13,11 @@ app = Flask(__name__)
 CORS(app)
 
 # Configuración del directorio para guardar los archivos
-UPLOAD_FOLDER = 'C:/Users/Alienware/Desktop/Proyectos software/EOLO_WEBAPP/api/db/sesiones/'
+UPLOAD_FOLDER = 'C:/Users/DREAMFYRE 5/Desktop/Proyectos/EOLO_WEBAPP/api/db/sesiones/'
 ALLOWED_EXTENSIONS = {'xls', 'xlsx'}
-JSON_FILE_PATH = 'C:/Users/Alienware/Desktop/Proyectos software/EOLO_WEBAPP/api/db/sesiones.json'  # Ruta al archivo JSON
+JSON_FILE_PATH = 'C:/Users/DREAMFYRE 5/Desktop/Proyectos/EOLO_WEBAPP/api/db/sesiones.json'  # Ruta al archivo JSON
+JSON_FILES_ROOT = 'C:/Users/DREAMFYRE 5/Desktop/Proyectos/EOLO_WEBAPP/api/db'  # Ruta al archivo JSON
+# JSON_FILE_PATH = 'C:/Users/Alienware/Desktop/Proyectos software/EOLO_WEBAPP/api/db/sesiones.json'  # Ruta al archivo JSON
 
 # Asegúrate de que el directorio existe
 if not os.path.exists(UPLOAD_FOLDER):
@@ -33,6 +36,86 @@ def get_sessions():
         return jsonify(data), 200  # Devolver los datos como JSON
     else:
         return jsonify({"error": "El archivo sesiones.json no existe"}), 404
+
+# Endpoint GET para leer los datos de 'dispositivos.json'
+@app.route('/dispositivos', methods=['GET'])
+def get_devices():
+    print(JSON_FILES_ROOT+"/dispositivos.json")
+    if os.path.exists(JSON_FILES_ROOT+"/dispositivos.json"):
+        with open(JSON_FILES_ROOT+"/dispositivos.json", 'r', encoding='utf-8') as file:
+            data = json.load(file)  # Leer el archivo JSON
+        return jsonify(data), 200  # Devolver los datos como JSON
+    else:
+        return jsonify({"error": "El archivo sesiones.json no existe"}), 404
+
+# Endpoint GET para obtener un dispositivo por patente
+@app.route('/dispositivo', methods=['GET'])
+def get_device():
+    # Obtener la patente desde los parámetros de la URL
+    patente = request.args.get('patente')
+
+    # Verificar si se proporcionó la patente
+    if not patente:
+        return jsonify({"error": "Falta el parámetro 'patente'"}), 400
+
+    # Verificar si el archivo JSON existe
+    if os.path.exists(JSON_FILES_ROOT + "/dispositivos.json"):
+        with open(JSON_FILES_ROOT + "/dispositivos.json", 'r', encoding='utf-8') as file:
+            data = json.load(file)  # Leer el archivo JSON
+
+        # Buscar el dispositivo que tenga la patente proporcionada
+        device = next((device for device in data if device['patente'] == patente), None)
+
+        # Si encontramos el dispositivo, devolverlo, de lo contrario, enviar un error
+        if device:
+            return jsonify(device), 200
+        else:
+            return jsonify({"error": "Dispositivo no encontrado"}), 404
+    else:
+        return jsonify({"error": "El archivo dispositivos.json no existe", "url": JSON_FILES_ROOT + "/dispositivos.json"}), 404
+    
+# Endpoint POST para agregar un dispositivo
+@app.route('/add-device', methods=['POST'])
+def add_device():
+    try:
+        # Obtener los datos del nuevo dispositivo desde la solicitud JSON
+        new_device = request.get_json()
+        print(new_device)
+
+        # Verificar que los campos necesarios estén en el JSON
+        if 'patente' not in new_device or 'modelo' not in new_device:
+            return jsonify({"error": "Faltan campos 'patente' o 'modelo'"}), 400
+
+        # Leer el archivo JSON de dispositivos
+        if os.path.exists(JSON_FILES_ROOT + "/dispositivos.json"):
+            with open(JSON_FILES_ROOT + "/dispositivos.json", 'r', encoding='utf-8') as file:
+                dispositivos_data = json.load(file)
+        else:
+            dispositivos_data = []  # Si el archivo no existe, se crea una lista vacía
+
+        # Verificar si ya existe un dispositivo con la misma patente
+        for device in dispositivos_data:
+            if device['patente'] == new_device['patente']:
+                return jsonify({"error": "Dispositivo con esta patente ya está asociado a tu cuenta."}), 400
+
+        # Agregar el nuevo dispositivo a la lista de dispositivos
+        dispositivos_data.append(new_device)
+
+        # Guardar los datos actualizados en el archivo JSON
+        with open(JSON_FILES_ROOT + "/dispositivos.json", 'w', encoding='utf-8') as file:
+            json.dump(dispositivos_data, file, ensure_ascii=False, indent=2)
+
+        return jsonify({"message": "Dispositivo agregado exitosamente"}), 201
+
+    except Exception as e:
+        return jsonify({"error": f"Hubo un problema al agregar el dispositivo: {str(e)}"}), 500
+
+
+
+
+
+
+
 
 # Función para verificar la extensión del archivo
 def allowed_file(filename):
@@ -175,6 +258,53 @@ def add_session():
 
     except Exception as e:
         return jsonify({"error": f"Hubo un problema al agregar la sesión: {str(e)}"}), 500
+
+
+# Ruta para validar el PIN
+@app.route('/validate-pin', methods=['GET'])
+def validate_pin():
+    # Obtener los parámetros 'text' y 'pin' de la URL
+    text = request.args.get('text')
+    pin = request.args.get('pin')
+
+    # Verificar que ambos parámetros existen
+    if not text or not pin:
+        return jsonify({"error": "Faltan parámetros 'text' o 'pin'"}), 400
+
+    # Generamos el PIN a partir del texto (patente)
+    generated_pin = generate_pin(text)
+
+    print(generated_pin)
+    
+    # Encriptamos el PIN generado
+    
+    # Validar si el PIN proporcionado coincide con el PIN generado
+    if str(pin) == str(generated_pin):
+        return jsonify({"message": "Valid PIN"}), 200
+    else:
+        print(str(pin) + "-" + str(generated_pin))
+        return jsonify({"message": "PIN incorrecto"}), 400
+    
+
+# Ruta para generar el PIN
+@app.route('/get-pin', methods=['GET'])
+def get_pin():
+    # Obtener los parámetros 'text' URL
+    text = request.args.get('text')
+
+    if not text:
+        return jsonify({"error": "Faltan parámetros 'text' o 'pin'"}), 400
+
+    # Generamos el PIN a partir del texto (patente)
+    generated_pin = generate_pin(text)
+
+    print(generated_pin)
+    
+    # Validar si el PIN proporcionado coincide con el PIN generado
+    return jsonify({"input": text, "pin": generated_pin}), 200
+    
+
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

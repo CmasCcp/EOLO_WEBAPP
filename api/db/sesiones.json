@@ -1,7 +1,7 @@
 [
   {
     "sesion_id": 1000,
-    "dispositivo": "Eolo_MP_100",
+    "patente": "Eolo_MP_100",
     "dia_inicial": 30,
     "mes_inicial": 6,
     "año_inicial": 2023,
@@ -15,7 +15,7 @@
   },
   {
     "sesion_id": 1001,
-    "dispositivo": "Eolo_MP_100",
+    "patente": "Eolo_MP_100",
     "dia_inicial": 1,
     "mes_inicial": 7,
     "año_inicial": 2023,
@@ -29,7 +29,7 @@
   },
   {
     "sesion_id": 1002,
-    "dispositivo": "Eolo_MP_100",
+    "patente": "Eolo_MP_100",
     "dia_inicial": 15,
     "mes_inicial": 7,
     "año_inicial": 2023,
@@ -43,7 +43,7 @@
   },
   {
     "sesion_id": 1003,
-    "dispositivo": "Eolo_MP_100",
+    "patente": "Eolo_MP_100",
     "dia_inicial": 10,
     "mes_inicial": 8,
     "año_inicial": 2023,
@@ -57,7 +57,7 @@
   },
   {
     "sesion_id": 1004,
-    "dispositivo": "Eolo_MP_100",
+    "patente": "Eolo_MP_100",
     "dia_inicial": 20,
     "mes_inicial": 8,
     "año_inicial": 2023,
@@ -71,7 +71,7 @@
   },
   {
     "sesion_id": 1005,
-    "dispositivo": "Eolo_MP_100",
+    "patente": "Eolo_MP_100",
     "dia_inicial": 5,
     "mes_inicial": 9,
     "año_inicial": 2023,
@@ -85,7 +85,7 @@
   },
   {
     "sesion_id": 2001,
-    "dispositivo": "Eolo_MP_200",
+    "patente": "Eolo_MP_200",
     "dia_inicial": 3,
     "mes_inicial": 7,
     "año_inicial": 2023,
@@ -99,7 +99,7 @@
   },
   {
     "sesion_id": 2002,
-    "dispositivo": "Eolo_MP_200",
+    "patente": "Eolo_MP_200",
     "dia_inicial": 18,
     "mes_inicial": 7,
     "año_inicial": 2023,
@@ -113,7 +113,7 @@
   },
   {
     "sesion_id": 2003,
-    "dispositivo": "Eolo_MP_200",
+    "patente": "Eolo_MP_200",
     "dia_inicial": 22,
     "mes_inicial": 8,
     "año_inicial": 2023,
@@ -127,7 +127,7 @@
   },
   {
     "sesion_id": 2004,
-    "dispositivo": "Eolo_MP_200",
+    "patente": "Eolo_MP_200",
     "dia_inicial": 17,
     "mes_inicial": 9,
     "año_inicial": 2023,
@@ -141,7 +141,7 @@
   },
   {
     "sesion_id": 2005,
-    "dispositivo": "Eolo_MP_200",
+    "patente": "Eolo_MP_200",
     "dia_inicial": 2,
     "mes_inicial": 10,
     "año_inicial": 2023,
@@ -155,7 +155,7 @@
   },
   {
     "sesion_id": 2003,
-    "dispositivo": "Eolo_MP_300",
+    "patente": "Eolo_MP_300",
     "dia_inicial": 22,
     "mes_inicial": 8,
     "año_inicial": 2023,
@@ -169,7 +169,7 @@
   },
   {
     "sesion_id": 2004,
-    "dispositivo": "Eolo_MP_300",
+    "patente": "Eolo_MP_300",
     "dia_inicial": 17,
     "mes_inicial": 9,
     "año_inicial": 2023,
@@ -183,7 +183,7 @@
   },
   {
     "sesion_id": 2005,
-    "dispositivo": "Eolo_MP_300",
+    "patente": "Eolo_MP_300",
     "dia_inicial": 2,
     "mes_inicial": 10,
     "año_inicial": 2023,

@@ -1,0 +1,24 @@
+[
+  {
+    "patente": "ABC124",
+    "pin": "123",
+    "modelo": "Eolo MP Express"
+  },
+  {
+    "patente": "ABC125",
+    "pin": "123",
+    "modelo": "Eolo MP Express"
+  },
+  {
+    "patente": "MP-01-EXPRESS",
+    "modelo": "Eolo MP Express"
+  },
+  {
+    "patente": "MP-03-EXPRESS",
+    "modelo": "Eolo MP Express"
+  },
+  {
+    "patente": "MP-02-EXPRESS",
+    "modelo": "Eolo MP Express"
+  }
+]
