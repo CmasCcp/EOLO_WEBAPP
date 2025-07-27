@@ -15,9 +15,9 @@ CORS(app)
 # Configuración del directorio para guardar los archivos
 UPLOAD_FOLDER = 'C:/Users/DREAMFYRE 5/Desktop/Proyectos/EOLO_WEBAPP/api/db/sesiones/'
 ALLOWED_EXTENSIONS = {'xls', 'xlsx'}
-JSON_FILE_PATH = 'C:/Users/DREAMFYRE 5/Desktop/Proyectos/EOLO_WEBAPP/api/db/sesiones.json'  # Ruta al archivo JSON
 JSON_FILES_ROOT = 'C:/Users/DREAMFYRE 5/Desktop/Proyectos/EOLO_WEBAPP/api/db'  # Ruta al archivo JSON
-# JSON_FILE_PATH = 'C:/Users/Alienware/Desktop/Proyectos software/EOLO_WEBAPP/api/db/sesiones.json'  # Ruta al archivo JSON
+JSON_FILES_API_SENSORES_ROOT = 'C:/Users/DREAMFYRE 5/Desktop/Proyectos/EOLO_WEBAPP/api/db/api_sensores'  # Ruta al archivo JSON
+JSON_FILES_USER_ROOT = 'C:/Users/DREAMFYRE 5/Desktop/Proyectos/EOLO_WEBAPP/api/db/usuario'  # Ruta al archivo JSON
 
 # Asegúrate de que el directorio existe
 if not os.path.exists(UPLOAD_FOLDER):
@@ -29,9 +29,20 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 # Endpoint GET para leer los datos de 'sesiones.json'
 @app.route('/sesiones', methods=['GET'])
 def get_sessions():
-    print(JSON_FILE_PATH)
-    if os.path.exists(JSON_FILE_PATH):
-        with open(JSON_FILE_PATH, 'r', encoding='utf-8') as file:
+    print(JSON_FILES_API_SENSORES_ROOT+"/sesiones.json")
+    if os.path.exists(JSON_FILES_API_SENSORES_ROOT+"/sesiones.json"):
+        with open(JSON_FILES_API_SENSORES_ROOT+"/sesiones.json", 'r', encoding='utf-8') as file:
+            data = json.load(file)  # Leer el archivo JSON
+        return jsonify(data), 200  # Devolver los datos como JSON
+    else:
+        return jsonify({"error": "El archivo sesiones.json no existe"}), 404
+
+# Endpoint GET para leer los datos de 'sesiones.json'
+@app.route('/mis-sesiones', methods=['GET'])
+def get_my_sessions():
+    print(JSON_FILES_USER_ROOT)
+    if os.path.exists(JSON_FILES_USER_ROOT+"/sesiones_usuario.json"):
+        with open(JSON_FILES_USER_ROOT+"/sesiones_usuario.json", 'r', encoding='utf-8') as file:
             data = json.load(file)  # Leer el archivo JSON
         return jsonify(data), 200  # Devolver los datos como JSON
     else:
@@ -40,9 +51,20 @@ def get_sessions():
 # Endpoint GET para leer los datos de 'dispositivos.json'
 @app.route('/dispositivos', methods=['GET'])
 def get_devices():
-    print(JSON_FILES_ROOT+"/dispositivos.json")
-    if os.path.exists(JSON_FILES_ROOT+"/dispositivos.json"):
-        with open(JSON_FILES_ROOT+"/dispositivos.json", 'r', encoding='utf-8') as file:
+    print(JSON_FILES_API_SENSORES_ROOT+"/dispositivos.json")
+    if os.path.exists(JSON_FILES_API_SENSORES_ROOT+"/dispositivos.json"):
+        with open(JSON_FILES_API_SENSORES_ROOT+"/dispositivos.json", 'r', encoding='utf-8') as file:
+            data = json.load(file)  # Leer el archivo JSON
+        return jsonify(data), 200  # Devolver los datos como JSON
+    else:
+        return jsonify({"error": "El archivo sesiones.json no existe"}), 404
+
+# Endpoint GET para leer los datos de 'dispositivos.json'
+@app.route('/mis-dispositivos', methods=['GET'])
+def get_my_devices():
+    print(JSON_FILES_USER_ROOT+"/dispositivos_usuario.json")
+    if os.path.exists(JSON_FILES_USER_ROOT+"/dispositivos_usuario.json"):
+        with open(JSON_FILES_USER_ROOT+"/dispositivos_usuario.json", 'r', encoding='utf-8') as file:
             data = json.load(file)  # Leer el archivo JSON
         return jsonify(data), 200  # Devolver los datos como JSON
     else:
@@ -59,8 +81,8 @@ def get_device():
         return jsonify({"error": "Falta el parámetro 'patente'"}), 400
 
     # Verificar si el archivo JSON existe
-    if os.path.exists(JSON_FILES_ROOT + "/dispositivos.json"):
-        with open(JSON_FILES_ROOT + "/dispositivos.json", 'r', encoding='utf-8') as file:
+    if os.path.exists(JSON_FILES_API_SENSORES_ROOT + "/dispositivos.json"):
+        with open(JSON_FILES_API_SENSORES_ROOT + "/dispositivos.json", 'r', encoding='utf-8') as file:
             data = json.load(file)  # Leer el archivo JSON
 
         # Buscar el dispositivo que tenga la patente proporcionada
@@ -72,7 +94,33 @@ def get_device():
         else:
             return jsonify({"error": "Dispositivo no encontrado"}), 404
     else:
-        return jsonify({"error": "El archivo dispositivos.json no existe", "url": JSON_FILES_ROOT + "/dispositivos.json"}), 404
+        return jsonify({"error": "El archivo dispositivos.json no existe", "url": JSON_FILES_API_SENSORES_ROOT + "/dispositivos.json"}), 404
+    
+# Endpoint GET para obtener un dispositivo por patente
+@app.route('/mi-dispositivo', methods=['GET'])
+def get_my_device():
+    # Obtener la patente desde los parámetros de la URL
+    patente = request.args.get('patente')
+
+    # Verificar si se proporcionó la patente
+    if not patente:
+        return jsonify({"error": "Falta el parámetro 'patente'"}), 400
+
+    # Verificar si el archivo JSON existe
+    if os.path.exists(JSON_FILES_API_SENSORES_ROOT + "/dispositivos.json"):
+        with open(JSON_FILES_API_SENSORES_ROOT + "/dispositivos.json", 'r', encoding='utf-8') as file:
+            data = json.load(file)  # Leer el archivo JSON
+
+        # Buscar el dispositivo que tenga la patente proporcionada
+        device = next((device for device in data if device['patente'] == patente), None)
+
+        # Si encontramos el dispositivo, devolverlo, de lo contrario, enviar un error
+        if device:
+            return jsonify(device), 200
+        else:
+            return jsonify({"error": "Dispositivo no encontrado"}), 404
+    else:
+        return jsonify({"error": "El archivo dispositivos.json no existe", "url": JSON_FILES_API_SENSORES_ROOT + "/dispositivos.json"}), 404
     
 # Endpoint POST para agregar un dispositivo
 @app.route('/add-device', methods=['POST'])
@@ -87,8 +135,8 @@ def add_device():
             return jsonify({"error": "Faltan campos 'patente' o 'modelo'"}), 400
 
         # Leer el archivo JSON de dispositivos
-        if os.path.exists(JSON_FILES_ROOT + "/dispositivos.json"):
-            with open(JSON_FILES_ROOT + "/dispositivos.json", 'r', encoding='utf-8') as file:
+        if os.path.exists(JSON_FILES_USER_ROOT + "/dispositivos_usuario.json"):
+            with open(JSON_FILES_USER_ROOT + "/dispositivos_usuario.json", 'r', encoding='utf-8') as file:
                 dispositivos_data = json.load(file)
         else:
             dispositivos_data = []  # Si el archivo no existe, se crea una lista vacía
@@ -102,7 +150,7 @@ def add_device():
         dispositivos_data.append(new_device)
 
         # Guardar los datos actualizados en el archivo JSON
-        with open(JSON_FILES_ROOT + "/dispositivos.json", 'w', encoding='utf-8') as file:
+        with open(JSON_FILES_USER_ROOT + "/dispositivos_usuario.json", 'w', encoding='utf-8') as file:
             json.dump(dispositivos_data, file, ensure_ascii=False, indent=2)
 
         return jsonify({"message": "Dispositivo agregado exitosamente"}), 201
@@ -134,14 +182,15 @@ def upload_file():
         filename = secure_filename(file.filename)
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(filepath)
-        
         # Leer el archivo Excel usando pandas
         try:
             # Cargar el archivo Excel
             df = pd.read_excel(filepath)
+            print("debug")
 
             # Asegurarse de que las columnas necesarias existen
-            required_columns = ['dispositivo', 'sesion_id', 'dia', 'mes', 'año', 'timestamp', 'ubicacion', 'modelo', 'variable', 'valor']
+            #TODO: en produccion será la base de datos quien asignará el sesion_id
+            required_columns = ['patente', 'sesion_id', 'dia', 'mes', 'año', 'timestamp', 'variable', 'valor']
             for column in required_columns:
                 if column not in df.columns:
                     return jsonify({"error": f"Falta la columna {column} en el archivo."}), 400
@@ -167,10 +216,8 @@ def upload_file():
             # Crear el diccionario para las filas que solo contienen la primera y última fila
              # Crear el diccionario para las filas que solo contienen la primera y última fila
             session_data = {
-                'dispositivo': str(first_row['dispositivo']),
+                'patente': str(first_row['patente']),
                 'sesion_id': int(first_row['sesion_id']),
-                'ubicacion': str(first_row['ubicacion']),
-                'modelo': str(first_row['modelo']),
                 'hora_inicial': time_inicial,
                 'dia_inicial': dia_inicial,
                 'mes_inicial': mes_inicial,
@@ -235,14 +282,13 @@ def add_session():
         # Obtener los datos de la nueva sesión desde la solicitud
         new_session = request.get_json()
 
-        # Verificar que los datos de la sesión sean válidos
-        required_fields = ['sesion_id', 'dispositivo', 'dia', 'mes', 'año', 'hora_inicio', 'hora_fin', 'descripcion', 'modelo']
+        required_fields = ['sesion_id', 'patente', 'dia_inicial', 'mes_inicial', 'año_inicial', 'dia_final', 'mes_final', 'hora_fin']
         if not all(field in new_session for field in required_fields):
             return jsonify({"error": "Faltan campos requeridos"}), 400
 
         # Leer el archivo JSON y agregar la nueva sesión
-        if os.path.exists(JSON_FILE_PATH):
-            with open(JSON_FILE_PATH, 'r', encoding='utf-8') as file:
+        if os.path.exists(JSON_FILES_API_SENSORES_ROOT+"/sesiones.json"):
+            with open(JSON_FILES_API_SENSORES_ROOT+"/sesiones.json", 'r', encoding='utf-8') as file:
                 sessions_data = json.load(file)
         else:
             sessions_data = []
@@ -251,8 +297,24 @@ def add_session():
         sessions_data.append(new_session)
 
         # Guardar los datos actualizados en el archivo JSON
-        with open(JSON_FILE_PATH, 'w', encoding='utf-8') as file:
+        with open(JSON_FILES_API_SENSORES_ROOT+"/sesiones.json", 'w', encoding='utf-8') as file:
             json.dump(sessions_data, file, ensure_ascii=False, indent=2)
+
+        # Leer el archivo JSON y agregar la nueva sesión a la cuenta del usuario
+        if os.path.exists(JSON_FILES_USER_ROOT+"/sesiones_usuario.json"):
+            with open(JSON_FILES_USER_ROOT+"/sesiones_usuario.json", 'r', encoding='utf-8') as file:
+                sessions_data = json.load(file)
+        else:
+            sessions_data = []
+
+        # Agregar la nueva sesión a la lista de sesiones
+        sessions_data.append(new_session)
+
+        # Guardar los datos actualizados en el archivo JSON
+        with open(JSON_FILES_USER_ROOT+"/sesiones_usuario.json", 'w', encoding='utf-8') as file:
+            json.dump(sessions_data, file, ensure_ascii=False, indent=2)
+
+
 
         return jsonify({"message": "Sesión agregada exitosamente"}), 201
 
@@ -303,8 +365,6 @@ def get_pin():
     # Validar si el PIN proporcionado coincide con el PIN generado
     return jsonify({"input": text, "pin": generated_pin}), 200
     
-
-
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

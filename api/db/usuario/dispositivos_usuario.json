@@ -1,4 +1,14 @@
-[  {
+[
+  {
     "patente": "MP-01-EXPRESS",
     "modelo": "Eolo MP Express"
-  }]
+  },
+  {
+    "patente": "MP-02-EXPRESS",
+    "modelo": "Eolo MP Express"
+  },
+  {
+    "patente": "MP-03-EXPRESS",
+    "modelo": "Eolo MP"
+  }
+]

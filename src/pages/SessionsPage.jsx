@@ -17,14 +17,14 @@ export const SessionsPage = () => {
     // Hacer la solicitud GET para obtener las sesiones
     const fetchSessions = async () => {
       try {
-        const response = await fetch(import.meta.env.VITE_REACT_APP_API_URL+'/sesiones');  // Endpoint para obtener las sesiones
+        const response = await fetch(import.meta.env.VITE_REACT_APP_API_URL+'/mis-sesiones');  // Endpoint para obtener las sesiones
         if (!response.ok) {
           throw new Error('Error al obtener las sesiones');
         }
         const data = await response.json();  // Parsear la respuesta JSON
-
+        console.log(data)
         // Filtrar las sesiones por el dispositivo actual
-        const sessionsForDevice = data.filter(session => session.dispositivo === titulo);
+        const sessionsForDevice = data.filter(session => session.patente === titulo);
         setFilteredSessions(sessionsForDevice);  // Guardar las sesiones filtradas en el estado
       } catch (err) {
         setError(err.message);  // Si ocurre un error, almacenamos el mensaje de error

@@ -8,25 +8,25 @@ export const DevicesPage = () => {
     const [devices, setDevices] = useState([]);
     const [loading, setLoading] = useState(true);  // Estado para saber si los datos están cargando
     const [error, setError] = useState(null); // Estado para manejar errores
-    const [sessionsData, setSessionsData] = useState([]); // Estado para almacenar las sesiones
 
     useEffect(() => {
         // Función para obtener las sesiones desde el backend
         const fetchDevices = async () => {
             try {
-                const response = await fetch(import.meta.env.VITE_REACT_APP_API_URL+"/sesiones");  // Endpoint para obtener las sesiones
+                const response = await fetch(import.meta.env.VITE_REACT_APP_API_URL+"/mis-dispositivos");  // Endpoint para obtener las sesiones
                 if (!response.ok) {
                     throw new Error('Error al obtener las sesiones');
                 }
                 const data = await response.json();  // Parsear la respuesta JSON
-                setSessionsData(data); // Guardar las sesiones en el estado
+                setDevices(data); // Guardar las sesiones en el estado
+                console.log(data)
 
-                // Extraer dispositivos únicos de las sesiones
-                const uniqueDevices = [
-                    ...new Set(data.map(session => session.dispositivo))
-                ];
+                // // Extraer dispositivos únicos de las sesiones
+                // const uniqueDevices = [
+                //     ...new Set(data.map(session => session.patente))
+                // ];
 
-                setDevices(uniqueDevices);  // Establecer los dispositivos en el estado
+                // setDevices(uniqueDevices);  // Establecer los dispositivos en el estado
             } catch (err) {
                 setError(err.message);  // Si ocurre un error, almacenamos el mensaje de error
             } finally {
@@ -69,11 +69,11 @@ export const DevicesPage = () => {
 
                 {/* Mostrar las tarjetas de los dispositivos */}
                 {devices.map((device, index) => (
-                    <Link key={index} to={`${device}`}>
+                    <Link key={index} to={`${device.patente}`}>
                         <EoloCard
-                            titulo={device}
-                            lateral={getDeviceModel(device)}  // Mostrar el modelo dinámicamente
-                            body={`Número de sesiones: ${sessionsData.filter(session => session.dispositivo === device).length}`}
+                            titulo={device.patente}
+                            lateral={device.modelo}  // Mostrar el modelo dinámicamente
+                            // body={`Número de sesiones: ${sessionsData.filter(session => session.dispositivo === device).length}`}
                         />
                     </Link>
                 ))}

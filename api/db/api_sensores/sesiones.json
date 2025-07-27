@@ -194,5 +194,17 @@
     "hora_fin": "21:30",
     "descripcion": "Iquique",
     "modelo": "Eolo MP"
+  },
+  {
+    "sesion_id": 3001,
+    "patente": "MP-01-EXPRESS",
+    "dia_inicial": "3",
+    "mes_inicial": "1",
+    "año_inicial": "2025",
+    "dia_final": "4",
+    "mes_final": "1",
+    "año_final": "2025",
+    "hora_inicio": "19:00:00",
+    "hora_fin": "13:00:00"
   }
 ]
