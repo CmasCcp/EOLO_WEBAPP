@@ -1,14 +1,15 @@
 import React, { useRef, useState } from 'react';
 import { Navbar } from '../components/Navbar';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Breadcrumb } from '../components/Breadcrumb';
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
+import L from 'leaflet';
+import MapComponent from '../components/MapComponent';
 
-// TODO: 
-// 1. Pasar de .csv a excel
-// 2. Input de ubicación
 
 export const UploadDataSessionPage = () => {
   let params = useParams();
+  const navigate = useNavigate();
   const fileInputRef = useRef(null); // Ref para el input de archivo
   const [file, setFile] = useState(null); // Estado para almacenar el archivo seleccionado
   const [uploading, setUploading] = useState(false); // Estado para manejar el estado de carga
@@ -29,21 +30,15 @@ export const UploadDataSessionPage = () => {
   const [fechaFinal, setFechaFinal] = useState("DD-MM-YYYY");
   const [horaFinal, setHoraFinal] = useState("HH:MM:SS");
 
-  // para guardar sesion
-  const [sesionId, setSesionId] = useState();
-
-
-  //API UBICACION
+  // API UBICACION
   const [ubicacion, setUbicacion] = useState(""); // Estado para la ubicación ingresada
   const [lat, setLat] = useState(null); // Estado para la latitud
   const [lon, setLon] = useState(null); // Estado para la longitud
-  // const [error, setError] = useState(null); // Estado para manejar errores
 
-
-  const handleLocationChange = async (ubicacion) => {
-    const location = ubicacion;
+  const handleLocationChange = async (e) => {
+    const location = String(e.target.value);
     setUbicacion(location); // Actualizar la ubicación con el valor ingresado
-
+    console.log(location);
     if (location.trim() === "") {
       setLat(null);
       setLon(null);
@@ -55,6 +50,7 @@ export const UploadDataSessionPage = () => {
       const response = await fetch(`${import.meta.env.VITE_REACT_APP_API_URL}/geocode?location=${location}`);
       const data = await response.json();
 
+      console.log("mapa", data);
       if (data.lat && data.lon) {
         setLat(parseFloat(data.lat));  // Asegurarse de que lat y lon sean números
         setLon(parseFloat(data.lon));
@@ -67,9 +63,8 @@ export const UploadDataSessionPage = () => {
     }
   };
 
-  const iframeSrc = lat && lon ?
+  const iframeSrc = lat && lon ? 
     `https://www.openstreetmap.org/export/embed.html?bbox=${lon - 0.05}%2C${lat - 0.05}%2C${lon + 0.05}%2C${lat + 0.05}&layer=mapnik`
-    // `https://www.openstreetmap.org/export/embed.html?bbox=${lon}%2C${lat}%2C${lon}%2C${lat}&layer=mapnik`
     : "";
 
   const handleFileSelect = () => {
@@ -108,20 +103,19 @@ export const UploadDataSessionPage = () => {
       if (response.ok) {
         const data = await response.json();
         console.log(data.data[0]);
-        // setDevice(data.data[0].dispositivo)
-        setDiaInicio(String(data.data[0].dia_inicial))
-        setMesInicio(String(data.data[0].mes_inicial))
-        setAnoInicio(String(data.data[0].año_inicial))
-        setFechaInicio(`${String(data.data[0].dia_inicial) + "-" + String(data.data[0].mes_inicial) + "-" + String(data.data[0].año_inicial)}`)
-        setHoraInicio(`${String(data.data[0].hora_inicial)}`)
-        handleLocationChange(data.data[0].ubicacion)
-        setSesionId(data.data[0].sesion_id)
+        setDiaInicio(String(data.data[0].dia_inicial));
+        setMesInicio(String(data.data[0].mes_inicial));
+        setAnoInicio(String(data.data[0].año_inicial));
+        setFechaInicio(`${String(data.data[0].dia_inicial) + "-" + String(data.data[0].mes_inicial) + "-" + String(data.data[0].año_inicial)}`);
+        setHoraInicio(`${String(data.data[0].hora_inicial)}`);
+        handleLocationChange(data.data[0].ubicacion);
+        setSesionId(data.data[0].sesion_id);
 
-        setDiaFinal(String(data.data[0].dia_final))
-        setMesFinal(String(data.data[0].mes_final))
-        setAnoFinal(String(data.data[0].año_final))
-        setFechaFinal(`${String(data.data[0].dia_final) + "-" + String(data.data[0].mes_final) + "-" + String(data.data[0].año_final)}`)
-        setHoraFinal(`${String(data.data[0].hora_final)}`)
+        setDiaFinal(String(data.data[0].dia_final));
+        setMesFinal(String(data.data[0].mes_final));
+        setAnoFinal(String(data.data[0].año_final));
+        setFechaFinal(`${String(data.data[0].dia_final) + "-" + String(data.data[0].mes_final) + "-" + String(data.data[0].año_final)}`);
+        setHoraFinal(`${String(data.data[0].hora_final)}`);
 
         alert(data.message || "Archivo subido exitosamente");
         setError(null); // Limpiar el error
@@ -139,7 +133,7 @@ export const UploadDataSessionPage = () => {
     e.preventDefault(); // Evitar que el formulario se recargue
 
     // Validar que todos los campos estén completos
-    if (!sesionId || !patente || !fechaFinal || !fechaInicio || !horaInicio || !horaFinal) {
+    if (!patente || !fechaFinal || !fechaInicio || !horaInicio || !horaFinal) {
       setError('Por favor, completa todos los campos');
       return;
     }
@@ -183,6 +177,11 @@ export const UploadDataSessionPage = () => {
         setAnoFinal('');
         setHoraInicio('');
         setHoraFinal('');
+        
+        alert(data.message || "Sesión cargada exitosamente");
+        setError(null); // Limpiar el error
+        // Redirigir a /devices después de agregar la sesión
+        navigate('/devices');
       } else {
         const data = await response.json();
         throw new Error(data.error || 'Error al agregar la sesión');
@@ -220,9 +219,6 @@ export const UploadDataSessionPage = () => {
 
 
         </div>
-
-
-
 
         {/* Mostrar nombre del archivo seleccionado */}
         {fileName && (
@@ -305,32 +301,27 @@ export const UploadDataSessionPage = () => {
               className="form-control"
               id="comentarios"
               rows="3"
-              placeholder="Dedicado a recolectar datos en Santiago"
+              placeholder="¿Desea agregar notas respecto a la sesión?"
             ></textarea>
           </div>
 
           {/* Localización */}
-          {/* <div className="mb-4">
-            <label htmlFor="comentarios" className="form-label fw-semibold">
+          <div className="mb-4">
+            <label htmlFor="ubicacion" className="form-label fw-semibold">
               Localización:
             </label>
-
-            <div className="border" style={{ height: "200px", width: "100%", overflow: "hidden" }}>
-              <iframe
-                title="Mapa"
-                width="100%"
-                height="100%"
-                frameBorder="0"
-                style={{ border: 0 }}
-                src="https://www.openstreetmap.org/export/embed.html?bbox=-73.15%2C-36.82%2C-73.05%2C-36.78&layer=mapnik"
-                allowFullScreen
-              ></iframe>
-            </div>
-          </div> */}
-
+            <input
+              type="text"
+              className="form-control"
+              id="ubicacion"
+              onChange={handleLocationChange}
+              placeholder={"ubicacion"}
+            />
+          </div>
 
           {/* Mostrar el mapa solo si las coordenadas están disponibles */}
           {lat && lon && (
+            <>
             <div className="border" style={{ height: "200px", width: "100%", overflow: "hidden" }}>
               <iframe
                 title="Mapa"
@@ -340,13 +331,15 @@ export const UploadDataSessionPage = () => {
                 style={{ border: 0 }}
                 src={iframeSrc} // Asignar la URL dinámica al iframe
                 allowFullScreen
-              ></iframe>
+                ></iframe>
             </div>
+             <MapComponent lat={lat} lon={lon}/>
+            </>
           )}
+
           {/* Mostrar errores o el estado de carga */}
           {error && <div className="text-danger mb-3">{error}</div>}
           {uploading && <div>Subiendo archivo...</div>}
-
 
           {/* Botón para enviar archivo */}
           <div className="mb-4">
