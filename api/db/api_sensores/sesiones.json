@@ -631,5 +631,21 @@
     "lon": -70.49315214157106,
     "ubicacion": "Cajón del Mapocho, Avenida Paseo Pie Andino, Cerro Dieciocho, Lo Barnechea, Provincia de Santiago, Región Metropolitana de Santiago, 7710053, Chile",
     "ubicacion_corto": "Lo Barnechea"
+  },
+  {
+    "sesion_id": 3001,
+    "patente": "MP-04-EXPRESS",
+    "dia_inicial": "3",
+    "mes_inicial": "1",
+    "año_inicial": "2025",
+    "dia_final": "4",
+    "mes_final": "1",
+    "año_final": "2025",
+    "hora_inicio": "19:00:00",
+    "hora_fin": "21:00:00",
+    "lat": -36.7770637505845,
+    "lon": -73.1349563598633,
+    "ubicacion": "El Triángulo, Hualpén, Provincia de Concepción, Región del Biobío, 4600000, Chile",
+    "ubicacion_corto": "Provincia de Concepción"
   }
 ]

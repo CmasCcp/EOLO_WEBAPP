@@ -22,6 +22,7 @@
     "react-stl-viewer": "^2.5.0",
     "reactstrap": "^9.2.3",
     "recharts": "^3.1.0",
+    "three": "^0.178.0",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
