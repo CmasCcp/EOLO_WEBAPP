@@ -8,12 +8,15 @@ export const LoginPage = () => {
 
   const handleLogin = () => {
     if (usuario === 'admin' && contrasena === 'admin') {
+      console.log("login")
       // Crear cookie 'logged=true' con duración de 1 hora
       const expirationDate = new Date();
       expirationDate.setHours(expirationDate.getHours() + 1); // Establece la expiración a 1 hora
       document.cookie = `logged=true; expires=${expirationDate.toUTCString()}; path=/`;
-
-      navigate('/devices');
+      
+      // navigate('/');
+      window.location.reload();
+      console.log("navigate")
     } else {
       alert('Usuario o contraseña incorrectos');
     }
@@ -58,7 +61,7 @@ export const LoginPage = () => {
               Iniciar Sesión
             </button>
           </div>
-
+{/* 
           <div className="text-center mt-3">
             <a href="#">¿Olvidaste tu contraseña?</a>
           </div>
@@ -67,7 +70,7 @@ export const LoginPage = () => {
 
           <div className="text-center">
             <p>¿No tienes una cuenta? <a href="#">Regístrate</a></p>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

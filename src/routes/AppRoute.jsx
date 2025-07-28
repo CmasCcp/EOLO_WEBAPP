@@ -7,6 +7,8 @@ import { UploadDataSessionPage } from "../pages/UploadDataSessionPage.jsx";
 import { DashboardPage } from "../pages/DashboardPage.jsx";
 import { Breadcrumb } from "../components/Breadcrumb"; // Importar el componente Breadcrumb
 import { useState, useEffect } from "react";
+import { HomePage } from "../pages/HomePage.jsx";
+import ExcelChart from "../components/ExcelChart.jsx";
 
 export const AppRoute = () => {
   const [isLogged, setIsLogged] = useState(false);
@@ -32,18 +34,19 @@ export const AppRoute = () => {
       <BrowserRouter>
         <Routes>
           {/* Si está logueado, redirige a /devices */}
-          <Route path="/" element={isLogged ? <Navigate to="devices" /> : <LoginPage />} />
+          <Route path="/" element={isLogged ? <HomePage /> : <LoginPage />} />
+          <Route path="/excel" element={<ExcelChart />} />
           <Route path="*" element={<>NOT FOUND</>} />
-          <Route path="login" element={isLogged ? <Navigate to="devices" /> : <LoginPage />} />
-          <Route path="devices" >
+          <Route path="login" element={isLogged ? <Navigate to="" /> : <LoginPage />} />
+          <Route path="dispositivos" >
             <Route path="" element={<DevicesPage />} />
             <Route path=":deviceSessions" >
               <Route path="" element={<SessionsPage />} />
-              <Route path="upload-data-sessions" element={<UploadDataSessionPage />} />
+              <Route path="agregar-sesion" element={<UploadDataSessionPage />} />
             </Route>
           </Route>
-          <Route path="add-device" element={<AddDevicesPage />} />
-          <Route path="dashboard">
+          <Route path="agregar-dispositivo" element={<AddDevicesPage />} />
+          <Route path="datos">
             <Route path="" element={<DashboardPage />} />
             <Route path=":device">
               <Route path="" element={<DashboardPage />} />

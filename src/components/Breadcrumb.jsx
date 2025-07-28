@@ -11,7 +11,7 @@ export const Breadcrumb = () => {
     <nav aria-label="breadcrumb">
       <ol className="breadcrumb">
         <li className="breadcrumb-item">
-          <Link to="/">Home</Link>
+          <Link to="/">Inicio</Link>
         </li>
         {pathSegments.map((segment, index) => {
           const pathTo = `/${pathSegments.slice(0, index + 1).join('/')}`;

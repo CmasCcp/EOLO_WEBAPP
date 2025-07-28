@@ -59,8 +59,8 @@ export const SessionsPage = () => {
           <div className="col-md-9 m-0 p-0 d-grid gap-3 d-md-flex justify-content-md-end">
 
             {/* TODO: DEBE DEPENDER DEL MODELO DEL DISPOSITIVO */}
-            <Link to={`/dashboard/${titulo}`} className='btn btn-dark'>Mediciones del dispositivo</Link>
-            <Link to={"upload-data-sessions"} className='btn btn-dark'>Agregar Sesión</Link>
+            <Link to={`/datos/${titulo}`} className='btn btn-dark'>Mediciones del dispositivo</Link>
+            <Link to={"agregar-sesion"} className='btn btn-dark'>Agregar Sesión</Link>
             {/* <Link to={"/dashboard"} className='btn btn-dark'>Ver Datos Online</Link> */}
           </div>
         </div>
@@ -86,7 +86,7 @@ export const SessionsPage = () => {
             year={session.año_inicial} 
             month={session.mes_inicial} 
             hourStart={session.hora_inicio} 
-            body={session.descripcion}
+            ubicacion={session.ubicacion_corto}
             final_day={session.dia_final}
             final_month={session.mes_final}
             final_year={session.año_final}

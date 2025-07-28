@@ -63,7 +63,7 @@ export const DevicesPage = () => {
                 <div className="row">
                     <h2 className='col-md-9'>Mis dispositivos</h2>
                     <div className="col-md-3 d-grid d-md-block">
-                        <Link to="/add-device" className='btn btn-dark w-100'>Agregar Dispositivo</Link>
+                        <Link to="/agregar-dispositivo" className='btn btn-dark w-100'>Agregar Dispositivo</Link>
                     </div>
                 </div>
 

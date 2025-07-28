@@ -18,6 +18,7 @@ ALLOWED_EXTENSIONS = {'xls', 'xlsx'}
 JSON_FILES_ROOT = 'C:/Users/DREAMFYRE 5/Desktop/Proyectos/EOLO_WEBAPP/api/db'  # Ruta al archivo JSON
 JSON_FILES_API_SENSORES_ROOT = 'C:/Users/DREAMFYRE 5/Desktop/Proyectos/EOLO_WEBAPP/api/db/api_sensores'  # Ruta al archivo JSON
 JSON_FILES_USER_ROOT = 'C:/Users/DREAMFYRE 5/Desktop/Proyectos/EOLO_WEBAPP/api/db/usuario'  # Ruta al archivo JSON
+JSON_FILES_SESIONES_JSON = 'C:/Users/DREAMFYRE 5/Desktop/Proyectos/EOLO_WEBAPP/api/db/sesiones/json'  # Ruta al archivo JSON
 
 # Asegúrate de que el directorio existe
 if not os.path.exists(UPLOAD_FOLDER):
@@ -225,12 +226,21 @@ def upload_file():
                 'hora_final': time_final,
                 'dia_final': dia_final,
                 'mes_final': mes_final,
-                'año_final': año_final
+                'año_final': año_final,
             }
 
+            
+            # Convertir el DataFrame a JSON
+            file_json = df.to_dict(orient='records')  # Convertir todo el DataFrame a formato de lista de diccionarios
+            print(file_json)
+
+            
+            # Guardar el JSON procesado en un archivo
+            with open(JSON_FILES_SESIONES_JSON + "/sesion_" + str(session_data["sesion_id"]) +".json", 'w', encoding='utf-8') as json_file:
+                json.dump(file_json, json_file, ensure_ascii=False, indent=2)
+            
             # Devolver el resultado solo con la primera y última fila
-            print(session_data)
-            return jsonify({"message": "Archivo procesado exitosamente", "data": [session_data]}), 200
+            return jsonify({"message": "Archivo procesado exitosamente", "data": [session_data], "mediciones": file_json}), 200
         
         except Exception as e:
             return jsonify({"error": f"Ocurrió un error al procesar el archivo: {str(e)}"}), 500
@@ -275,6 +285,47 @@ def geocode_location():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+# Endpoint para obtener coordenadas de una ubicación
+@app.route('/geocode-reverse', methods=['GET'])
+def geocode_reverse_location():
+    lat = request.args.get('lat')  # Obtener la ubicación desde los parámetros de la URL
+    lon = request.args.get('lon')  # Obtener la ubicación desde los parámetros de la URL
+
+    if not lat or not lon:
+        return jsonify({"error": "No location provided"}), 400
+
+    try:
+
+        
+        # Agregar el encabezado User-Agent para evitar el bloqueo
+        headers = {
+            'User-Agent': 'EOLO/1.0 (dkressing@udd.cl)'  # Agrega un correo válido o información relevante
+        }
+
+        # Solicitar a la API de Nominatim
+        response = requests.get(f'https://nominatim.openstreetmap.org/reverse', 
+                                params={'lat': lat,"lon": lon, 'format': 'json'},
+                                headers=headers)
+
+        data = response.json()
+        # data_string = json.dumps(data, ensure_ascii=False)
+        print(str(data["display_name"]))
+        if data:
+            # Tomar la primera coincidencia
+            location_data = data
+            display_name = str(location_data['display_name'])
+
+            # Decodificar cualquier secuencia Unicode en el texto
+            return jsonify(data), 200
+        else:
+            return jsonify({"error": "Location not found"}), 404
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+
+
 # Endpoint para agregar una nueva sesión
 @app.route('/add-session', methods=['POST'])
 def add_session():
@@ -282,7 +333,24 @@ def add_session():
         # Obtener los datos de la nueva sesión desde la solicitud
         new_session = request.get_json()
 
-        required_fields = ['sesion_id', 'patente', 'dia_inicial', 'mes_inicial', 'año_inicial', 'dia_final', 'mes_final', 'hora_fin']
+         # Agregar el encabezado User-Agent para evitar el bloqueo
+        headers = {
+            'User-Agent': 'EOLO/1.0 (dkressing@udd.cl)'  # Agrega un correo válido o información relevante
+        }
+
+        # Solicitar a la API de Nominatim
+        response = requests.get(f'https://nominatim.openstreetmap.org/reverse', 
+                                params={'lat': new_session["lat"],"lon": new_session["lon"], 'format': 'json'},
+                                headers=headers)
+
+        data_location = response.json()
+        print(data_location)
+        location_display_name = data_location["display_name"]
+        address = data_location["address"]
+        new_session["ubicacion"] = location_display_name
+        new_session["ubicacion_corto"] = address.get("city", "") or address.get("road", "") or address.get("suburb", "") or address.get("county", "")
+
+        required_fields = ['ubicacion', "ubicacion_corto","lat", "lon", 'sesion_id', 'patente', 'dia_inicial', 'mes_inicial', 'año_inicial', 'dia_final', 'mes_final', 'hora_fin']
         if not all(field in new_session for field in required_fields):
             return jsonify({"error": "Faltan campos requeridos"}), 400
 

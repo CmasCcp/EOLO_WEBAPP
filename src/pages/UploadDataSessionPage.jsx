@@ -5,6 +5,7 @@ import { Breadcrumb } from '../components/Breadcrumb';
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import MapComponent from '../components/MapComponent';
+import { ChartComponent } from '../components/ExcelChart';
 
 
 export const UploadDataSessionPage = () => {
@@ -13,11 +14,16 @@ export const UploadDataSessionPage = () => {
   const fileInputRef = useRef(null); // Ref para el input de archivo
   const [file, setFile] = useState(null); // Estado para almacenar el archivo seleccionado
   const [uploading, setUploading] = useState(false); // Estado para manejar el estado de carga
+  const [updated, setUpdated] = useState(false); // Estado para manejar el estado de carga
   const [error, setError] = useState(null); // Estado para manejar errores
   const [successMessage, setSuccessMessage] = useState(null); // Estado para manejar errores
   const [fileName, setFileName] = useState(''); // Estado para almacenar el nombre del archivo seleccionado
+  const [isSelected, setIsSelected] = useState(false); // Estado para almacenar el nombre del archivo seleccionado
+  const [jsonData, setJsonData] = useState(); // Estado para almacenar el nombre del archivo seleccionado
 
   // datos formulario
+
+  const [sesionId, setSesionId] = useState();
   const [patente, setPatente] = useState(params.deviceSessions);
   const [diaInicio, setDiaInicio] = useState();
   const [mesInicio, setMesInicio] = useState();
@@ -34,6 +40,14 @@ export const UploadDataSessionPage = () => {
   const [ubicacion, setUbicacion] = useState(""); // Estado para la ubicación ingresada
   const [lat, setLat] = useState(null); // Estado para la latitud
   const [lon, setLon] = useState(null); // Estado para la longitud
+  
+  
+  
+  const handleChangeLocation = (newlat, newlon) => {
+    setLat(newlat);
+    setLon(newlon);
+    console.log("cambiar por picker", newlat, newlon)
+  }
 
   const handleLocationChange = async (e) => {
     const location = String(e.target.value);
@@ -45,9 +59,10 @@ export const UploadDataSessionPage = () => {
       return;
     }
 
+
     try {
       // Llamada al backend para obtener las coordenadas de la ubicación
-      const response = await fetch(`${import.meta.env.VITE_REACT_APP_API_URL}/geocode?location=${location}`);
+      const response = await fetch(`${import.meta.env.VITE_REACT_APP_API_URL}/geocode?location=${location} Chile`);
       const data = await response.json();
 
       console.log("mapa", data);
@@ -63,7 +78,7 @@ export const UploadDataSessionPage = () => {
     }
   };
 
-  const iframeSrc = lat && lon ? 
+  const iframeSrc = lat && lon ?
     `https://www.openstreetmap.org/export/embed.html?bbox=${lon - 0.05}%2C${lat - 0.05}%2C${lon + 0.05}%2C${lat + 0.05}&layer=mapnik`
     : "";
 
@@ -78,6 +93,8 @@ export const UploadDataSessionPage = () => {
     if (selectedFile) {
       setFile(selectedFile);
       setFileName(selectedFile.name); // Actualizar el nombre del archivo seleccionado
+      setIsSelected(true)
+
     }
   };
 
@@ -93,6 +110,7 @@ export const UploadDataSessionPage = () => {
     formData.append('file', file);
 
     setUploading(true); // Cambiar el estado a "cargando"
+
 
     try {
       const response = await fetch(import.meta.env.VITE_REACT_APP_API_URL + '/upload', {
@@ -118,6 +136,11 @@ export const UploadDataSessionPage = () => {
         setHoraFinal(`${String(data.data[0].hora_final)}`);
 
         alert(data.message || "Archivo subido exitosamente");
+        setUpdated(true)
+        setJsonData(data.mediciones)
+        console.log(data.mediciones)
+
+
         setError(null); // Limpiar el error
       } else {
         throw new Error('Error al subir el archivo');
@@ -149,6 +172,8 @@ export const UploadDataSessionPage = () => {
       año_final: anoFinal,
       hora_inicio: horaInicio,
       hora_fin: horaFinal,
+      lat: lat,
+      lon: lon,
     };
 
     try {
@@ -177,11 +202,11 @@ export const UploadDataSessionPage = () => {
         setAnoFinal('');
         setHoraInicio('');
         setHoraFinal('');
-        
+
         alert(data.message || "Sesión cargada exitosamente");
         setError(null); // Limpiar el error
         // Redirigir a /devices después de agregar la sesión
-        navigate('/devices');
+        navigate(-1);
       } else {
         const data = await response.json();
         throw new Error(data.error || 'Error al agregar la sesión');
@@ -199,14 +224,21 @@ export const UploadDataSessionPage = () => {
 
         <h2 className="fw-bold mb-4">Agregar sesión:</h2>
 
+        { !!jsonData && (
+          <div className="row">
+            <ChartComponent datos={jsonData}/>
+          </div>
+        )
+
+        }
+
         {/* Cargar datos sesión SD */}
-        <div className="row mb-2">
+        <div className="col-md-12 m-0 p-0 d-grid gap-3 d-md-flex justify-content-md-start">
           <button
-            type="button"
-            className="btn m-0 btn-secondary w-25 text-center me-auto"
+            className={`btn m-0 btn-${isSelected ? "secondary" : "success"}`}
             onClick={handleFileSelect}
           >
-            Cargar Datos SD
+            {isSelected ? "Datos Cargados" : "Cargar Datos SD"}
           </button>
           {/* Input de archivo oculto */}
           <input
@@ -217,6 +249,15 @@ export const UploadDataSessionPage = () => {
             onChange={handleFileChange}  // Llamar a la función de manejo
           />
 
+
+          {/* Botón para enviar archivo */}
+          <button
+            onClick={handleUpload}
+            className={`btn m-0 btn-${!isSelected || updated ? "secondary" : "success"}`}
+            disabled={!isSelected || updated}  // Deshabilitar el botón mientras se carga el archivo
+          >
+            {!updated ? "Llenar formulario" : "Formulario llenado"}
+          </button>
 
         </div>
 
@@ -251,6 +292,8 @@ export const UploadDataSessionPage = () => {
               className="form-control"
               id="nombre"
               placeholder={String(fechaInicio)}
+              disabled
+
             />
           </div>
 
@@ -264,6 +307,8 @@ export const UploadDataSessionPage = () => {
               className="form-control"
               id="nombre"
               placeholder={horaInicio}
+              disabled
+
             />
           </div>
           {/* Nombre */}
@@ -276,6 +321,8 @@ export const UploadDataSessionPage = () => {
               className="form-control"
               id="nombre"
               placeholder={fechaFinal}
+              disabled
+
             />
           </div>
 
@@ -289,11 +336,13 @@ export const UploadDataSessionPage = () => {
               className="form-control"
               id="nombre"
               placeholder={horaFinal}
+              disabled
+
             />
           </div>
 
           {/* Comentarios */}
-          <div className="mb-4">
+          {/* <div className="mb-4">
             <label htmlFor="comentarios" className="form-label fw-semibold">
               Comentarios:
             </label>
@@ -303,7 +352,7 @@ export const UploadDataSessionPage = () => {
               rows="3"
               placeholder="¿Desea agregar notas respecto a la sesión?"
             ></textarea>
-          </div>
+          </div> */}
 
           {/* Localización */}
           <div className="mb-4">
@@ -315,14 +364,14 @@ export const UploadDataSessionPage = () => {
               className="form-control"
               id="ubicacion"
               onChange={handleLocationChange}
-              placeholder={"ubicacion"}
+              placeholder={"¿Dónde se hicieron las mediciones?"}
             />
           </div>
 
           {/* Mostrar el mapa solo si las coordenadas están disponibles */}
           {lat && lon && (
             <>
-            <div className="border" style={{ height: "200px", width: "100%", overflow: "hidden" }}>
+              {/* <div className="border" style={{ height: "200px", width: "100%", overflow: "hidden" }}>
               <iframe
                 title="Mapa"
                 width="100%"
@@ -332,8 +381,8 @@ export const UploadDataSessionPage = () => {
                 src={iframeSrc} // Asignar la URL dinámica al iframe
                 allowFullScreen
                 ></iframe>
-            </div>
-             <MapComponent lat={lat} lon={lon}/>
+            </div> */}
+              <MapComponent handleChangeLocation={handleChangeLocation} lat={lat} lon={lon} />
             </>
           )}
 
@@ -341,16 +390,6 @@ export const UploadDataSessionPage = () => {
           {error && <div className="text-danger mb-3">{error}</div>}
           {uploading && <div>Subiendo archivo...</div>}
 
-          {/* Botón para enviar archivo */}
-          <div className="mb-4">
-            <button
-              onClick={handleUpload}
-              className="btn m-0 btn-secondary w-25 text-center ms-auto"
-              disabled={uploading}  // Deshabilitar el botón mientras se carga el archivo
-            >
-              Enviar archivo al backend
-            </button>
-          </div>
 
           {/* Botón para agregar sesión */}
           <div className="row mb-4">
