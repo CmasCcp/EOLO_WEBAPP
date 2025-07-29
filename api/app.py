@@ -13,11 +13,11 @@ app = Flask(__name__)
 CORS(app)
 
 # Configuración del directorio para guardar los archivos
-UPLOAD_FOLDER = 'C:/Users/DREAMFYRE 5/Desktop/Proyectos/EOLO_WEBAPP/api/db/sesiones/'
+UPLOAD_FOLDER = 'C:/Users/esteb/EOLO_WEBAPP/api/db/sesiones/'
 ALLOWED_EXTENSIONS = {'xls', 'xlsx'}
-JSON_FILES_ROOT = 'C:/Users/DREAMFYRE 5/Desktop/Proyectos/EOLO_WEBAPP/api/db'  # Ruta al archivo JSON
-JSON_FILES_API_SENSORES_ROOT = 'C:/Users/DREAMFYRE 5/Desktop/Proyectos/EOLO_WEBAPP/api/db/api_sensores'  # Ruta al archivo JSON
-JSON_FILES_USER_ROOT = 'C:/Users/DREAMFYRE 5/Desktop/Proyectos/EOLO_WEBAPP/api/db/usuario'  # Ruta al archivo JSON
+JSON_FILES_ROOT = 'C:/Users/esteb/EOLO_WEBAPP/api/db'  # Ruta al archivo JSON
+JSON_FILES_API_SENSORES_ROOT = 'C:/Users/esteb/EOLO_WEBAPP/api/db/api_sensores'  # Ruta al archivo JSON
+JSON_FILES_USER_ROOT = 'C:/Users/esteb/EOLO_WEBAPP/api/db/usuario'  # Ruta al archivo JSON
 
 # Asegúrate de que el directorio existe
 if not os.path.exists(UPLOAD_FOLDER):

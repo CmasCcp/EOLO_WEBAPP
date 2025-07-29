@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Navbar } from '../components/Navbar'
 import { Link } from 'react-router-dom'
 import { Breadcrumb } from '../components/Breadcrumb'
+import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 
 export const AddDevicesPage = () => {
   // Estado para manejar los datos del dispositivo
@@ -107,12 +108,25 @@ export const AddDevicesPage = () => {
       <div className="container mt-5">
         <Breadcrumb />
 
-        <h2 className="fw-bold mb-4">Asociar dispositivo</h2>
+        <h2 className="fw-bold mb-4">Asociar Dispositivo</h2>
 
         <form onSubmit={handleAddDevice}>
           <div className="mb-4">
             <label htmlFor="nombre" className="form-label fw-semibold">
-              Patente dispositivo:
+              Patente Dispositivo:
+                  <OverlayTrigger
+                    placement="top"
+                    overlay={
+                      <Tooltip id="patente-tooltip">
+                        Escrito en la parte posterior del dispositivo
+                      </Tooltip>
+                    }
+                  >
+                    <span
+                      className="ms-2 d-inline-flex align-items-center justify-content-center"
+                      style={{ cursor: 'pointer', border: '1px solid #ddd' , borderRadius: '50%' , width: '20px' , height: '20px' , background: '#f0f0f0'}}
+                    >?</span>
+                  </OverlayTrigger>
             </label>
             <input
               type="text"
@@ -125,7 +139,20 @@ export const AddDevicesPage = () => {
           </div>
           <div className="mb-4">
             <label htmlFor="nombre" className="form-label fw-semibold">
-              Pin dispositivo:
+              Pin Dispositivo:
+                  <OverlayTrigger
+                    placement="top"
+                    overlay={
+                      <Tooltip id="pin-tooltip">
+                        Escrito en la parte posterior del dispositivo
+                      </Tooltip>
+                    }
+                  >
+                    <span
+                      className="ms-2 d-inline-flex align-items-center justify-content-center"
+                      style={{ cursor: 'pointer', border: '1px solid #ddd' , borderRadius: '50%' , width: '20px' , height: '20px' , background: '#f0f0f0'}}
+                    >?</span>
+                  </OverlayTrigger>
             </label>
             <input
               type="text"
@@ -146,7 +173,7 @@ export const AddDevicesPage = () => {
               disabled={valid}
               onClick={handleValidateDevice} 
               className='btn btn-success ms-auto'>
-              {valid ?"Dispositivo validado": "Validar dispositivo"}
+              {valid ?"Dispositivo validado": "Validar Dispositivo"}
             </button>
           </div>
 

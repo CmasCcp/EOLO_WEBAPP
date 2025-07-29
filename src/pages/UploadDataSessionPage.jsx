@@ -197,7 +197,7 @@ export const UploadDataSessionPage = () => {
       <div className="container mt-5">
         <Breadcrumb />
 
-        <h2 className="fw-bold mb-4">Agregar sesión:</h2>
+        <h2 className="fw-bold mb-4">Agregar Sesión:</h2>
 
         {/* Cargar datos sesión SD */}
         <div className="row mb-2">
@@ -223,7 +223,7 @@ export const UploadDataSessionPage = () => {
         {/* Mostrar nombre del archivo seleccionado */}
         {fileName && (
           <div className="mb-4">
-            <p><strong>Archivo seleccionado:</strong> {fileName}</p>
+            <p><strong>Archivo Seleccionado:</strong> {fileName}</p>
           </div>
         )}
 
@@ -231,7 +231,7 @@ export const UploadDataSessionPage = () => {
           {/* Nombre */}
           <div className="mb-4">
             <label htmlFor="nombre" className="form-label fw-semibold">
-              Patente del dispositivo:
+              Patente del Dispositivo:
             </label>
             <input
               type="text"
@@ -315,7 +315,7 @@ export const UploadDataSessionPage = () => {
               className="form-control"
               id="ubicacion"
               onChange={handleLocationChange}
-              placeholder={"ubicacion"}
+              placeholder={"Ubicación"}
             />
           </div>
 
@@ -333,7 +333,7 @@ export const UploadDataSessionPage = () => {
                 allowFullScreen
                 ></iframe>
             </div>
-             <MapComponent lat={lat} lon={lon}/>
+            <MapComponent lat={lat} lon={lon}/>
             </>
           )}
 
@@ -348,7 +348,7 @@ export const UploadDataSessionPage = () => {
               className="btn m-0 btn-secondary w-25 text-center ms-auto"
               disabled={uploading}  // Deshabilitar el botón mientras se carga el archivo
             >
-              Enviar archivo al backend
+              enviar archivo al backend
             </button>
           </div>
 
