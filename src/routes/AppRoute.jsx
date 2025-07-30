@@ -34,8 +34,9 @@ export const AppRoute = () => {
       <BrowserRouter>
         <Routes>
           {/* Si está logueado, redirige a /devices */}
-          <Route path="/" element={isLogged ? <HomePage /> : <LoginPage />} />
-          <Route path="/excel" element={<ExcelChart />} />
+          {/* <Route path="/" element={isLogged ? <HomePage /> : <LoginPage />} /> */}
+          <Route path="/" element={isLogged ? <Navigate to={"dispositivos"} /> : <LoginPage />} />
+          <Route path="/excel" element={<DashboardPage />} />
           <Route path="*" element={<>NOT FOUND</>} />
           <Route path="login" element={isLogged ? <Navigate to="" /> : <LoginPage />} />
           <Route path="dispositivos" >
@@ -43,6 +44,8 @@ export const AppRoute = () => {
             <Route path=":deviceSessions" >
               <Route path="" element={<SessionsPage />} />
               <Route path="agregar-sesion" element={<UploadDataSessionPage />} />
+              <Route path="datos/:deviceSessions" element={<DashboardPage />} />
+              <Route path=":session" element={<DashboardPage />} />
             </Route>
           </Route>
           <Route path="agregar-dispositivo" element={<AddDevicesPage />} />

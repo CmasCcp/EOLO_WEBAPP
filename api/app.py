@@ -6,19 +6,35 @@ from werkzeug.utils import secure_filename
 import pandas as pd
 import requests
 from functions.cript import generate_pin
+from dotenv import load_dotenv
+import pymysql
+
 
 app = Flask(__name__)
 
 # Habilitar CORS para permitir cualquier origen
 CORS(app)
 
+load_dotenv()
+
 # Configuración del directorio para guardar los archivos
-UPLOAD_FOLDER = 'C:/Users/DREAMFYRE 5/Desktop/Proyectos/EOLO_WEBAPP/api/db/sesiones/'
+UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER")
 ALLOWED_EXTENSIONS = {'xls', 'xlsx'}
-JSON_FILES_ROOT = 'C:/Users/DREAMFYRE 5/Desktop/Proyectos/EOLO_WEBAPP/api/db'  # Ruta al archivo JSON
-JSON_FILES_API_SENSORES_ROOT = 'C:/Users/DREAMFYRE 5/Desktop/Proyectos/EOLO_WEBAPP/api/db/api_sensores'  # Ruta al archivo JSON
-JSON_FILES_USER_ROOT = 'C:/Users/DREAMFYRE 5/Desktop/Proyectos/EOLO_WEBAPP/api/db/usuario'  # Ruta al archivo JSON
-JSON_FILES_SESIONES_JSON = 'C:/Users/DREAMFYRE 5/Desktop/Proyectos/EOLO_WEBAPP/api/db/sesiones/json'  # Ruta al archivo JSON
+JSON_FILES_ROOT = os.getenv("JSON_FILES_ROOT")
+JSON_FILES_API_SENSORES_ROOT = os.getenv("JSON_FILES_API_SENSORES_ROOT")
+JSON_FILES_USER_ROOT = os.getenv("JSON_FILES_USER_ROOT")
+JSON_FILES_SESIONES_JSON = os.getenv("JSON_FILES_SESIONES_JSON")
+
+
+# --- GUARDAR EN MYSQL ---
+connection = pymysql.connect(
+    host=os.getenv("MYSQL_HOST"),
+    user=os.getenv("MYSQL_USER"),
+    password=os.getenv("MYSQL_PASSWORD"),
+    database=os.getenv("MYSQL_DATABASE"),
+    charset='utf8mb4',
+    cursorclass=pymysql.cursors.DictCursor
+)
 
 # Asegúrate de que el directorio existe
 if not os.path.exists(UPLOAD_FOLDER):
@@ -154,11 +170,23 @@ def add_device():
         with open(JSON_FILES_USER_ROOT + "/dispositivos_usuario.json", 'w', encoding='utf-8') as file:
             json.dump(dispositivos_data, file, ensure_ascii=False, indent=2)
 
+        # --- INICIO MYSQL ---
+        try:
+            with connection.cursor() as cursor:
+                sql = "INSERT INTO dispositivos (patente, modelo) VALUES (%s, %s)"
+                cursor.execute(sql, (new_device['patente'], new_device['modelo']))
+            connection.commit()
+        except Exception as db_err:
+            print("Error al guardar en MySQL:", db_err)
+            # Si quieres, puedes retornar un error aquí o solo imprimirlo
+        finally:
+            connection.close()
+        # --- FIN MYSQL ---
+
         return jsonify({"message": "Dispositivo agregado exitosamente"}), 201
 
     except Exception as e:
         return jsonify({"error": f"Hubo un problema al agregar el dispositivo: {str(e)}"}), 500
-
 
 
 
@@ -191,7 +219,7 @@ def upload_file():
 
             # Asegurarse de que las columnas necesarias existen
             #TODO: en produccion será la base de datos quien asignará el sesion_id
-            required_columns = ['patente', 'sesion_id', 'dia', 'mes', 'año', 'timestamp', 'variable', 'valor']
+            required_columns = ['patente', 'sesion_id', 'dia', 'mes', 'año', 'timestamp']
             for column in required_columns:
                 if column not in df.columns:
                     return jsonify({"error": f"Falta la columna {column} en el archivo."}), 400

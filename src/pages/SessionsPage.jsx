@@ -59,8 +59,8 @@ export const SessionsPage = () => {
           <div className="col-md-9 m-0 p-0 d-grid gap-3 d-md-flex justify-content-md-end">
 
             {/* TODO: DEBE DEPENDER DEL MODELO DEL DISPOSITIVO */}
-            <Link to={`/datos/${titulo}`} className='btn btn-dark'>Mediciones del dispositivo</Link>
-            <Link to={"agregar-sesion"} className='btn btn-dark'>Agregar Sesión</Link>
+            <Link to={`/dispositivos/${titulo}/historico`} className='btn btn-dark'>Histórico</Link>
+            <Link to={"agregar-sesion"} className='btn btn-dark'>Cargar CSV</Link>
             {/* <Link to={"/dashboard"} className='btn btn-dark'>Ver Datos Online</Link> */}
           </div>
         </div>

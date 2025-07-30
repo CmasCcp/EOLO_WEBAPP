@@ -1,28 +1,43 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Navbar } from '../components/Navbar';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Breadcrumb } from '../components/Breadcrumb';
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
-import L from 'leaflet';
 import MapComponent from '../components/MapComponent';
-import { ChartComponent } from '../components/ExcelChart';
 
+// TODO: verificar campos completos
+
+
+
+
+// cargar csv
+// guardar csv
+// llenar formulario
+// llenar ubicacion
+// guardar sesion
 
 export const UploadDataSessionPage = () => {
+
   let params = useParams();
   const navigate = useNavigate();
-  const fileInputRef = useRef(null); // Ref para el input de archivo
-  const [file, setFile] = useState(null); // Estado para almacenar el archivo seleccionado
-  const [uploading, setUploading] = useState(false); // Estado para manejar el estado de carga
-  const [updated, setUpdated] = useState(false); // Estado para manejar el estado de carga
   const [error, setError] = useState(null); // Estado para manejar errores
   const [successMessage, setSuccessMessage] = useState(null); // Estado para manejar errores
-  const [fileName, setFileName] = useState(''); // Estado para almacenar el nombre del archivo seleccionado
+
+
+  //cargar csv
+  const fileInputRef = useRef(null); // Ref para el input de archivo
   const [isSelected, setIsSelected] = useState(false); // Estado para almacenar el nombre del archivo seleccionado
-  const [jsonData, setJsonData] = useState(); // Estado para almacenar el nombre del archivo seleccionado
+  const [file, setFile] = useState(null); // Estado para almacenar el archivo seleccionado
+  const [fileName, setFileName] = useState(''); // Estado para almacenar el nombre del archivo seleccionado
+  const [uploading, setUploading] = useState(false); // Estado para manejar el estado de carga
+
+  // guardar csv
+  const [updated, setUpdated] = useState(false); // 
+
+  // llenar formulario
+  const [jsonData, setJsonData] = useState(); // 
+  const inputRef = useRef(null);  // Referencia al input de texto
 
   // datos formulario
-
   const [sesionId, setSesionId] = useState();
   const [patente, setPatente] = useState(params.deviceSessions);
   const [diaInicio, setDiaInicio] = useState();
@@ -36,13 +51,117 @@ export const UploadDataSessionPage = () => {
   const [fechaFinal, setFechaFinal] = useState("DD-MM-YYYY");
   const [horaFinal, setHoraFinal] = useState("HH:MM:SS");
 
-  // API UBICACION
+
+  //Completar ubicacion - API UBICACION
   const [ubicacion, setUbicacion] = useState(""); // Estado para la ubicación ingresada
-  const [lat, setLat] = useState(null); // Estado para la latitud
-  const [lon, setLon] = useState(null); // Estado para la longitud
-  
-  
-  
+  const [lat, setLat] = useState("-36.8270698"); // Estado para la latitud
+  const [lon, setLon] = useState("-73.0502064"); // Estado para la longitud
+
+
+
+
+  // Funciones ------------------------------------------------------------------------
+
+
+  // cargar csv
+  const handleFileSelect = () => {
+    // Activar el input de archivo al hacer clic en el botón
+    fileInputRef.current.click();
+
+  };
+
+  const handleFileChange = async (e) => {
+    // Guardar el archivo seleccionado en el estado
+    e.preventDefault()
+    const selectedFile = e.target.files[0];
+    if (selectedFile) {
+      console.log("selectedFile", selectedFile.name)
+      setFile(selectedFile);
+      setFileName(selectedFile.name); // Actualizar el nombre del archivo seleccionado
+      setIsSelected(true)
+      await handleUpload(selectedFile)
+      // handleUpload(e)
+    }
+  };
+
+
+  // guardar csv
+  // useEffect(()=>{
+  //   console.log(!!file?.name)
+  //   if(!!file?.name){
+  //     handleUpload(file)
+  //   }
+  // },[fileName])
+
+  const handleUpload = async (fileSelected) => {
+    // e.preventDefault();
+    console.log("handleUpload")
+    if (!fileSelected) {
+      setError("Por favor, selecciona un archivo.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', fileSelected);
+
+    setUploading(true); // Cambiar el estado a "cargando"
+    console.log("cargabdi")
+
+    try {
+      const response = await fetch(import.meta.env.VITE_REACT_APP_API_URL + '/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      console.log(response)
+      console.log("guardado, llenar formulario")
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data.data[0]);
+        setDiaInicio(String(data.data[0].dia_inicial));
+        setMesInicio(String(data.data[0].mes_inicial));
+        setAnoInicio(String(data.data[0].año_inicial));
+        setFechaInicio(`${String(data.data[0].dia_inicial) + "-" + String(data.data[0].mes_inicial) + "-" + String(data.data[0].año_inicial)}`);
+        setHoraInicio(`${String(data.data[0].hora_inicial)}`);
+        // handleLocationChange(data.data[0].ubicacion);
+        setSesionId(data.data[0].sesion_id);
+
+        setDiaFinal(String(data.data[0].dia_final));
+        setMesFinal(String(data.data[0].mes_final));
+        setAnoFinal(String(data.data[0].año_final));
+        setFechaFinal(`${String(data.data[0].dia_final) + "-" + String(data.data[0].mes_final) + "-" + String(data.data[0].año_final)}`);
+        setHoraFinal(`${String(data.data[0].hora_final)}`);
+
+        setJsonData(data.mediciones)
+        console.log(data.mediciones)
+
+
+        setError(null); // Limpiar el error
+        setUpdated(true)
+      } else {
+        throw new Error('Error al subir el archivo');
+      }
+    } catch (err) {
+      setError(err.message); // Capturar cualquier error que ocurra
+    } finally {
+      setUploading(false); // Cambiar el estado a "no cargando"
+    }
+  };
+
+  // llenar formulario
+
+
+
+  // llenar ubicacion
+
+  // Usamos useEffect para observar el cambio de 'active' y aplicar el foco cuando cambie
+  // useEffect(() => {
+  //   if (updated && inputRef.current) {
+  //     inputRef.current.focus();  // Enfocar el input cuando 'active' sea true
+  //   }
+  // }, [updated]);  // Ejecutar cuando 'active' cambie
+
   const handleChangeLocation = (newlat, newlon) => {
     setLat(newlat);
     setLon(newlon);
@@ -50,6 +169,7 @@ export const UploadDataSessionPage = () => {
   }
 
   const handleLocationChange = async (e) => {
+    e.preventDefault()
     const location = String(e.target.value);
     setUbicacion(location); // Actualizar la ubicación con el valor ingresado
     console.log(location);
@@ -78,79 +198,7 @@ export const UploadDataSessionPage = () => {
     }
   };
 
-  const iframeSrc = lat && lon ?
-    `https://www.openstreetmap.org/export/embed.html?bbox=${lon - 0.05}%2C${lat - 0.05}%2C${lon + 0.05}%2C${lat + 0.05}&layer=mapnik`
-    : "";
-
-  const handleFileSelect = () => {
-    // Activar el input de archivo al hacer clic en el botón
-    fileInputRef.current.click();
-  };
-
-  const handleFileChange = (e) => {
-    // Guardar el archivo seleccionado en el estado
-    const selectedFile = e.target.files[0];
-    if (selectedFile) {
-      setFile(selectedFile);
-      setFileName(selectedFile.name); // Actualizar el nombre del archivo seleccionado
-      setIsSelected(true)
-
-    }
-  };
-
-  const handleUpload = async (e) => {
-    e.preventDefault(); // Evitar el comportamiento por defecto del formulario
-
-    if (!file) {
-      setError("Por favor, selecciona un archivo.");
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append('file', file);
-
-    setUploading(true); // Cambiar el estado a "cargando"
-
-
-    try {
-      const response = await fetch(import.meta.env.VITE_REACT_APP_API_URL + '/upload', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log(data.data[0]);
-        setDiaInicio(String(data.data[0].dia_inicial));
-        setMesInicio(String(data.data[0].mes_inicial));
-        setAnoInicio(String(data.data[0].año_inicial));
-        setFechaInicio(`${String(data.data[0].dia_inicial) + "-" + String(data.data[0].mes_inicial) + "-" + String(data.data[0].año_inicial)}`);
-        setHoraInicio(`${String(data.data[0].hora_inicial)}`);
-        handleLocationChange(data.data[0].ubicacion);
-        setSesionId(data.data[0].sesion_id);
-
-        setDiaFinal(String(data.data[0].dia_final));
-        setMesFinal(String(data.data[0].mes_final));
-        setAnoFinal(String(data.data[0].año_final));
-        setFechaFinal(`${String(data.data[0].dia_final) + "-" + String(data.data[0].mes_final) + "-" + String(data.data[0].año_final)}`);
-        setHoraFinal(`${String(data.data[0].hora_final)}`);
-
-        alert(data.message || "Archivo subido exitosamente");
-        setUpdated(true)
-        setJsonData(data.mediciones)
-        console.log(data.mediciones)
-
-
-        setError(null); // Limpiar el error
-      } else {
-        throw new Error('Error al subir el archivo');
-      }
-    } catch (err) {
-      setError(err.message); // Capturar cualquier error que ocurra
-    } finally {
-      setUploading(false); // Cambiar el estado a "no cargando"
-    }
-  };
+  // guardar sesion
 
   const handleAddSession = async (e) => {
     e.preventDefault(); // Evitar que el formulario se recargue
@@ -177,6 +225,7 @@ export const UploadDataSessionPage = () => {
     };
 
     try {
+      console.log("first")
       // Enviar los datos de la nueva sesión al backend
       const response = await fetch(import.meta.env.VITE_REACT_APP_API_URL + '/add-session', {
         method: 'POST',
@@ -203,10 +252,10 @@ export const UploadDataSessionPage = () => {
         setHoraInicio('');
         setHoraFinal('');
 
-        alert(data.message || "Sesión cargada exitosamente");
         setError(null); // Limpiar el error
-        // Redirigir a /devices después de agregar la sesión
+        alert(data.message || "Sesión cargada exitosamente");
         navigate(-1);
+        // Redirigir a /devices después de agregar la sesión
       } else {
         const data = await response.json();
         throw new Error(data.error || 'Error al agregar la sesión');
@@ -216,6 +265,10 @@ export const UploadDataSessionPage = () => {
     }
   };
 
+
+
+
+
   return (
     <>
       <Navbar />
@@ -223,14 +276,6 @@ export const UploadDataSessionPage = () => {
         <Breadcrumb />
 
         <h2 className="fw-bold mb-4">Agregar sesión:</h2>
-
-        { !!jsonData && (
-          <div className="row">
-            <ChartComponent datos={jsonData}/>
-          </div>
-        )
-
-        }
 
         {/* Cargar datos sesión SD */}
         <div className="col-md-12 m-0 p-0 d-grid gap-3 d-md-flex justify-content-md-start">
@@ -250,14 +295,14 @@ export const UploadDataSessionPage = () => {
           />
 
 
-          {/* Botón para enviar archivo */}
+          {/* Botón para enviar archivo
           <button
             onClick={handleUpload}
             className={`btn m-0 btn-${!isSelected || updated ? "secondary" : "success"}`}
             disabled={!isSelected || updated}  // Deshabilitar el botón mientras se carga el archivo
           >
             {!updated ? "Llenar formulario" : "Formulario llenado"}
-          </button>
+          </button> */}
 
         </div>
 
@@ -269,119 +314,116 @@ export const UploadDataSessionPage = () => {
         )}
 
         <form onSubmit={handleAddSession}>
+        {/* <form> */}
           {/* Nombre */}
-          <div className="mb-4">
-            <label htmlFor="nombre" className="form-label fw-semibold">
-              Patente del dispositivo:
-            </label>
-            <input
-              type="text"
-              className="form-control"
-              id="nombre"
-              placeholder={patente}
-              disabled
-            />
-          </div>
-          {/* Nombre */}
-          <div className="mb-4">
-            <label htmlFor="nombre" className="form-label fw-semibold">
-              Fecha inicial:
-            </label>
-            <input
-              type="text"
-              className="form-control"
-              id="nombre"
-              placeholder={String(fechaInicio)}
-              disabled
+          <div className="row">
+            <div className="col-6">
+              <div className="mb-4">
+                <label htmlFor="nombre" className="form-label fw-semibold">
+                  Patente del dispositivo:
+                </label>
+                <input
+                  type="text"
+                  className="form-control"
+                  id="nombre"
+                  placeholder={patente}
+                  disabled
+                />
+              </div>
+              {/* Nombre */}
+              <div className="mb-4">
+                <label htmlFor="nombre" className="form-label fw-semibold">
+                  Fecha inicial:
+                </label>
+                <input
+                  type="text"
+                  className="form-control"
+                  id="nombre"
+                  placeholder={String(fechaInicio)}
+                  disabled
 
-            />
-          </div>
+                />
+              </div>
 
-          {/* HORA */}
-          <div className="mb-4">
-            <label htmlFor="nombre" className="form-label fw-semibold">
-              Hora de inicio:
-            </label>
-            <input
-              type="text"
-              className="form-control"
-              id="nombre"
-              placeholder={horaInicio}
-              disabled
+              {/* HORA */}
+              <div className="mb-4">
+                <label htmlFor="nombre" className="form-label fw-semibold">
+                  Hora de inicio:
+                </label>
+                <input
+                  type="text"
+                  className="form-control"
+                  id="nombre"
+                  placeholder={horaInicio}
+                  disabled
 
-            />
-          </div>
-          {/* Nombre */}
-          <div className="mb-4">
-            <label htmlFor="nombre" className="form-label fw-semibold">
-              Fecha final:
-            </label>
-            <input
-              type="text"
-              className="form-control"
-              id="nombre"
-              placeholder={fechaFinal}
-              disabled
+                />
+              </div>
+            </div>
+            <div className="col-6">
+              {/* Nombre */}
+              <div className="mb-4">
+                <label htmlFor="nombre" className="form-label fw-semibold">
+                  Fecha final:
+                </label>
+                <input
+                  type="text"
+                  className="form-control"
+                  id="nombre"
+                  placeholder={fechaFinal}
+                  disabled
+                />
+              </div>
 
-            />
-          </div>
+              {/* HORA */}
+              <div className="mb-4">
+                <label htmlFor="nombre" className="form-label fw-semibold">
+                  Hora de fin:
+                </label>
+                <input
+                  type="text"
+                  className="form-control"
+                  id="nombre"
+                  placeholder={horaFinal}
+                  disabled
 
-          {/* HORA */}
-          <div className="mb-4">
-            <label htmlFor="nombre" className="form-label fw-semibold">
-              Hora de fin:
-            </label>
-            <input
-              type="text"
-              className="form-control"
-              id="nombre"
-              placeholder={horaFinal}
-              disabled
+                />
+                {/* </div> */}
+              </div>
 
-            />
-          </div>
-
-          {/* Comentarios */}
-          {/* <div className="mb-4">
+              {/* Comentarios */}
+              {/* <div className="mb-4">
             <label htmlFor="comentarios" className="form-label fw-semibold">
-              Comentarios:
+            Comentarios:
             </label>
             <textarea
-              className="form-control"
-              id="comentarios"
-              rows="3"
-              placeholder="¿Desea agregar notas respecto a la sesión?"
+            className="form-control"
+            id="comentarios"
+            rows="3"
+            placeholder="¿Desea agregar notas respecto a la sesión?"
             ></textarea>
-          </div> */}
+            </div> */}
 
+            </div>
+          </div>
           {/* Localización */}
           <div className="mb-4">
             <label htmlFor="ubicacion" className="form-label fw-semibold">
               Localización:
             </label>
             <input
+              // ref={inputRef}
               type="text"
               className="form-control"
               id="ubicacion"
               onChange={handleLocationChange}
-              placeholder={"¿Dónde se hicieron las mediciones?"}
+              placeholder={"Buscar en el mapa."}
             />
           </div>
 
           {/* Mostrar el mapa solo si las coordenadas están disponibles */}
           {lat && lon && (
             <>
-              {/* <div className="border" style={{ height: "200px", width: "100%", overflow: "hidden" }}>
-              <iframe
-                title="Mapa"
-                width="100%"
-                height="100%"
-                frameBorder="0"
-                style={{ border: 0 }}
-                src={iframeSrc} // Asignar la URL dinámica al iframe
-                allowFullScreen
-                ></iframe>
-            </div> */}
               <MapComponent handleChangeLocation={handleChangeLocation} lat={lat} lon={lon} />
             </>
           )}

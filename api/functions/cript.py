@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
-from Crypto.Cipher import AES
-from Crypto.Util.Padding import pad, unpad
+# from Crypto.Cipher import AES
+# from Crypto.Util.Padding import pad, unpad
 import base64
 import hashlib
 
@@ -25,14 +25,14 @@ def generate_pin(patente):
     
     return pin
 
-# Función para desencriptar el texto
-def decrypt_text(encrypted_text):
-    # Separar IV y ciphertext
-    iv, ct = encrypted_text.split(":")
-    iv = base64.b64decode(iv)
-    ct = base64.b64decode(ct)
+# # Función para desencriptar el texto
+# def decrypt_text(encrypted_text):
+#     # Separar IV y ciphertext
+#     iv, ct = encrypted_text.split(":")
+#     iv = base64.b64decode(iv)
+#     ct = base64.b64decode(ct)
     
-    # Desencriptar el texto
-    cipher = AES.new(SECRET_KEY.encode('utf-8'), AES.MODE_CBC, iv=iv)
-    pt = unpad(cipher.decrypt(ct), AES.block_size).decode('utf-8')
-    return pt
+#     # Desencriptar el texto
+#     cipher = AES.new(SECRET_KEY.encode('utf-8'), AES.MODE_CBC, iv=iv)
+#     pt = unpad(cipher.decrypt(ct), AES.block_size).decode('utf-8')
+#     return pt

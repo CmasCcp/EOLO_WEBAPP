@@ -13,7 +13,7 @@ export const DevicesPage = () => {
         // Función para obtener las sesiones desde el backend
         const fetchDevices = async () => {
             try {
-                const response = await fetch(import.meta.env.VITE_REACT_APP_API_URL+"/mis-dispositivos");  // Endpoint para obtener las sesiones
+                const response = await fetch(import.meta.env.VITE_REACT_APP_API_URL + "/mis-dispositivos");  // Endpoint para obtener las sesiones
                 if (!response.ok) {
                     throw new Error('Error al obtener las sesiones');
                 }
@@ -66,17 +66,18 @@ export const DevicesPage = () => {
                         <Link to="/agregar-dispositivo" className='btn btn-dark w-100'>Agregar Dispositivo</Link>
                     </div>
                 </div>
-
-                {/* Mostrar las tarjetas de los dispositivos */}
-                {devices.map((device, index) => (
-                    <Link key={index} to={`${device.patente}`}>
+                <div className="d-flex flex-row justify-content-between flex-wrap">
+                    {/* Mostrar las tarjetas de los dispositivos */}
+                    {devices.map((device, index) => (
                         <EoloCard
-                            titulo={device.patente}
-                            lateral={device.modelo}  // Mostrar el modelo dinámicamente
-                            // body={`Número de sesiones: ${sessionsData.filter(session => session.dispositivo === device).length}`}
+                            index={index}
+                            device={device}
+                            titulo={{ "valor": device.patente, "label": "Patente" }}
+                            lateral={{ "valor": device.modelo, "label": "Modelo" }}  // Mostrar el modelo dinámicamente
+                        // body={`Número de sesiones: ${sessionsData.filter(session => session.dispositivo === device).length}`}
                         />
-                    </Link>
-                ))}
+                    ))}
+                </div>
             </div>
         </div>
     );

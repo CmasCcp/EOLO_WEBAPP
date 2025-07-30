@@ -19,53 +19,58 @@ export const AddDevicesPage = () => {
   const [valid, setValid] = useState(false);
 
 
-  const handleAddDevice = async (e) => {
-    e.preventDefault();  // Evitar que el formulario se recargue
-
-    // Validar que los campos no estén vacíos
-    if (!patente || !deviceModel || !valid) {
-      console.log(patente, deviceModel, valid)
-      setError('Por favor, completa todos los campos');
-      return;
-    }
-
-    // Crear el objeto con los datos del dispositivo
-    const newDevice = {
-      patente: patente,
-      modelo: deviceModel,
-    };
-
+  const handleAddDevice = async (modelo, valido) => {
     try {
-      // Realizar el POST al backend
-      const response = await fetch(`${import.meta.env.VITE_REACT_APP_API_URL}/add-device`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(newDevice),
-      });
-
-      // Verificar si la respuesta es exitosa
-      if (response.ok) {
-        const data = await response.json();
-        setSuccessMessage('Dispositivo agregado exitosamente');
-        setError('');
-        // Limpiar los campos después de agregar el dispositivo
-        setPatente('');
-        setDeviceModel('');
-        setPin('');
-        setValid(false);
-        navigate(-1)
-
-
-      } else {
-        const data = await response.json();
-
-        throw new Error(data.error);
+      
+      // Validar que los campos no estén vacíos
+      if (!patente || !modelo || !valido) {
+        console.log(!patente, !modelo, !valid)
+        setError('Por favor, completa todos los campos');
+        return;
       }
+
+      // Crear el objeto con los datos del dispositivo
+      const newDevice = {
+        patente: patente,
+        modelo: modelo,
+      };
+
+      try {
+        // Realizar el POST al backend
+        const response = await fetch(`${import.meta.env.VITE_REACT_APP_API_URL}/add-device`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(newDevice),
+        });
+
+        // Verificar si la respuesta es exitosa
+        if (response.ok) {
+          const data = await response.json();
+          setSuccessMessage('Dispositivo agregado exitosamente');
+          setError('');
+          // Limpiar los campos después de agregar el dispositivo
+          setPatente('');
+          setDeviceModel('');
+          setPin('');
+          setValid(false);
+          navigate(-1)
+
+
+        } else {
+          const data = await response.json();
+
+          throw new Error(data.error);
+        }
+      } catch (error) {
+        setError(`Error: ${error.message}`);
+      }      
     } catch (error) {
       setError(`Error: ${error.message}`);
+      
     }
+
   };
 
   const handleValidateDevice = async (e) => {
@@ -93,8 +98,17 @@ export const AddDevicesPage = () => {
           const deviceData = await deviceRes.json();
           setValid(true);
           setDeviceModel(deviceData.modelo)
+          console.log("seteo modelo", deviceData.modelo)
 
           console.log(deviceData)
+          try {
+            
+              console.log(deviceModel)
+              await handleAddDevice(deviceData.modelo, true)
+            } catch (error) {
+              
+            }
+
         } catch (error) {
           console.log(error)
         }
@@ -119,7 +133,7 @@ export const AddDevicesPage = () => {
 
       
 
-        <form onSubmit={handleAddDevice}>
+        <form onSubmit={handleValidateDevice}>
             <InputWithImagePopover
               label="Patente dispositivo:"
               id="patente"
@@ -143,7 +157,7 @@ export const AddDevicesPage = () => {
           {/* <b className='text-success'>{successMessage}</b> */}
           <b className='text-danger'>{error}</b>
 
-          <div className="mb-4 ms-auto">
+          {/* <div className="mb-4 ms-auto">
 
             <button
               disabled={valid}
@@ -151,11 +165,11 @@ export const AddDevicesPage = () => {
               className='btn btn-success ms-auto'>
               {valid ? "Dispositivo validado" : "Validar dispositivo"}
             </button>
-          </div>
+          </div> */}
 
           {/* Modelo */}
           {/* TODO: CAMBIAR ESTO A UNA DESCRIPCION DEL DISPOSITIVO QUE TIENE LA PATENTE INSERTADA */}
-          <div className="mb-4">
+          {/* <div className="mb-4">
             <label htmlFor="nombre" className="form-label fw-semibold">
               Modelo:
             </label>
@@ -166,10 +180,10 @@ export const AddDevicesPage = () => {
               value={deviceModel}
               disabled
             />
-          </div>
+          </div> */}
 
           <div className="row">
-            <button type="submit" className="btn btn-dark" disabled={!valid}>
+            <button type="submit" className="btn btn-dark mx-auto">
               Agregar Dispositivo
             </button>
           </div>

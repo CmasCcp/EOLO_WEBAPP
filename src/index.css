@@ -83,3 +83,7 @@ button:focus-visible {
 .rounded-bottom{
   border-bottom-left-radius: 0 !important;
 }
+
+.hover-zoom:hover{
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+}

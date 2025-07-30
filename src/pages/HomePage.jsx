@@ -11,7 +11,7 @@ export const HomePage = () => {
                 {/* <RenderComponent /> */}
                 {/* <iframe id="vs_iframe" src="https://www.viewstl.com/?embedded&local=C:/Users/DREAMFYRE 5/Desktop/Proyectos/EOLO_WEBAPP/src/components/Eolo de Polvo 1_.stl" style={{"border":0,"margin":0,"width":"100%","height":"100%"}}></iframe> */}
                 
-                <h1 className='animate__animated animate__backInDown animate__fast'>Bienvenido a ELUN</h1>
+                <h1 className='animate__animated animate__backInDown animate__fast'>Bienvenido a EOLO</h1>
                 <p>Seleccione una opción para continuar</p>
 
                 <div className="d-flex justify-content-center gap-3">

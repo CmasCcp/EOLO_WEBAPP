@@ -1,27 +1,27 @@
 [
   {
-    "patente": "MP-01-EXPRESS",
+    "patente": "MPE001",
     "modelo": "Eolo MP Express"
   },
   {
-    "patente": "MP-02-EXPRESS",
+    "patente": "MPE002",
     "modelo": "Eolo MP Express"
   },
   {
-    "patente": "MP-03-EXPRESS",
-    "modelo": "Eolo MP"
+    "patente": "MPE003",
+    "modelo": "Eolo MP Express"
   },
   {
-    "patente": "MP-04-EXPRESS",
-    "modelo": "Eolo MP"
+    "patente": "MPE004",
+    "modelo": "Eolo MP Express"
   },
   {
-    "patente": "MP-05-EXPRESS",
-    "modelo": "Eolo MP"
+    "patente": "MPE005",
+    "modelo": "Eolo MP Express"
   },
   {
-    "patente": "MP-06-EXPRESS",
-    "modelo": "Eolo MP"
+    "patente": "MPE006",
+    "modelo": "Eolo MP Express"
   },
   {}
 ]
