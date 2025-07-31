@@ -17,7 +17,7 @@ export const SessionsPage = () => {
     // Hacer la solicitud GET para obtener las sesiones
     const fetchSessions = async () => {
       try {
-        const response = await fetch(import.meta.env.VITE_REACT_APP_API_URL+'/mis-sesiones');  // Endpoint para obtener las sesiones
+        const response = await fetch(import.meta.env.VITE_REACT_APP_API_URL+'/mis-sesiones?patente='+titulo);  // Endpoint para obtener las sesiones
         if (!response.ok) {
           throw new Error('Error al obtener las sesiones');
         }
@@ -68,33 +68,25 @@ export const SessionsPage = () => {
 
         {/* Mostrar las sesiones filtradas */}
         {filteredSessions.map((session, index) => (
-          // <Link key={index} to={`/dashboard/${titulo}/Sesión_${session.sesion_id}`}>
-          //   <EoloCard
-          //     className="col-md-5"
-          //     titulo={`Sesión_${session.sesion_id}`}
-          //     lateral={`${session.dia_inicial}-${session.mes_inicial}-${session.año_inicial} ${session.hora_inicio}`}
-          //     body={session.descripcion}
-          //   />
-          // </Link>
           <SessionCard
             index={index}
             titulo={titulo}
             session={session}
             // color={index % 2 === 0 ? "white" : "secondary"}
             color={"white"}
-            day={session.dia_inicial} 
-            year={session.año_inicial} 
-            month={session.mes_inicial} 
-            hourStart={session.hora_inicio} 
+            day={session.timestamp_inicial.split('T')[0].split('-')[2]} 
+            month={session.timestamp_inicial.split('T')[0].split('-')[1]} 
+            year={session.timestamp_inicial.split('T')[0].split('-')[0]} 
+            hourStart={session.timestamp_inicial.split('T')[1]} 
             ubicacion={session.ubicacion_corto}
-            final_day={session.dia_final}
-            final_month={session.mes_final}
-            final_year={session.año_final}
-            hourFinal={session.hora_fin}
+            final_day={session.timestamp_final.split('T')[0].split('-')[2]}
+            final_month={session.timestamp_final.split('T')[0].split('-')[1]}
+            final_year={session.timestamp_final.split('T')[0].split('-')[0]}
+            hourFinal={session.timestamp_final.split('T')[1]}
             />
         ))}
         </div>
-      </div>
+      </div> 
     </div>
   );
 };

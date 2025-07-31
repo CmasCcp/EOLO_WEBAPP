@@ -87,3 +87,7 @@ button:focus-visible {
 .hover-zoom:hover{
   box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
 }
+
+.fs-6 {
+  font-size: 0.75rem !important;
+}

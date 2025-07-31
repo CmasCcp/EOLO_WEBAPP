@@ -57,13 +57,17 @@ def get_sessions():
 # Endpoint GET para leer los datos de 'sesiones.json'
 @app.route('/mis-sesiones', methods=['GET'])
 def get_my_sessions():
-    print(JSON_FILES_USER_ROOT)
-    if os.path.exists(JSON_FILES_USER_ROOT+"/sesiones_usuario.json"):
-        with open(JSON_FILES_USER_ROOT+"/sesiones_usuario.json", 'r', encoding='utf-8') as file:
-            data = json.load(file)  # Leer el archivo JSON
-        return jsonify(data), 200  # Devolver los datos como JSON
-    else:
-        return jsonify({"error": "El archivo sesiones.json no existe"}), 404
+    patente = request.args.get('patente')
+    if not patente:
+        return jsonify({"error": "Falta el parámetro 'patente'"}), 400
+    try:
+        with connection.cursor() as cursor:
+            sql = "SELECT * FROM sesiones WHERE patente = %s"
+            cursor.execute(sql, (patente,))
+            sesiones = cursor.fetchall()
+        return jsonify(sesiones), 200
+    except Exception as e:
+        return jsonify({"error": f"Error al obtener sesiones: {str(e)}"}), 500
 
 # Endpoint GET para leer los datos de 'dispositivos.json'
 @app.route('/dispositivos', methods=['GET'])
@@ -79,13 +83,16 @@ def get_devices():
 # Endpoint GET para leer los datos de 'dispositivos.json'
 @app.route('/mis-dispositivos', methods=['GET'])
 def get_my_devices():
-    print(JSON_FILES_USER_ROOT+"/dispositivos_usuario.json")
-    if os.path.exists(JSON_FILES_USER_ROOT+"/dispositivos_usuario.json"):
-        with open(JSON_FILES_USER_ROOT+"/dispositivos_usuario.json", 'r', encoding='utf-8') as file:
-            data = json.load(file)  # Leer el archivo JSON
-        return jsonify(data), 200  # Devolver los datos como JSON
-    else:
-        return jsonify({"error": "El archivo sesiones.json no existe"}), 404
+    # print(JSON_FILES_USER_ROOT+"/dispositivos_usuario.json")
+    try:
+        with connection.cursor() as cursor:
+            sql = "SELECT * FROM dispositivo_en_usuario WHERE usuario = %s"
+            cursor.execute(sql, (1,))
+            dispositivos = cursor.fetchall()
+        return jsonify(dispositivos), 200
+    except Exception as e:
+        return jsonify({"error": f"Error al obtener dispositivos: {str(e)}"}), 500
+
 
 # Endpoint GET para obtener un dispositivo por patente
 @app.route('/dispositivo', methods=['GET'])
@@ -150,37 +157,14 @@ def add_device():
         # Verificar que los campos necesarios estén en el JSON
         if 'patente' not in new_device or 'modelo' not in new_device:
             return jsonify({"error": "Faltan campos 'patente' o 'modelo'"}), 400
-
-        # Leer el archivo JSON de dispositivos
-        if os.path.exists(JSON_FILES_USER_ROOT + "/dispositivos_usuario.json"):
-            with open(JSON_FILES_USER_ROOT + "/dispositivos_usuario.json", 'r', encoding='utf-8') as file:
-                dispositivos_data = json.load(file)
-        else:
-            dispositivos_data = []  # Si el archivo no existe, se crea una lista vacía
-
-        # Verificar si ya existe un dispositivo con la misma patente
-        for device in dispositivos_data:
-            if device['patente'] == new_device['patente']:
-                return jsonify({"error": "Dispositivo con esta patente ya está asociado a tu cuenta."}), 400
-
-        # Agregar el nuevo dispositivo a la lista de dispositivos
-        dispositivos_data.append(new_device)
-
-        # Guardar los datos actualizados en el archivo JSON
-        with open(JSON_FILES_USER_ROOT + "/dispositivos_usuario.json", 'w', encoding='utf-8') as file:
-            json.dump(dispositivos_data, file, ensure_ascii=False, indent=2)
-
         # --- INICIO MYSQL ---
         try:
             with connection.cursor() as cursor:
-                sql = "INSERT INTO dispositivos (patente, modelo) VALUES (%s, %s)"
-                cursor.execute(sql, (new_device['patente'], new_device['modelo']))
+                sql = "INSERT INTO dispositivo_en_usuario (patente_dispositivo, usuario, modelo) VALUES (%s, %s, %s)"
+                cursor.execute(sql, (new_device['patente'], 1, new_device['modelo']))  
             connection.commit()
         except Exception as db_err:
             print("Error al guardar en MySQL:", db_err)
-            # Si quieres, puedes retornar un error aquí o solo imprimirlo
-        finally:
-            connection.close()
         # --- FIN MYSQL ---
 
         return jsonify({"message": "Dispositivo agregado exitosamente"}), 201
@@ -378,37 +362,66 @@ def add_session():
         new_session["ubicacion"] = location_display_name
         new_session["ubicacion_corto"] = address.get("city", "") or address.get("road", "") or address.get("suburb", "") or address.get("county", "")
 
-        required_fields = ['ubicacion', "ubicacion_corto","lat", "lon", 'sesion_id', 'patente', 'dia_inicial', 'mes_inicial', 'año_inicial', 'dia_final', 'mes_final', 'hora_fin']
+        required_fields = ['ubicacion', "ubicacion_corto","lat", "lon", 'filename', 'patente', 'dia_inicial', 'mes_inicial', 'año_inicial',"hora_inicio", 'dia_final', 'mes_final', 'hora_fin']
         if not all(field in new_session for field in required_fields):
             return jsonify({"error": "Faltan campos requeridos"}), 400
 
         # Leer el archivo JSON y agregar la nueva sesión
-        if os.path.exists(JSON_FILES_API_SENSORES_ROOT+"/sesiones.json"):
-            with open(JSON_FILES_API_SENSORES_ROOT+"/sesiones.json", 'r', encoding='utf-8') as file:
-                sessions_data = json.load(file)
-        else:
-            sessions_data = []
+        # if os.path.exists(JSON_FILES_API_SENSORES_ROOT+"/sesiones.json"):
+        #     with open(JSON_FILES_API_SENSORES_ROOT+"/sesiones.json", 'r', encoding='utf-8') as file:
+        #         sessions_data = json.load(file)
 
-        # Agregar la nueva sesión a la lista de sesiones
-        sessions_data.append(new_session)
+        
+        # --- GUARDAR EN MYSQL ---
+        try:
+            timestamp_inicial = f"{new_session['año_inicial']}-{new_session['mes_inicial']}-{new_session['dia_inicial']}T{new_session['hora_inicio']}"
+            timestamp_final = f"{new_session['año_final']}-{new_session['mes_final']}-{new_session['dia_final']}T{new_session['hora_fin']}"
+            with connection.cursor() as cursor:
+                sql = """
+                    INSERT INTO sesiones (
+                        filename, patente, ubicacion_corto, lat, lon,
+                        timestamp_inicial,timestamp_final
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s)
+                """
+                cursor.execute(sql, (
+                    new_session['filename'],
+                    new_session['patente'],
+                    new_session['ubicacion_corto'],
+                    new_session['lat'],
+                    new_session['lon'],
+                    str(timestamp_inicial),
+                    str(timestamp_final)
+                ))
+            connection.commit()
+            # connection.close()
+        except Exception as db_err:
+            print("Error al guardar sesión en MySQL:", db_err)
+            # Puedes retornar un error si lo deseas
+        # --- FIN MYSQL ---
 
-        # Guardar los datos actualizados en el archivo JSON
-        with open(JSON_FILES_API_SENSORES_ROOT+"/sesiones.json", 'w', encoding='utf-8') as file:
-            json.dump(sessions_data, file, ensure_ascii=False, indent=2)
+        
+        
 
-        # Leer el archivo JSON y agregar la nueva sesión a la cuenta del usuario
-        if os.path.exists(JSON_FILES_USER_ROOT+"/sesiones_usuario.json"):
-            with open(JSON_FILES_USER_ROOT+"/sesiones_usuario.json", 'r', encoding='utf-8') as file:
-                sessions_data = json.load(file)
-        else:
-            sessions_data = []
+        # # Agregar la nueva sesión a la lista de sesiones
+        # sessions_data.append(new_session)
 
-        # Agregar la nueva sesión a la lista de sesiones
-        sessions_data.append(new_session)
+        # # Guardar los datos actualizados en el archivo JSON
+        # with open(JSON_FILES_API_SENSORES_ROOT+"/sesiones.json", 'w', encoding='utf-8') as file:
+        #     json.dump(sessions_data, file, ensure_ascii=False, indent=2)
 
-        # Guardar los datos actualizados en el archivo JSON
-        with open(JSON_FILES_USER_ROOT+"/sesiones_usuario.json", 'w', encoding='utf-8') as file:
-            json.dump(sessions_data, file, ensure_ascii=False, indent=2)
+        # # Leer el archivo JSON y agregar la nueva sesión a la cuenta del usuario
+        # if os.path.exists(JSON_FILES_USER_ROOT+"/sesiones_usuario.json"):
+        #     with open(JSON_FILES_USER_ROOT+"/sesiones_usuario.json", 'r', encoding='utf-8') as file:
+        #         sessions_data = json.load(file)
+        # else:
+        #     sessions_data = []
+
+        # # Agregar la nueva sesión a la lista de sesiones
+        # sessions_data.append(new_session)
+
+        # # Guardar los datos actualizados en el archivo JSON
+        # with open(JSON_FILES_USER_ROOT+"/sesiones_usuario.json", 'w', encoding='utf-8') as file:
+        #     json.dump(sessions_data, file, ensure_ascii=False, indent=2)
 
 
 

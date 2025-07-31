@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
-export const ChartComponent = ({datos, fileName}) => {
+export const ChartComponent = ({datos, title, fileName}) => {
 
   const [data, setData] = useState(datos);
   // const [fileName, setFileName] = useState(fileName);
@@ -19,8 +19,13 @@ export const ChartComponent = ({datos, fileName}) => {
 
   return (
     <div>
-      {data.length > 0 && (
-        <ResponsiveContainer className="mt-5" width="100%" height={400}>
+      {data.length > 0 && (<div className='' >
+        <p className='text-center mt-4 mb-0'>
+          <span className="fw-bolder">{title || "Gráfico de Datos"}</span>
+        </p>
+        <div className="pe-5">
+
+        <ResponsiveContainer className="mt-5" width="100%" height={300}>
           <LineChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="date" />
@@ -31,6 +36,8 @@ export const ChartComponent = ({datos, fileName}) => {
             {/* <Line type="monotone" dataKey="value" stroke="#8884d8" /> */}
           </LineChart>
         </ResponsiveContainer>
+        </div>
+      </div>
       )}
     </div>
   );

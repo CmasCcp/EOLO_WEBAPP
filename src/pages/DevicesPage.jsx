@@ -20,13 +20,6 @@ export const DevicesPage = () => {
                 const data = await response.json();  // Parsear la respuesta JSON
                 setDevices(data); // Guardar las sesiones en el estado
                 console.log(data)
-
-                // // Extraer dispositivos únicos de las sesiones
-                // const uniqueDevices = [
-                //     ...new Set(data.map(session => session.patente))
-                // ];
-
-                // setDevices(uniqueDevices);  // Establecer los dispositivos en el estado
             } catch (err) {
                 setError(err.message);  // Si ocurre un error, almacenamos el mensaje de error
             } finally {
@@ -72,7 +65,7 @@ export const DevicesPage = () => {
                         <EoloCard
                             index={index}
                             device={device}
-                            titulo={{ "valor": device.patente, "label": "Patente" }}
+                            titulo={{ "valor": device.patente_dispositivo, "label": "Patente" }}
                             lateral={{ "valor": device.modelo, "label": "Modelo" }}  // Mostrar el modelo dinámicamente
                         // body={`Número de sesiones: ${sessionsData.filter(session => session.dispositivo === device).length}`}
                         />

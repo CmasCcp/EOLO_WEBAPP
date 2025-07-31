@@ -1,5 +1,9 @@
 [
   {
+    "patente": "MPE004",
+    "modelo": "Eolo MP Express"
+  },
+  {
     "patente": "MPE001",
     "modelo": "Eolo MP Express"
   },
@@ -12,7 +16,11 @@
     "modelo": "Eolo MP Express"
   },
   {
-    "patente": "MPE004",
+    "patente": "MPE005",
+    "modelo": "Eolo MP Express"
+  },
+  {
+    "patente": "MPE006",
     "modelo": "Eolo MP Express"
   }
 ]

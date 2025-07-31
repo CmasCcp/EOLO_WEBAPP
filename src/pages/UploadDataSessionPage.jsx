@@ -210,7 +210,7 @@ export const UploadDataSessionPage = () => {
     }
 
     const newSession = {
-      sesion_id: sesionId,
+      filename: fileName,
       patente: patente,
       dia_inicial: diaInicio,
       mes_inicial: mesInicio,
@@ -241,6 +241,7 @@ export const UploadDataSessionPage = () => {
         setSuccessMessage(data.message || 'Sesión agregada exitosamente');
         setError('');
         // Limpiar los campos después de agregar la sesión
+        setFileName('');
         setSesionId('');
         setPatente('');
         setDiaInicio('');

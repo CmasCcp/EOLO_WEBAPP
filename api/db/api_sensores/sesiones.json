@@ -903,5 +903,21 @@
     "lon": "-73.0502064",
     "ubicacion": "Barros Arana, Centro, Concepción, Provincia de Concepción, Región del Biobío, 4030575, Chile",
     "ubicacion_corto": "Concepción"
+  },
+  {
+    "sesion_id": 3002,
+    "patente": "MPE004",
+    "dia_inicial": "4",
+    "mes_inicial": "1",
+    "año_inicial": "2025",
+    "dia_final": "5",
+    "mes_final": "1",
+    "año_final": "2025",
+    "hora_inicio": "19:00:00",
+    "hora_fin": "21:00:00",
+    "lat": "-36.8270698",
+    "lon": "-73.0502064",
+    "ubicacion": "Barros Arana, Centro, Concepción, Provincia de Concepción, Región del Biobío, 4030575, Chile",
+    "ubicacion_corto": "Concepción"
   }
 ]

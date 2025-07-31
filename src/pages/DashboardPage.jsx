@@ -66,6 +66,35 @@ export const DashboardPage = () => {
     setSesionSelected("")
   }
 
+  // {pathSegments.length < 2 && (<>
+  //   {/* Filtros a la derecha */}
+  //   <div className="col-md-4">
+  //     <div className="row">
+  //       <h5 className="col-8 m-0 p-0">Filtros</h5>
+  //       <a className="col-2 ms-auto my-0 p-0" style={{ "cursor": "pointer" }} onClick={handleClearFilters}>Limpiar</a>
+  //     </div>
+  //     <hr />
+  //     <div className="row">
+
+  //       <div className="d-flex flex-column col-6">
+  //         <h5 className="text-center">Dispositivos</h5>
+  //         {devices.map(device => (
+  //           <button className={`btn ${deviceSelected == device.patente ? "btn-dark" : "btn-secondary"}`} onClick={handleClickDevice} value={device.patente}>{device.patente}</button>
+  //         ))}
+  //       </div>
+  //       {!!deviceSelected &&
+  //         <div className="d-flex flex-column col-6">
+  //           <h5 className="text-center">Sesiones</h5>
+
+  //           {sesionsOpt.map(sesion => (
+  //             <button className={`btn ${sesionSelected == sesion.sesion_id ? "btn-dark" : "btn-secondary"}`} onClick={handleClickSesion} value={sesion.sesion_id}>{sesion.sesion_id}</button>
+  //           ))}
+  //         </div>
+  //       }
+  //     </div>
+  //   </div>
+  // </>)}
+
   return (
     <>
       <Navbar />
@@ -73,44 +102,63 @@ export const DashboardPage = () => {
         <Breadcrumb />
       </div>
 
-      <div className="container row mx-auto">
+      <div className="row mx-auto">
 
-        {pathSegments.length < 2 && (<>        
-        {/* Filtros a la derecha */}
-        <div className="col-md-4">
-          <div className="row">
-            <h5 className="col-8 m-0 p-0">Filtros</h5>
-            <a className="col-2 ms-auto my-0 p-0" style={{ "cursor": "pointer" }} onClick={handleClearFilters}>Limpiar</a>
-          </div>
-          <hr />
-          <div className="row">
-
-            <div className="d-flex flex-column col-6">
-              <h5 className="text-center">Dispositivos</h5>
-              {devices.map(device => (
-                <button className={`btn ${deviceSelected == device.patente ? "btn-dark" : "btn-secondary"}`} onClick={handleClickDevice} value={device.patente}>{device.patente}</button>
-              ))}
-            </div>
-            {!!deviceSelected &&
-              <div className="d-flex flex-column col-6">
-                <h5 className="text-center">Sesiones</h5>
-
-                {sesionsOpt.map(sesion => (
-                  <button className={`btn ${sesionSelected == sesion.sesion_id ? "btn-dark" : "btn-secondary"}`} onClick={handleClickSesion} value={sesion.sesion_id}>{sesion.sesion_id}</button>
-                ))}
-              </div>
-            }
-          </div>
-        </div>
-</>)}
-
-        {/* Gráfico a la izquierda */}
-        <div className="col-md-8">
+        <div className="col-md-10 mx-auto">
           <h5 className="text-center">{!!sesionSelected ? deviceSelected + " > Sesión " + sesionSelected : (!!deviceSelected ? deviceSelected : "Todos los datos")}</h5>
-          <hr className="w-75 mx-auto" />
+          <hr className="col-10 mx-auto" />
           {!!datos && (
-            <div className="row">
-              <ChartComponent datos={datos} />
+            <div className="container">
+              {/* Tarjetas de resumen */}
+              <div className="mx-auto d-flex flex-row justify-content-between flex-wrap mb-2">
+                <div className="card p-0 col-12 col-sm-2 text-center">
+                  <div className="card-body p-1">
+                    <h5 className="m-0">1000</h5>
+                    <span><small className="fs-6">LPM</small></span>
+                  </div>
+                </div>
+                <div className="card p-0 col-12 col-sm-2 text-center">
+                  <div className="card-body p-1">
+                    <h5 className="m-0">1000</h5>
+                    <span><small className="fs-6">M Cúbicos</small></span>
+                  </div>
+                </div>
+                <div className="card p-0 col-12 col-sm-2 text-center">
+                  <div className="card-body p-1">
+                    <h5 className="m-0">1000</h5>
+                    <span><small className="fs-6">°C</small></span>
+                  </div>
+                </div>
+                <div className="card p-0 col-12 col-sm-2 text-center">
+                  <div className="card-body p-1">
+                    <h5 className="m-0">1000</h5>
+                    <span><small className="fs-6">% hum.</small></span>
+                  </div>
+                </div>
+                <div className="card p-0 col-12 col-sm-2 text-center">
+                  <div className="card-body p-1">
+                    <h5 className="m-0">1000</h5>
+                    <span><small className="fs-6">hPa</small></span>
+                  </div>
+                </div>
+              </div>
+              {/* Gráficos */}
+              <div className="col-md-12 mx-auto px-0 d-flex flex-row flex-wrap justify-content-between">
+                <div className="col-6">
+                  
+                </div>
+                <div className="col-6">
+                  <div className="card col-12 col-md-12 ">
+                    <ChartComponent title="Litros Por Minuto" datos={datos} />
+                  </div>
+                  <div className="card col-12 col-md-12  ">
+                    <ChartComponent title="Metros Cubicos" datos={datos} />
+                  </div>
+                  <div className="card col-12 col-md-12  ">
+                    <ChartComponent title="Temperatura" datos={datos} />
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </div>
