@@ -1,51 +1,74 @@
 import { Breadcrumb } from "../components/Breadcrumb";
 import { ChartComponent } from "../components/ExcelChart";
 import { Navbar } from "../components/Navbar";
-import datos from "../../api/db/sesiones/json/sesion_3001.json";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
+// import datos from "../../api/db/sesiones/json/sesion_3001.json";
 
 export const DashboardPage = () => {
-  // Datos de dispositivos y sesiones
-  const devices = [
-    {
-      "patente": "MP-01-EXPRESS",
-      "modelo": "Eolo MP Express",
-    },
-    {
-      "patente": "MP-02-EXPRESS",
-      "modelo": "Eolo MP Express",
-    },
-  ];
 
-  const sesiones_en_dispositivo = [
-    {
-      "sesion_id": 3001,
-      "patente": "MP-01-EXPRESS",
-    },
-    {
-      "sesion_id": 3002,
-      "patente": "MP-01-EXPRESS",
-    },
-    {
-      "sesion_id": 3003,
-      "patente": "MP-02-EXPRESS",
-    },
-    {
-      "sesion_id": 3004,
-      "patente": "MP-02-EXPRESS",
-    },
-  ];
+  const [datos, setDatos] = useState(null);
+  const [idSesion, setIdSesion] = useState(); // Puedes cambiar esto dinámicamente según tu lógica
 
+  // Arrays separados
+  const [humedadArr, setHumedadArr] = useState([]);
+  const [presionArr, setPresionArr] = useState([]);
+  const [temperaturaArr, setTemperaturaArr] = useState([]);
+
+  useEffect(() => {
+    // Aquí puedes obtener el id de la sesión desde la URL o desde donde lo necesites
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id_sesion');
+    if (id) {
+      setIdSesion(id);
+    }
+  }, []);
+  
   const location = useLocation();
 
   // Dividir la ruta actual en segmentos
   const pathSegments = location.pathname.split('/').filter(Boolean);
 
   console.log(pathSegments)
+  useEffect(() => {
+    if (idSesion) {
+      fetch(`${import.meta.env.VITE_REACT_APP_API_URL}/datos?id_sesion=${idSesion}`)
+        .then(res => res.json())
+        .then(data => {
+          setDatos(data);
+
+          // Separar arrays
+          setHumedadArr(
+            data.map(d => ({
+              date: d.timestamp,
+              id_dato: d.id_dato,
+              porcentaje_humedad: parseInt(d.humedad)
+            }))
+          );
+          setPresionArr(
+            data.map(d => ({
+              date: d.timestamp,
+              id_dato: d.id_dato,
+              presion: parseInt(d.presion)
+            }))
+          );
+          setTemperaturaArr(
+            data.map(d => ({
+              date: d.timestamp,
+              id_dato: d.id_dato,
+              temperatura: parseInt(d.temperatura)
+            }))
+          );
+        })
+        .catch(err => {
+          console.error("No se pudo cargar los datos de la API:", err);
+          setDatos(null);
+        });
+    }
+  }, [idSesion]);
+
 
   const [deviceSelected, setDeviceSelected] = useState();
-  const [sesionsOpt, setSesionsOpt] = useState(sesiones_en_dispositivo);
   const [sesionSelected, setSesionSelected] = useState();
 
   const handleClickDevice = (e) => {
@@ -66,35 +89,7 @@ export const DashboardPage = () => {
     setSesionSelected("")
   }
 
-  // {pathSegments.length < 2 && (<>
-  //   {/* Filtros a la derecha */}
-  //   <div className="col-md-4">
-  //     <div className="row">
-  //       <h5 className="col-8 m-0 p-0">Filtros</h5>
-  //       <a className="col-2 ms-auto my-0 p-0" style={{ "cursor": "pointer" }} onClick={handleClearFilters}>Limpiar</a>
-  //     </div>
-  //     <hr />
-  //     <div className="row">
-
-  //       <div className="d-flex flex-column col-6">
-  //         <h5 className="text-center">Dispositivos</h5>
-  //         {devices.map(device => (
-  //           <button className={`btn ${deviceSelected == device.patente ? "btn-dark" : "btn-secondary"}`} onClick={handleClickDevice} value={device.patente}>{device.patente}</button>
-  //         ))}
-  //       </div>
-  //       {!!deviceSelected &&
-  //         <div className="d-flex flex-column col-6">
-  //           <h5 className="text-center">Sesiones</h5>
-
-  //           {sesionsOpt.map(sesion => (
-  //             <button className={`btn ${sesionSelected == sesion.sesion_id ? "btn-dark" : "btn-secondary"}`} onClick={handleClickSesion} value={sesion.sesion_id}>{sesion.sesion_id}</button>
-  //           ))}
-  //         </div>
-  //       }
-  //     </div>
-  //   </div>
-  // </>)}
-
+  { console.log(datos) }
   return (
     <>
       <Navbar />
@@ -103,7 +98,7 @@ export const DashboardPage = () => {
       </div>
 
       <div className="row mx-auto">
-
+        {/* {datos[0]?.patente } */}
         <div className="col-md-10 mx-auto">
           <h5 className="text-center">{!!sesionSelected ? deviceSelected + " > Sesión " + sesionSelected : (!!deviceSelected ? deviceSelected : "Todos los datos")}</h5>
           <hr className="col-10 mx-auto" />
@@ -144,18 +139,18 @@ export const DashboardPage = () => {
               </div>
               {/* Gráficos */}
               <div className="col-md-12 mx-auto px-0 d-flex flex-row flex-wrap justify-content-between">
-                <div className="col-6">
-                  
-                </div>
-                <div className="col-6">
-                  <div className="card col-12 col-md-12 ">
-                    <ChartComponent title="Litros Por Minuto" datos={datos} />
+                {/* <div className="col-6">
+
+                </div> */}
+                <div className="col-12">
+                  <div className="card col-12 col-md-12 mb-2 ">
+                    <ChartComponent title="Humedad Ambiental (%)" datos={humedadArr} />
                   </div>
-                  <div className="card col-12 col-md-12  ">
-                    <ChartComponent title="Metros Cubicos" datos={datos} />
+                  <div className="card col-12 col-md-12 mb-2 ">
+                    <ChartComponent title="Temperatura (°C)" datos={temperaturaArr} />
                   </div>
-                  <div className="card col-12 col-md-12  ">
-                    <ChartComponent title="Temperatura" datos={datos} />
+                  <div className="card col-12 col-md-12 mb-2 ">
+                    <ChartComponent title="Presión (hPa)" datos={presionArr} />
                   </div>
                 </div>
               </div>

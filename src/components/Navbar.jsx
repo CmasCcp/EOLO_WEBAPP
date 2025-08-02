@@ -1,16 +1,16 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { onLogout } from '../controllers/loginControl';
 
 export const Navbar = () => {
   // Suponiendo que el username está en localStorage (ajusta según tu lógica real)
-  const username = localStorage.getItem('username') || 'admin';
+  const username = localStorage.getItem('username');
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    // Limpia el almacenamiento y redirige al login
-    localStorage.removeItem('username');
-    localStorage.removeItem('token'); // si usas token
+    onLogout(); // Llamar a la función de logout
     navigate('/login');
+    window.location.reload();
   };
 
   return (

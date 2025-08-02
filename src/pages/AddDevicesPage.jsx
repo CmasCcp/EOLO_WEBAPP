@@ -36,8 +36,9 @@ export const AddDevicesPage = () => {
       };
 
       try {
+        const id_usuario = localStorage.getItem('id_usuario');
         // Realizar el POST al backend
-        const response = await fetch(`${import.meta.env.VITE_REACT_APP_API_URL}/add-device`, {
+        const response = await fetch(`${import.meta.env.VITE_REACT_APP_API_URL}/add-device?usuario=${encodeURIComponent(id_usuario)}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

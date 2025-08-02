@@ -1,7 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom';
 import 'animate.css';
-import { RenderComponent } from '../components/RenderComponent';
+// import { RenderComponent } from '../components/RenderComponent';
 
 export const HomePage = () => {
     return (

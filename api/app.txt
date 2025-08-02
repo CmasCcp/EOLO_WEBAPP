@@ -1,0 +1,29 @@
+   
+# @app.route('/dispositivo', methods=['GET'])
+# def get_device():
+#     # Obtener la patente desde los parámetros de la URL
+#     patente = request.args.get('patente')
+
+#     # Verificar si se proporcionó la patente
+#     if not patente:
+#         return jsonify({"error": "Falta el parámetro 'patente'"}), 400
+
+#     try:
+#         # Consultar la API externa
+#         response = requests.get(
+#             "https://api-sensores.cmasccp.cl/listarDatos",
+#             params={"tabla": "dispositivos", "id_proyecto": 15}
+#         )
+#         if response.status_code != 200:
+#             return jsonify({"error": "No se pudo obtener datos de la API externa"}), 502
+
+#         data = response.json()
+#         # Buscar el dispositivo por patente (ajusta el nombre de la clave si es distinto)
+#         device = next((device for device in data if device.get('patente') == patente), None)
+
+#         if device:
+#             return jsonify(device), 200
+#         else:
+#             return jsonify({"error": "Dispositivo no encontrado"}), 404
+#     except Exception as e:
+#         return jsonify({"error": f"Error al consultar la API externa: {str(e)}"}), 500

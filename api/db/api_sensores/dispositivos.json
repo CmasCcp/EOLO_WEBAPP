@@ -1,27 +1,50 @@
-[
-  {
-    "patente": "MPE001",
-    "modelo": "Eolo MP Express"
+{
+  "data": {
+    "tabla": "dispositivos",
+    "tableData": [
+      {
+        "codigo_interno": "MPE000",
+        "descripcion": null,
+        "id_dispositivo": 80,
+        "id_estado": 5,
+        "id_proyecto": 15
+      },
+      {
+        "codigo_interno": "MPE001",
+        "descripcion": null,
+        "id_dispositivo": 81,
+        "id_estado": 5,
+        "id_proyecto": 15
+      },
+      {
+        "codigo_interno": "MPE002",
+        "descripcion": null,
+        "id_dispositivo": 81,
+        "id_estado": 5,
+        "id_proyecto": 15
+      }
+      ,{
+        "codigo_interno": "MPE03",
+        "descripcion": null,
+        "id_dispositivo": 81,
+        "id_estado": 5,
+        "id_proyecto": 15
+      }
+      ,{
+        "codigo_interno": "MPE004",
+        "descripcion": null,
+        "id_dispositivo": 81,
+        "id_estado": 5,
+        "id_proyecto": 15
+      }
+      ,{
+        "codigo_interno": "MPE005",
+        "descripcion": null,
+        "id_dispositivo": 81,
+        "id_estado": 5,
+        "id_proyecto": 15
+      }
+    ]
   },
-  {
-    "patente": "MPE002",
-    "modelo": "Eolo MP Express"
-  },
-  {
-    "patente": "MPE003",
-    "modelo": "Eolo MP Express"
-  },
-  {
-    "patente": "MPE004",
-    "modelo": "Eolo MP Express"
-  },
-  {
-    "patente": "MPE005",
-    "modelo": "Eolo MP Express"
-  },
-  {
-    "patente": "MPE006",
-    "modelo": "Eolo MP Express"
-  },
-  {}
-]
+  "status": "success"
+}

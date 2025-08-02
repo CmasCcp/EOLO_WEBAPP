@@ -72,6 +72,7 @@ export const SessionsPage = () => {
             index={index}
             titulo={titulo}
             session={session}
+            filename={session.filename}
             // color={index % 2 === 0 ? "white" : "secondary"}
             color={"white"}
             day={session.timestamp_inicial.split('T')[0].split('-')[2]} 

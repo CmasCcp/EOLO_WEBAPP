@@ -1,26 +1,22 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { onLogin } from '../controllers/loginControl';
 
 export const LoginPage = () => {
   const [usuario, setUsuario] = useState('');
   const [contrasena, setContrasena] = useState('');
-  const navigate = useNavigate();
 
-  const handleLogin = () => {
-    if (usuario === 'admin' && contrasena === 'admin') {
-      console.log("login")
-      // Crear cookie 'logged=true' con duración de 1 hora
-      const expirationDate = new Date();
-      expirationDate.setHours(expirationDate.getHours() + 1); // Establece la expiración a 1 hora
-      document.cookie = `logged=true; expires=${expirationDate.toUTCString()}; path=/`;
-      
-      // navigate('/');
-      window.location.reload();
-      console.log("navigate")
-    } else {
-      alert('Usuario o contraseña incorrectos');
-    }
-  };
+  const handleLogin = async () => {
+  const result = await onLogin(usuario, contrasena);
+  if (result.success) {
+    result.data.username = usuario; // Asegúrate de que el username se guarde correctamente
+    console.log("Username guardado:", localStorage.getItem('username'));
+    // Guardar username y cookie ya lo hace onLogin
+    window.location.reload();
+  } else {
+    alert(result.error || 'Usuario o contraseña incorrectos');
+  }
+};
 
   return (
     <div className="d-flex justify-content-center align-items-center min-vh-100">
@@ -32,36 +28,36 @@ export const LoginPage = () => {
 
           <div className="mb-3">
             <label className="form-label">Usuario</label>
-            <input 
-              type="text" 
-              className="form-control" 
-              value={usuario} 
-              onChange={(e) => setUsuario(e.target.value)} 
-              required 
-            />
-          </div>
-          
-          <div className="mb-3">
-            <label className="form-label">Contraseña</label>
-            <input 
-              type="password" 
-              className="form-control" 
-              value={contrasena} 
-              onChange={(e) => setContrasena(e.target.value)} 
-              required 
+            <input
+              type="text"
+              className="form-control"
+              value={usuario}
+              onChange={(e) => setUsuario(e.target.value)}
+              required
             />
           </div>
 
           <div className="mb-3">
-            <button 
-              type="button" 
-              className="mx-auto btn w-100 btn-dark" 
+            <label className="form-label">Contraseña</label>
+            <input
+              type="password"
+              className="form-control"
+              value={contrasena}
+              onChange={(e) => setContrasena(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="mb-3">
+            <button
+              type="button"
+              className="mx-auto btn w-100 btn-dark"
               onClick={handleLogin}
             >
               Iniciar Sesión
             </button>
           </div>
-{/* 
+          {/* 
           <div className="text-center mt-3">
             <a href="#">¿Olvidaste tu contraseña?</a>
           </div>

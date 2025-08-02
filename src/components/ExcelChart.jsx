@@ -1,22 +1,16 @@
 import React, { useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
-export const ChartComponent = ({datos, title, fileName}) => {
+export const ChartComponent = ({datos, title}) => {
 
   const [data, setData] = useState(datos);
-  // const [fileName, setFileName] = useState(fileName);
-
-
-  // Opcional: Si el Excel tiene un formato específico, puedes adaptar cómo procesar los datos
-  // Suponemos que el archivo Excel tiene columnas `date`, `value` para el gráfico
-  const chartData = data.map(row =>
-  ({
-    // date: row['dia'] + "-" + row['mes']+ "-" + row['año'] + "  " +  row['timestamp'], // Columna de fechas
-    date: row['id'], // Columna de fechas
-    "°C": row['valor'], // Columna de valores
-  }));
-
-
+  
+  const propertyNames = data.length > 0 ? Object.keys(data[0]) : [];
+  console.log("Propiedades:", propertyNames);
+  const filteredProperties = propertyNames.filter(
+    prop => prop !== "date" && prop !== "id_dato"
+  );
+  const remainingProperty = filteredProperties.length > 0 ? filteredProperties[0] : null;
   return (
     <div>
       {data.length > 0 && (<div className='' >
@@ -26,13 +20,13 @@ export const ChartComponent = ({datos, title, fileName}) => {
         <div className="pe-5">
 
         <ResponsiveContainer className="mt-5" width="100%" height={300}>
-          <LineChart data={chartData}>
+          <LineChart data={data}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="date" />
             <YAxis />
             <Tooltip />
             <Legend />
-            <Line type="monotone" dataKey={data[0].variable} stroke="#8884d8" />
+            <Line type="monotone" dataKey={remainingProperty} stroke="#8884d8" />
             {/* <Line type="monotone" dataKey="value" stroke="#8884d8" /> */}
           </LineChart>
         </ResponsiveContainer>

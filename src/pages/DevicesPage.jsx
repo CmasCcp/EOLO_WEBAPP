@@ -3,6 +3,7 @@ import EoloCard from '../components/EoloCard';
 import { Navbar } from '../components/Navbar';
 import { Link } from 'react-router-dom';
 import { Breadcrumb } from '../components/Breadcrumb';
+import { getMisDispositivos } from '../controllers/dispositivosControl';
 
 export const DevicesPage = () => {
     const [devices, setDevices] = useState([]);
@@ -13,7 +14,8 @@ export const DevicesPage = () => {
         // Función para obtener las sesiones desde el backend
         const fetchDevices = async () => {
             try {
-                const response = await fetch(import.meta.env.VITE_REACT_APP_API_URL + "/mis-dispositivos");  // Endpoint para obtener las sesiones
+                // const response = await fetch(import.meta.env.VITE_REACT_APP_API_URL + "/mis-dispositivos");  // Endpoint para obtener las sesiones
+                const response = await getMisDispositivos();
                 if (!response.ok) {
                     throw new Error('Error al obtener las sesiones');
                 }
@@ -25,6 +27,9 @@ export const DevicesPage = () => {
             } finally {
                 setLoading(false);  // Cuando termine la carga, cambiamos el estado de loading
             }
+
+
+
         };
 
         fetchDevices();  // Llamar a la función de carga de datos

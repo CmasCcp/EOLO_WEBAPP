@@ -9,25 +9,25 @@ import { Breadcrumb } from "../components/Breadcrumb"; // Importar el componente
 import { useState, useEffect } from "react";
 import { HomePage } from "../pages/HomePage.jsx";
 import ExcelChart from "../components/ExcelChart.jsx";
+import { isLoggedIn } from "../controllers/loginControl.js";
 
 export const AppRoute = () => {
   const [isLogged, setIsLogged] = useState(false);
 
   // Función para comprobar si la cookie "logged=true" existe
   const checkLoginStatus = () => {
-    const cookies = document.cookie.split(';');
-    const loggedCookie = cookies.find(cookie => cookie.trim().startsWith('logged='));
-    if (loggedCookie && loggedCookie.split('=')[1] === 'true') {
-      setIsLogged(true);
-    } else {
-      setIsLogged(false);
-    }
+    isLoggedIn() ? setIsLogged(true) : setIsLogged(false);
   };
 
   // Ejecutamos la verificación de la cookie al montar el componente
   useEffect(() => {
     checkLoginStatus();
   }, []);
+
+  useEffect(() => {
+    // Verificar el estado de la cookie cada vez que se renderiza el componente
+    console.log(isLogged)
+  }, [isLogged]);
 
   return (
     <div>
@@ -38,7 +38,7 @@ export const AppRoute = () => {
           <Route path="/" element={isLogged ? <Navigate to={"dispositivos"} /> : <LoginPage />} />
           <Route path="/excel" element={<DashboardPage />} />
           <Route path="*" element={<>NOT FOUND</>} />
-          <Route path="login" element={isLogged ? <Navigate to="" /> : <LoginPage />} />
+          <Route path="login" element={isLogged ? <Navigate to="/dispositivos" /> : <LoginPage />} />
           <Route path="dispositivos" >
             <Route path="" element={<DevicesPage />} />
             <Route path=":deviceSessions" >

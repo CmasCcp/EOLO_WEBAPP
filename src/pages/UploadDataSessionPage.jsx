@@ -38,18 +38,9 @@ export const UploadDataSessionPage = () => {
   const inputRef = useRef(null);  // Referencia al input de texto
 
   // datos formulario
-  const [sesionId, setSesionId] = useState();
   const [patente, setPatente] = useState(params.deviceSessions);
-  const [diaInicio, setDiaInicio] = useState();
-  const [mesInicio, setMesInicio] = useState();
-  const [anoInicio, setAnoInicio] = useState();
-  const [diaFinal, setDiaFinal] = useState();
-  const [mesFinal, setMesFinal] = useState();
-  const [anoFinal, setAnoFinal] = useState();
   const [fechaInicio, setFechaInicio] = useState("DD-MM-YYYY");
-  const [horaInicio, setHoraInicio] = useState("HH:MM:SS");
   const [fechaFinal, setFechaFinal] = useState("DD-MM-YYYY");
-  const [horaFinal, setHoraFinal] = useState("HH:MM:SS");
 
 
   //Completar ubicacion - API UBICACION
@@ -84,15 +75,6 @@ export const UploadDataSessionPage = () => {
     }
   };
 
-
-  // guardar csv
-  // useEffect(()=>{
-  //   console.log(!!file?.name)
-  //   if(!!file?.name){
-  //     handleUpload(file)
-  //   }
-  // },[fileName])
-
   const handleUpload = async (fileSelected) => {
     // e.preventDefault();
     console.log("handleUpload")
@@ -105,34 +87,20 @@ export const UploadDataSessionPage = () => {
     formData.append('file', fileSelected);
 
     setUploading(true); // Cambiar el estado a "cargando"
-    console.log("cargabdi")
 
     try {
-      const response = await fetch(import.meta.env.VITE_REACT_APP_API_URL + '/upload', {
+      const response = await fetch(import.meta.env.VITE_REACT_APP_API_URL + '/upload?patente=' + patente, {
         method: 'POST',
         body: formData,
       });
 
       console.log(response)
-      console.log("guardado, llenar formulario")
 
       if (response.ok) {
         const data = await response.json();
-        console.log(data.data[0]);
-        setDiaInicio(String(data.data[0].dia_inicial));
-        setMesInicio(String(data.data[0].mes_inicial));
-        setAnoInicio(String(data.data[0].año_inicial));
-        setFechaInicio(`${String(data.data[0].dia_inicial) + "-" + String(data.data[0].mes_inicial) + "-" + String(data.data[0].año_inicial)}`);
-        setHoraInicio(`${String(data.data[0].hora_inicial)}`);
-        // handleLocationChange(data.data[0].ubicacion);
-        setSesionId(data.data[0].sesion_id);
-
-        setDiaFinal(String(data.data[0].dia_final));
-        setMesFinal(String(data.data[0].mes_final));
-        setAnoFinal(String(data.data[0].año_final));
-        setFechaFinal(`${String(data.data[0].dia_final) + "-" + String(data.data[0].mes_final) + "-" + String(data.data[0].año_final)}`);
-        setHoraFinal(`${String(data.data[0].hora_final)}`);
-
+        setFechaInicio(data.data[0].timestamp_inicial);
+        setFechaFinal(data.data[0].timestamp_final);
+        
         setJsonData(data.mediciones)
         console.log(data.mediciones)
 
@@ -204,7 +172,7 @@ export const UploadDataSessionPage = () => {
     e.preventDefault(); // Evitar que el formulario se recargue
 
     // Validar que todos los campos estén completos
-    if (!patente || !fechaFinal || !fechaInicio || !horaInicio || !horaFinal) {
+    if (!patente || !fechaFinal || !fechaInicio) {
       setError('Por favor, completa todos los campos');
       return;
     }
@@ -212,14 +180,8 @@ export const UploadDataSessionPage = () => {
     const newSession = {
       filename: fileName,
       patente: patente,
-      dia_inicial: diaInicio,
-      mes_inicial: mesInicio,
-      año_inicial: anoInicio,
-      dia_final: diaFinal,
-      mes_final: mesFinal,
-      año_final: anoFinal,
-      hora_inicio: horaInicio,
-      hora_fin: horaFinal,
+      fecha_inicial: fechaInicio,
+      fecha_final: fechaFinal,
       lat: lat,
       lon: lon,
     };
@@ -241,18 +203,6 @@ export const UploadDataSessionPage = () => {
         setSuccessMessage(data.message || 'Sesión agregada exitosamente');
         setError('');
         // Limpiar los campos después de agregar la sesión
-        setFileName('');
-        setSesionId('');
-        setPatente('');
-        setDiaInicio('');
-        setDiaFinal('');
-        setMesInicio('');
-        setMesFinal('');
-        setAnoInicio('');
-        setAnoFinal('');
-        setHoraInicio('');
-        setHoraFinal('');
-
         setError(null); // Limpiar el error
         alert(data.message || "Sesión cargada exitosamente");
         navigate(-1);
@@ -295,16 +245,6 @@ export const UploadDataSessionPage = () => {
             onChange={handleFileChange}  // Llamar a la función de manejo
           />
 
-
-          {/* Botón para enviar archivo
-          <button
-            onClick={handleUpload}
-            className={`btn m-0 btn-${!isSelected || updated ? "secondary" : "success"}`}
-            disabled={!isSelected || updated}  // Deshabilitar el botón mientras se carga el archivo
-          >
-            {!updated ? "Llenar formulario" : "Formulario llenado"}
-          </button> */}
-
         </div>
 
         {/* Mostrar nombre del archivo seleccionado */}
@@ -318,7 +258,7 @@ export const UploadDataSessionPage = () => {
         {/* <form> */}
           {/* Nombre */}
           <div className="row">
-            <div className="col-6">
+            <div className="col-4">
               <div className="mb-4">
                 <label htmlFor="nombre" className="form-label fw-semibold">
                   Patente del dispositivo:
@@ -331,6 +271,9 @@ export const UploadDataSessionPage = () => {
                   disabled
                 />
               </div>
+              
+            </div>
+                        <div className="col-4">
               {/* Nombre */}
               <div className="mb-4">
                 <label htmlFor="nombre" className="form-label fw-semibold">
@@ -346,22 +289,8 @@ export const UploadDataSessionPage = () => {
                 />
               </div>
 
-              {/* HORA */}
-              <div className="mb-4">
-                <label htmlFor="nombre" className="form-label fw-semibold">
-                  Hora de inicio:
-                </label>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="nombre"
-                  placeholder={horaInicio}
-                  disabled
-
-                />
-              </div>
             </div>
-            <div className="col-6">
+            <div className="col-4">
               {/* Nombre */}
               <div className="mb-4">
                 <label htmlFor="nombre" className="form-label fw-semibold">
@@ -375,36 +304,6 @@ export const UploadDataSessionPage = () => {
                   disabled
                 />
               </div>
-
-              {/* HORA */}
-              <div className="mb-4">
-                <label htmlFor="nombre" className="form-label fw-semibold">
-                  Hora de fin:
-                </label>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="nombre"
-                  placeholder={horaFinal}
-                  disabled
-
-                />
-                {/* </div> */}
-              </div>
-
-              {/* Comentarios */}
-              {/* <div className="mb-4">
-            <label htmlFor="comentarios" className="form-label fw-semibold">
-            Comentarios:
-            </label>
-            <textarea
-            className="form-control"
-            id="comentarios"
-            rows="3"
-            placeholder="¿Desea agregar notas respecto a la sesión?"
-            ></textarea>
-            </div> */}
-
             </div>
           </div>
           {/* Localización */}
