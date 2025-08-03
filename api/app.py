@@ -73,6 +73,26 @@ def upload_file():
         file.save(filepath)
         # Leer el archivo Excel usando pandas
         try:
+            connection = pymysql.connect(
+                host=os.getenv("MYSQL_HOST"),
+                user=os.getenv("MYSQL_USER"),
+                password=os.getenv("MYSQL_PASSWORD"),
+                database=os.getenv("MYSQL_DATABASE"),
+                charset='utf8mb4',
+                cursorclass=pymysql.cursors.DictCursor
+            )
+            
+            with connection.cursor() as cursor:
+                # Verificar si ya existe un registro con ese filename y patente
+                check_sql = "SELECT COUNT(*) AS count FROM sesiones WHERE filename = %s AND patente = %s"
+                cursor.execute(check_sql, (file.filename, patente))
+                result = cursor.fetchone()
+
+                if result['count'] > 0:
+                    return jsonify({"error": "Ya existe una sesión con este filename y patente asociada."}), 400
+            
+            connection.close()
+
             # Cargar el archivo Excel
             df = pd.read_excel(filepath)
             print("debug")
@@ -94,12 +114,16 @@ def upload_file():
             # Extraer los datos de la última fila para el final
             timestamp_final = datetime.utcfromtimestamp(last_row['timestamp']).strftime('%Y-%m-%dT%H:%M:%S')
 
+            volumen = str(first_row['volumen'])
+            flujo = str(first_row['flujo'])
 
             # Crear el diccionario para las filas que solo contienen la primera y última fila
             session_data = {
                 'patente': patente,
                 'timestamp_inicial': timestamp_inicial,
-                'timestamp_final': timestamp_final
+                'timestamp_final': timestamp_final,
+                'volumen': volumen,
+                'flujo': flujo
             }
 
             
@@ -108,9 +132,9 @@ def upload_file():
             print(file_json)
 
             
-            # # Guardar el JSON procesado en un archivo
-            with open(JSON_FILES_SESIONES_JSON + "/"+ file.filename + ".json", 'w', encoding='utf-8') as json_file:
-                json.dump(file_json, json_file, ensure_ascii=False, indent=2)
+            # # # Guardar el JSON procesado en un archivo
+            # with open(JSON_FILES_SESIONES_JSON + "/"+ file.filename + ".json", 'w', encoding='utf-8') as json_file:
+            #     json.dump(file_json, json_file, ensure_ascii=False, indent=2)
             
             # Devolver el resultado solo con la primera y última fila
             return jsonify({"message": "Archivo procesado exitosamente", "data": [session_data], "mediciones": file_json}), 200

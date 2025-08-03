@@ -126,7 +126,7 @@ def get_my_device():
 @dispositivos_bp.route('/add-device', methods=['POST'])
 def add_device():
     try:
-        id_usuario= request.args.get('usuario')
+        id_usuario = request.args.get('usuario')
         # Obtener los datos del nuevo dispositivo desde la solicitud JSON
         new_device = request.get_json()
         print(new_device)
@@ -134,6 +134,7 @@ def add_device():
         # Verificar que los campos necesarios estén en el JSON
         if 'patente' not in new_device or 'modelo' not in new_device:
             return jsonify({"error": "Faltan campos 'patente' o 'modelo'"}), 400
+
         # --- INICIO MYSQL ---
         try:
             connection = pymysql.connect(
@@ -145,11 +146,22 @@ def add_device():
                 cursorclass=pymysql.cursors.DictCursor
             )
             with connection.cursor() as cursor:
+                # Verificar si ya existe la patente asociada al id_usuario
+                check_sql = "SELECT COUNT(*) AS count FROM dispositivo_en_usuario WHERE patente_dispositivo = %s AND usuario = %s"
+                cursor.execute(check_sql, (new_device['patente'], id_usuario))
+                result = cursor.fetchone()
+
+                if result['count'] > 0:
+                    return jsonify({"error": "La patente ya está asociada a este usuario"}), 400
+
+                # Si no existe, insertamos el nuevo dispositivo
                 sql = "INSERT INTO dispositivo_en_usuario (patente_dispositivo, usuario, modelo) VALUES (%s, %s, %s)"
                 cursor.execute(sql, (new_device['patente'], id_usuario, new_device['modelo']))  
             connection.commit()
+
         except Exception as db_err:
             print("Error al guardar en MySQL:", db_err)
+            return jsonify({"error": "Error al interactuar con la base de datos"}), 500
         # --- FIN MYSQL ---
 
         return jsonify({"message": "Dispositivo agregado exitosamente"}), 201

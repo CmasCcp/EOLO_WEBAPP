@@ -41,6 +41,8 @@ export const UploadDataSessionPage = () => {
   const [patente, setPatente] = useState(params.deviceSessions);
   const [fechaInicio, setFechaInicio] = useState("DD-MM-YYYY");
   const [fechaFinal, setFechaFinal] = useState("DD-MM-YYYY");
+  const [flujo, setFlujo] = useState("");
+  const [volumen, setVolumen] = useState("");
 
 
   //Completar ubicacion - API UBICACION
@@ -100,6 +102,8 @@ export const UploadDataSessionPage = () => {
         const data = await response.json();
         setFechaInicio(data.data[0].timestamp_inicial);
         setFechaFinal(data.data[0].timestamp_final);
+        setFlujo(data.data[0].flujo);
+        setVolumen(data.data[0].volumen);
         
         setJsonData(data.mediciones)
         console.log(data.mediciones)
@@ -108,10 +112,14 @@ export const UploadDataSessionPage = () => {
         setError(null); // Limpiar el error
         setUpdated(true)
       } else {
-        throw new Error('Error al subir el archivo');
+        const data = await response.json();
+        console.log(data.error)
+        alert(data.error);
+        // throw new Error(data.error);
       }
     } catch (err) {
-      setError(err.message); // Capturar cualquier error que ocurra
+      setError(err); // Capturar cualquier error que ocurra
+      // console.error("Error al subir el archivo:", err);
     } finally {
       setUploading(false); // Cambiar el estado a "no cargando"
     }
@@ -182,6 +190,8 @@ export const UploadDataSessionPage = () => {
       patente: patente,
       fecha_inicial: fechaInicio,
       fecha_final: fechaFinal,
+      volumen: volumen,
+      flujo: flujo,
       lat: lat,
       lon: lon,
     };

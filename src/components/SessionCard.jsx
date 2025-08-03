@@ -11,7 +11,6 @@ export const SessionCard = ({index, titulo, filename, session,color, day, month,
       <div className={`card-header bg-${color} text-${color =="white"? "dark":"white"} p-0`}>
         <p className="m-0 px-4 text-center" 
         >{ubicacion}</p>
-
       </div>
 
       {/* Cuerpo  */}

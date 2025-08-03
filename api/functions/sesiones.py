@@ -32,6 +32,31 @@ def get_sessions():
         return jsonify({"error": "El archivo sesiones.json no existe"}), 404
 
 # Endpoint GET para leer los datos de 'sesiones.json'
+@sesiones_bp.route('/sesion', methods=['GET'])
+def get_sesion():
+    patente = request.args.get('id_sesion')
+    if not patente:
+        return jsonify({"error": "Falta el parámetro 'patente'"}), 400
+    try:
+        connection = pymysql.connect(
+            host=os.getenv("MYSQL_HOST"),
+            user=os.getenv("MYSQL_USER"),
+            password=os.getenv("MYSQL_PASSWORD"),
+            database=os.getenv("MYSQL_DATABASE"),
+            charset='utf8mb4',
+            cursorclass=pymysql.cursors.DictCursor
+        )
+        with connection.cursor() as cursor:
+            sql = "SELECT * FROM sesiones WHERE id_sesion = %s"
+            cursor.execute(sql, (patente))
+            sesiones = cursor.fetchall()
+
+        connection.close()
+        return jsonify(sesiones), 200
+    except Exception as e:
+        return jsonify({"error": f"Error al obtener sesiones: {str(e)}"}), 500
+
+# Endpoint GET para leer los datos de 'sesiones.json'
 @sesiones_bp.route('/mis-sesiones', methods=['GET'])
 def get_my_sessions():
     patente = request.args.get('patente')
@@ -84,7 +109,7 @@ def add_session():
         new_session["ubicacion_corto"] = address.get("city", "") or address.get("road", "") or address.get("suburb", "") or address.get("county", "")
 
         
-        required_fields = ['ubicacion', "ubicacion_corto","lat", "lon", 'filename', 'patente', 'fecha_inicial','fecha_final']
+        required_fields = ['ubicacion', "ubicacion_corto","lat", "lon", 'filename', 'patente', 'flujo', 'volumen', 'fecha_inicial','fecha_final']
         
         
         if not all(field in new_session for field in required_fields):
@@ -105,8 +130,8 @@ def add_session():
                 sql = """
                     INSERT INTO sesiones (
                         filename, patente, ubicacion_corto, lat, lon,
-                        timestamp_inicial,timestamp_final
-                    ) VALUES (%s, %s, %s, %s, %s, %s, %s)
+                        timestamp_inicial,timestamp_final, volumen, flujo
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """
                 cursor.execute(sql, (
                     new_session['filename'],
@@ -116,8 +141,12 @@ def add_session():
                     new_session['lon'],
                     new_session['fecha_inicial'],
                     new_session['fecha_final'],
+                    new_session['volumen'],
+                    new_session['flujo'],
                 ))
-            
+
+
+                # Obtener el ID de la sesión recién insertada (esta es una buena forma de asignar el id? que pasa si varias personas suben sesiones al mismo tiempo?)
                 cursor.execute("SELECT LAST_INSERT_ID() as id")
                 id_sesion = cursor.fetchone()['id']
 
