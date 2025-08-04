@@ -4,7 +4,9 @@ import pymysql
 import os
 import json
 import requests
+# from dotenv import load_dotenv
 
+# load_dotenv(dotenv_path="/var/www/api-eolo/.env")
 
 
 # Configuración del directorio para guardar los archivos

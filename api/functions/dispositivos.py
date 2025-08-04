@@ -2,6 +2,9 @@ from flask import Blueprint, request, jsonify
 import pymysql
 import os
 import json
+# from dotenv import load_dotenv
+
+# load_dotenv(dotenv_path="/var/www/api-eolo/.env")
 
 
 # Configuración del directorio para guardar los archivos

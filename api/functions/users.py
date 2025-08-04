@@ -1,6 +1,9 @@
 from flask import Blueprint, request, jsonify
 import pymysql
 import os
+# from dotenv import load_dotenv
+
+# load_dotenv(dotenv_path="/var/www/api-eolo/.env")
 
 users_bp = Blueprint('users', __name__)
 @users_bp.route('/login', methods=['POST'])
