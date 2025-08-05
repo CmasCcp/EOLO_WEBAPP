@@ -98,7 +98,7 @@ def upload_file():
             print("debug")
 
             # Asegurarse de que las columnas necesarias existen
-            required_columns = ['patente', 'sesion_id', 'timestamp', 'temperatura_valor', 'humedad_valor', 'presion_valor']
+            required_columns = ['timestamp', 'temperatura_valor', 'humedad_valor', 'presion_valor']
             for column in required_columns:
                 if column not in df.columns:
                     return jsonify({"error": f"Falta la columna {column} en el archivo."}), 400
@@ -132,9 +132,10 @@ def upload_file():
             print(file_json)
 
             
-            # # # Guardar el JSON procesado en un archivo
-            # with open(JSON_FILES_SESIONES_JSON + "/"+ file.filename + ".json", 'w', encoding='utf-8') as json_file:
-            #     json.dump(file_json, json_file, ensure_ascii=False, indent=2)
+            # Necesario para luego guardar los datos en tabla datos. 
+            # Guardar el JSON procesado en un archivo
+            with open(JSON_FILES_SESIONES_JSON + "/"+ file.filename + ".json", 'w', encoding='utf-8') as json_file:
+                json.dump(file_json, json_file, ensure_ascii=False, indent=2)
             
             # Devolver el resultado solo con la primera y última fila
             return jsonify({"message": "Archivo procesado exitosamente", "data": [session_data], "mediciones": file_json}), 200

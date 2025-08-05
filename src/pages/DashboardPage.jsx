@@ -9,7 +9,7 @@ export const DashboardPage = () => {
 
   const [datos, setDatos] = useState(null);
   const [idSesion, setIdSesion] = useState(); // Puedes cambiar esto dinámicamente según tu lógica
-  const [sesionData, setSesionData] = useState(); // Puedes cambiar esto dinámicamente según tu lógica
+  const [sesionData, setSesionData] = useState([]); // Puedes cambiar esto dinámicamente según tu lógica
 
   // Arrays separados
   const [humedadArr, setHumedadArr] = useState([]);
@@ -136,31 +136,31 @@ export const DashboardPage = () => {
               <div className="mx-auto d-flex flex-row justify-content-between flex-wrap mb-2">
                 <div className="card p-0 col-12 col-sm-2 text-center">
                   <div className="card-body p-1">
-                    <h5 className="m-0">{sesionData[0].flujo} LPM</h5>
+                    <h5 className="m-0">{sesionData[0].flujo || ""} LPM</h5>
                     <span><small className="fs-6">Flujo</small></span>
                   </div>
                 </div>
                 <div className="card p-0 col-12 col-sm-2 text-center">
                   <div className="card-body p-1">
-                    <h5 className="m-0">{sesionData[0].volumen} m<sup>3</sup></h5>
+                    <h5 className="m-0">{sesionData[0]?.volumen} m<sup>3</sup></h5>
                     <span><small className="fs-6">Volumen</small></span>
                   </div>
                 </div>
                 <div className="card p-0 col-12 col-sm-2 text-center">
                   <div className="card-body p-1">
-                    <h5 className="m-0">{promedioTemperatura} °C</h5>
+                    <h5 className="m-0">{promedioTemperatura || ""} °C</h5>
                     <span><small className="fs-6">Temperatura</small></span>
                   </div>
                 </div>
                 <div className="card p-0 col-12 col-sm-2 text-center">
                   <div className="card-body p-1">
-                    <h5 className="m-0">{promedioHumedad}%</h5>
+                    <h5 className="m-0">{promedioHumedad || ""}%</h5>
                     <span><small className="fs-6">Humedad</small></span>
                   </div>
                 </div>
                 <div className="card p-0 col-12 col-sm-2 text-center">
                   <div className="card-body p-1">
-                    <h5 className="m-0">{promedioPresion} hPa</h5>
+                    <h5 className="m-0">{promedioPresion || ""} hPa</h5>
                     <span><small className="fs-6">Presión atmosférica</small></span>
                   </div>
                 </div>
