@@ -8,7 +8,7 @@ import 'leaflet/dist/leaflet.css';
 const MapComponent = ({lat, lon, handleChangeLocation}) => {
     // Estado para almacenar la ubicación seleccionada
     const [position, setPosition] = useState([lat, lon]);  // Inicializa en una latitud y longitud por defecto
-
+    console.log(lat, lon)
     useEffect(()=>{
         handleChangeLocation(lat, lon);
         setPosition([lat, lon])
@@ -42,7 +42,7 @@ const MapComponent = ({lat, lon, handleChangeLocation}) => {
 
   return (
     <div style={{ width: '100%', height: '400px' }}>
-      <MapContainer center={position} zoom={13} style={{ width: '100%', height: '100%' }} scrollWheelZoom={false} >
+      <MapContainer center={position} zoom={50} style={{ width: '100%', height: '100%' }} scrollWheelZoom={false} >
         {/* Capa del mapa usando OpenStreetMap */}
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

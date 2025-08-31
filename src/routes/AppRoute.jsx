@@ -10,6 +10,8 @@ import { useState, useEffect } from "react";
 import { HomePage } from "../pages/HomePage.jsx";
 import ExcelChart from "../components/ExcelChart.jsx";
 import { isLoggedIn } from "../controllers/loginControl.js";
+import { BiAxialLineChart } from "../components/graphics/BiAxialLineChart.jsx";
+import { Anemografo } from "../components/dummys/Anemografo.jsx";
 
 export const AppRoute = () => {
   const [isLogged, setIsLogged] = useState(false);
@@ -36,7 +38,7 @@ export const AppRoute = () => {
           {/* Si está logueado, redirige a /devices */}
           {/* <Route path="/" element={isLogged ? <HomePage /> : <LoginPage />} /> */}
           <Route path="/" element={isLogged ? <Navigate to={"dispositivos"} /> : <LoginPage />} />
-          <Route path="/excel" element={<DashboardPage />} />
+          <Route path="/excel" element={<Anemografo />} />
           <Route path="*" element={<>NOT FOUND</>} />
           <Route path="login" element={isLogged ? <Navigate to="/dispositivos" /> : <LoginPage />} />
           <Route path="dispositivos" >

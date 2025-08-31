@@ -85,7 +85,7 @@ def get_device():
             data = json.load(file)  # Leer el archivo JSON
 
         # Buscar el dispositivo que tenga la patente proporcionada
-        device = next((device for device in data["data"]["tableData"] if device['codigo_interno'] == patente), None)
+        device = next((device for device in data["data"]["tableData"] if device['codigo_interno'] == patente), False)
 
         device["modelo"] = "Eolo MP Express"
 

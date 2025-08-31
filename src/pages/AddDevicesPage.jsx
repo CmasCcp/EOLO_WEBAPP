@@ -140,7 +140,7 @@ export const AddDevicesPage = () => {
               id="patente"
               placeholder="Ingrese la patente"
               value={patente}
-              onChange={(e) => { setPatente(e.target.value); setValid(false); setDeviceModel("") }} // Actualiza el estado con la patente ingresada
+              onChange={(e) => { setPatente(e.target.value.trim()); setValid(false); setDeviceModel("") }} // Actualiza el estado con la patente ingresada
               img_url={"tarjeta.png"}
               instruccion={"La patente está en la parte trasera del dispositivo."}
             />
@@ -150,7 +150,7 @@ export const AddDevicesPage = () => {
               id="pin"
               placeholder="Ingrese el pin"
               value={pin}
-              onChange={(e) => { setPin(e.target.value);; setValid(false); setDeviceModel("") }} // Actualiza el estado con el PIN ingresado
+              onChange={(e) => { setPin(e.target.value.trim()); setValid(false); setDeviceModel("") }} // Actualiza el estado con el PIN ingresado
               img_url={"tarjeta.png"}
               instruccion={"El pin está en la parte trasera del dispositivo."}
             />

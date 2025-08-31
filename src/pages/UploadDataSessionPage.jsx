@@ -43,8 +43,10 @@ export const UploadDataSessionPage = () => {
   const [fechaFinal, setFechaFinal] = useState("DD-MM-YYYY");
   const [flujo, setFlujo] = useState("");
   const [volumen, setVolumen] = useState("");
+  const [bateria, setBateria] = useState("");
 
 
+  console.log("patente", patente)
   //Completar ubicacion - API UBICACION
   const [ubicacion, setUbicacion] = useState(""); // Estado para la ubicación ingresada
   const [lat, setLat] = useState("-36.8270698"); // Estado para la latitud
@@ -91,7 +93,7 @@ export const UploadDataSessionPage = () => {
     setUploading(true); // Cambiar el estado a "cargando"
 
     try {
-      const response = await fetch(import.meta.env.VITE_REACT_APP_API_URL + '/upload?patente=' + patente, {
+      const response = await fetch(import.meta.env.VITE_REACT_APP_API_URL + `/upload?patente=${patente}`, {
         method: 'POST',
         body: formData,
       });
@@ -104,7 +106,8 @@ export const UploadDataSessionPage = () => {
         setFechaFinal(data.data[0].timestamp_final);
         setFlujo(data.data[0].flujo);
         setVolumen(data.data[0].volumen);
-        
+        setBateria(data.data[0].bateria);
+
         setJsonData(data.mediciones)
         console.log(data.mediciones)
 
@@ -194,7 +197,10 @@ export const UploadDataSessionPage = () => {
       flujo: flujo,
       lat: lat,
       lon: lon,
+      bateria: bateria
     };
+
+    console.log("nueva sesion", newSession)
 
     try {
       console.log("first")

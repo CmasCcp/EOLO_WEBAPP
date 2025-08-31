@@ -68,6 +68,7 @@ def upload_file():
     if file and allowed_file(file.filename):
         patente = request.args.get('patente')
 
+        print("Patente recibida:", patente)
         filename = secure_filename(file.filename)
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(filepath)
@@ -114,8 +115,10 @@ def upload_file():
             # Extraer los datos de la última fila para el final
             timestamp_final = datetime.utcfromtimestamp(last_row['timestamp']).strftime('%Y-%m-%dT%H:%M:%S')
 
-            volumen = str(first_row['volumen'])
-            flujo = str(first_row['flujo'])
+            volumen = str(last_row['volumen_valor'])
+            flujo = str((first_row["flujo_valor"] + last_row["flujo_valor"]) / 2)
+            bateria = str(last_row['bateria_valor'])
+            print("bateria", bateria)
 
             # Crear el diccionario para las filas que solo contienen la primera y última fila
             session_data = {
@@ -123,7 +126,8 @@ def upload_file():
                 'timestamp_inicial': timestamp_inicial,
                 'timestamp_final': timestamp_final,
                 'volumen': volumen,
-                'flujo': flujo
+                "flujo": flujo,
+                "bateria": bateria,
             }
 
             

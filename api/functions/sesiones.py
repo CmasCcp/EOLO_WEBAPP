@@ -104,14 +104,12 @@ def add_session():
                                 headers=headers)
 
         data_location = response.json()
-        # print(data_location)
         location_display_name = data_location["display_name"]
         address = data_location["address"]
         new_session["ubicacion"] = location_display_name
         new_session["ubicacion_corto"] = address.get("city", "") or address.get("road", "") or address.get("suburb", "") or address.get("county", "")
-
         
-        required_fields = ['ubicacion', "ubicacion_corto","lat", "lon", 'filename', 'patente', 'flujo', 'volumen', 'fecha_inicial','fecha_final']
+        required_fields = ['ubicacion', "ubicacion_corto","lat", "lon", 'filename', 'patente', 'volumen', 'fecha_inicial','fecha_final']
         
         
         if not all(field in new_session for field in required_fields):
@@ -128,12 +126,13 @@ def add_session():
                 cursorclass=pymysql.cursors.DictCursor
             )
             
+
             with connection.cursor() as cursor:
                 sql = """
                     INSERT INTO sesiones (
                         filename, patente, ubicacion_corto, lat, lon,
-                        timestamp_inicial,timestamp_final, volumen, flujo
-                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                        timestamp_inicial,timestamp_final, volumen, flujo, bateria
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """
                 cursor.execute(sql, (
                     new_session['filename'],
@@ -145,10 +144,11 @@ def add_session():
                     new_session['fecha_final'],
                     new_session['volumen'],
                     new_session['flujo'],
+                    new_session['bateria']
                 ))
 
 
-                # Obtener el ID de la sesión recién insertada (esta es una buena forma de asignar el id? que pasa si varias personas suben sesiones al mismo tiempo?)
+                # TODO: Obtener el ID de la sesión recién insertada (esta es una buena forma de asignar el id? que pasa si varias personas suben sesiones al mismo tiempo?)
                 cursor.execute("SELECT LAST_INSERT_ID() as id")
                 id_sesion = cursor.fetchone()['id']
 
@@ -157,7 +157,6 @@ def add_session():
 
             # --- NUEVO: Insertar datos del archivo JSON en la tabla datos ---
             json_path = JSON_FILES_SESIONES_JSON + f"/{new_session['filename']}.json"
-            print("json_path", json_path)
             if os.path.exists(json_path):
                 with open(json_path, 'r', encoding='utf-8') as f:
                     mediciones = json.load(f)
@@ -174,21 +173,32 @@ def add_session():
 
                     with conn.cursor() as cursor:
                         sql = """
-                            INSERT INTO datos (patente, id_sesion, timestamp, temperatura, humedad, presion)
-                            VALUES (%s, %s, %s, %s, %s, %s)
+                            INSERT INTO datos 
+                            (patente, id_sesion, 
+                            timestamp, temperatura, 
+                            humedad, presion, 
+                            pm2_5, pm10, bateria, 
+                            velocidad, direccion, 
+                            flujo, volumen)
+                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                         """
                         for row in mediciones:
-                            
-
                             # Extraer los datos de la primera fila para el inicio
                             timestamp = datetime.utcfromtimestamp(row.get('timestamp')).strftime('%Y-%m-%dT%H:%M:%S')
                             cursor.execute(sql, (
-                                row.get('patente'),
+                                new_session['patente'],
                                 str(id_sesion),
                                 str(timestamp),
                                 row.get('temperatura_valor'),
                                 row.get('humedad_valor'),
-                                row.get('presion_valor')
+                                row.get('presion_valor'),
+                                row.get('pm2.5_valor'),
+                                row.get('pm10_valor'),
+                                row.get('bateria_valor'),
+                                row.get('velocidad_valor'),
+                                row.get('direccion_valor'),
+                                row.get('flujo_valor'),
+                                row.get('volumen_valor')
                             ))
 
                         print("guardando mediciones")
