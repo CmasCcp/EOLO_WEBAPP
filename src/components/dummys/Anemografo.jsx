@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Line } from 'recharts';
 import { Brujula } from '../Brujula';
+import { ChartComponent } from '../ExcelChart';
 
 // const data =
 //     [
@@ -173,8 +174,9 @@ import { Brujula } from '../Brujula';
 
 // const off = gradientOffset();
 
-export const Anemografo = ({ datos }) => {
+export const Anemografo = ({ promedio, datos, datosVelocidad }) => {
 
+    console.log("velocidad: ", datosVelocidad)
     const [points, setPoints] = useState([]);
     const [selectedPoint, setSelectedPoint] = useState(null);
 
@@ -195,52 +197,75 @@ export const Anemografo = ({ datos }) => {
                 <p className='text-center mt-4 mb-0'>
                     <span className="fw-bolder">{"Anemógrafo"}</span>
                 </p>
-                <Brujula degrees={selectedPoint?.grados} />
+                <Brujula degrees={selectedPoint?.grados || promedio} />
             </div>
-            <ResponsiveContainer width="100%" height={400}>
-                <AreaChart
-                    width={500}
-                    height={400}
-                    data={datos}
-                    margin={{
-                        top: 10,
-                        right: 30,
-                        left: 0,
-                        bottom: 0,
-                    }}
-                    onClick={e => {
-                        if (e && e.activeLabel) {
-                            // e.activeLabel es el valor del eje X (por ejemplo, fecha)
-                            // e.activePayload[0].payload es el objeto completo del punto
-                            // console.log("Punto seleccionado:", e.activePayload);
-                            handleSetSelectedPoint(e.activeCoordinate)
-                        }
-                        // console.log(e.activeCoordinate)
-                    }}
-                >
-                    <CartesianGrid strokeDasharray="360 200" />
-                    <XAxis dataKey="date" />
-                    <YAxis dataKey="grados" />
-                    <Tooltip />
-                    <defs>
-                        <linearGradient id="splitColor" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset={1} stopColor="red" stopOpacity={1} />
-                            <stop offset={1} stopColor="purple" stopOpacity={1} />
-                            <stop offset={1} stopColor="blue" stopOpacity={1} />
-                            <stop offset={1} stopColor="red" stopOpacity={1} />
-                        </linearGradient>
-                    </defs>
-                    <ReferenceLine y={360} label="Norte" stroke="red" opacity={0.1} />
-                    <ReferenceLine y={270} label="Oeste" stroke="purple" opacity={0.1} />
-                    <ReferenceLine y={180} label="Sur" stroke="blue" opacity={0.1} />
-                    <ReferenceLine y={90} label="Este" stroke="purple" opacity={0.1} />
-                    <Area onClick={e => {
-                        // e es el evento, pero no siempre tiene el punto
-                        // console.log(e.points);
-                        setPoints(e.points);
-                    }} type="monotone" dataKey="grados" stroke="#0000004d" fill="url(#splitColor)" />
-                </AreaChart>
-            </ResponsiveContainer>
+            <div className="container m-0 px-3">
+                <ResponsiveContainer width="100%" height={400}>
+                    <AreaChart
+                        width={500}
+                        height={400}
+                        data={datos}
+                        margin={{
+                            top: 10,
+                            right: 30,
+                            left: 0,
+                            bottom: 0,
+                        }}
+                        onClick={e => {
+                            if (e && e.activeLabel) {
+                                // e.activeLabel es el valor del eje X (por ejemplo, fecha)
+                                // e.activePayload[0].payload es el objeto completo del punto
+                                // console.log("Punto seleccionado:", e.activePayload);
+                                handleSetSelectedPoint(e.activeCoordinate)
+                            }
+                            // console.log(e.activeCoordinate)
+                        }}
+                    >
+                        <CartesianGrid strokeDasharray="360 200" />
+
+                        <XAxis dataKey="date" />
+                        <YAxis dataKey="grados" label={{ value: 'Grados (°)', angle: -90, position: 'insideLeft', fontSize: 16, fill: '#333', fontWeight: 'bold' }} />
+                        {/* <YAxis yAxisId="right" orientation="right" label={{ value: 'Velocidad (m/s)', angle: 90, position: 'insideRight', fontSize: 16, fill: '#333', fontWeight: 'bold' }} /> */}
+                        {/* <YAxis yAxisId="right" orientation="right" label={{ value: "Velocidad", angle: 90, position: 'insideRight', fontSize: 16, fill: '#333', fontWeight: 'bold' }} /> */}
+                        <Line yAxisId="right" type="monotone" dataKey={datosVelocidad} stroke="#8884d8" activeDot={{ r: 8 }} />
+
+                        <Tooltip />
+                        <defs>
+                            <linearGradient id="splitColor" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset={1} stopColor="red" stopOpacity={1} />
+                                <stop offset={1} stopColor="purple" stopOpacity={1} />
+                                <stop offset={1} stopColor="blue" stopOpacity={1} />
+                                <stop offset={1} stopColor="red" stopOpacity={1} />
+                            </linearGradient>
+                        </defs>
+                        <ReferenceLine y={360} label="Norte" stroke="red" opacity={0.1} />
+                        <ReferenceLine y={270} label="Oeste" stroke="purple" opacity={0.1} />
+                        <ReferenceLine y={180} label="Sur" stroke="blue" opacity={0.1} />
+                        <ReferenceLine y={90} label="Este" stroke="purple" opacity={0.1} />
+                        <Area onClick={e => {
+                            // e es el evento, pero no siempre tiene el punto
+                            // console.log(e.points);
+                            setPoints(e.points);
+                        }} type="monotone" dataKey="grados" stroke="#0000004d" fill="url(#splitColor)">
+                        </Area>
+                    </AreaChart>
+                </ResponsiveContainer>
+            </div>
+            <div className="row pb-3">
+                <p className='text-center my-auto '>
+                    <span className="fw-bolder">{"Tiempo"}</span>
+                </p>
+            </div>
+
+
+
+            <ChartComponent datos={datosVelocidad} title={"Velocidad Viento (m/s)"} />
+            <div className="row pb-3">
+                <p className='text-center my-auto '>
+                    <span className="fw-bolder">{"Tiempo"}</span>
+                </p>
+            </div>
+
         </>
     );
 };

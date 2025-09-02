@@ -223,6 +223,12 @@ export const DashboardPage = () => {
   const promedioPresion = Math.round(
     presionArr.reduce((sum, d) => sum + d.presion, 0) / presionArr.length
   );
+  const promedioDireccion = Math.round(
+    direccionArr.reduce((sum, d) => sum + d.grados, 0) / direccionArr.length
+  );
+  const promedioVelocidad = Math.round(
+    velocidadArr.reduce((sum, d) => sum + d.velocidad, 0) / velocidadArr.length
+  );
 
   const [selectedChart, setSelectedChart] = useState("mapa");
 
@@ -310,7 +316,7 @@ export const DashboardPage = () => {
                     <ChartComponent title="Volumen (m³)" datos={volumenArr} />
                   </div>
                   <div style={{ display: selectedChart === "flujoVolumen" ? "block" : "none" }}>
-                    <BiAxialLineChartComponent datos={flujoVolumenArr} lineDataKeyOne={"flujo"} lineDataKeyTwo={"volumen"} title="Flujo / Volumen" />
+                    <BiAxialLineChartComponent datos={flujoVolumenArr} lineDataKeyOne={"flujo"} lineDataKeyTwo={"volumen"} title="Flujo (L/min) / Volumen (m³)" />
                   </div>
                   <div style={{ display: selectedChart === "pm2_5" ? "block" : "none" }}>
                     <ChartComponent title="PM 2.5 (µg/m³)" datos={pm25Arr} />
@@ -328,7 +334,7 @@ export const DashboardPage = () => {
                     <ChartComponent title="Presión (hPa)" datos={presionArr} />
                   </div>
                   <div style={{ display: selectedChart === "anemografo" ? "block" : "none" }}>
-                    <Anemografo title="Anemógrafo" datos={direccionArr} />
+                    <Anemografo title="Anemógrafo" promedio={promedioDireccion} datosVelocidad={velocidadArr} promedioVelocidad={promedioVelocidad} datos={direccionArr} />
                   </div>
                   <div style={{ display: selectedChart === "mapa" ? "block" : "none" }}>
                     

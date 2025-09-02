@@ -19,7 +19,7 @@ export const BiAxialLineChartComponent = ({datos, title, lineDataKeyOne, lineDat
         </p>
         <div className="pe-5">
 
-        <ResponsiveContainer className={"mt-5"} width="100%" height={300}>
+        <ResponsiveContainer className={"mt-5"} width="100%" height={400}>
               {/* <LineChart */}
               <AreaChart
                 width={500}
@@ -34,8 +34,8 @@ export const BiAxialLineChartComponent = ({datos, title, lineDataKeyOne, lineDat
               >
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey={lineXDataKey} />
-                <YAxis yAxisId="left" />
-                <YAxis yAxisId="right" orientation="right" />
+                <YAxis yAxisId="left" label={{ value: lineDataKeyOne, angle: -90, position: 'insideLeft', fontSize: 16, fill: '#333', fontWeight: 'bold' }}/>
+                <YAxis yAxisId="right" orientation="right" label={{ value: lineDataKeyTwo, angle: 90, position: 'insideRight', fontSize: 16, fill: '#333', fontWeight: 'bold' }} />
                 <Tooltip />
                 <Legend />
                 <Line yAxisId="left" type="monotone" dataKey={lineDataKeyOne} stroke="#8884d8" activeDot={{ r: 8 }} />
@@ -51,20 +51,3 @@ export const BiAxialLineChartComponent = ({datos, title, lineDataKeyOne, lineDat
   );
 
 }
-
-const ExcelChart = () => {
-
-  const datos = [
-    {'patente': 'MP-01-EXPRESS', 'sesion_id': 3001, 'dia': 3, 'mes': 1, 'año': 2025, 'timestamp': '19:00:00', 'variable': '°C', 'valor': 50, 'id': 1 },
-    {'patente':'MP-01-EXPRESS', 'sesion_id': 3001, 'dia': 3, 'mes': 1, 'año': 2025, 'timestamp': '20:00:00', 'variable': '°C', 'valor': 20, 'id': 2},
-    {'patente': 'MP-01-EXPRESS', 'sesion_id': 3001, 'dia': 3, 'mes': 1, 'año': 2025, 'timestamp': '21:00:00', 'variable': '°C', 'valor': 30, 'id': 3 }
-  ]
-
-  return (
-    <ChartComponent datos={datos} fileName="file" />
-  )
-  
-  
-};
-
-export default ExcelChart;

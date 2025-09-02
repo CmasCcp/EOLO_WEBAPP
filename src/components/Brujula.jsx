@@ -1,9 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { PieChart, Pie, Cell } from 'recharts';
 
-export const Brujula = ({ degrees = 0 }) => {
+export const Brujula = ({ 
+    degrees = 0 
+}) => {
+
     // Normalize degrees to [0, 360)
-    const angle = (((degrees + 90) % 360) + 360) % 360;
+    const angle = - degrees + 90;
+    // const angle = (((degrees - 90) % 360) + 360) % 360;
 
     // Data for compass: full circle and pointer
     const data = [
@@ -39,14 +43,14 @@ export const Brujula = ({ degrees = 0 }) => {
                     <Pie
                         data={[data[1]]}
                         dataKey="value"
-                        cx="50%"
-                        cy="50%"
+                        cx={"50%"}
+                        cy={"50%"}
                         startAngle={angle - 2}
                         endAngle={angle + 2}
                         innerRadius={0}
                         outerRadius={65*factor}
                         fill={COLORS[1]}
-                        isAnimationActive={true}
+                        isAnimationActive={false}
                     />
                     {/* Center dot */}
                     <circle cx={100*factor} cy={100*factor} r={8*factor} fill="#fff" stroke="black" strokeWidth={2} />
