@@ -14,6 +14,8 @@ SECRET_KEY = SECRET_KEY[:16].ljust(16, '\0')  # Truncamos o rellenamos para que 
 
 # Función para generar el PIN a partir de la patente
 def generate_pin(patente):
+    # Eliminar guiones de la patente si existen
+    patente = patente.replace("-", "")
     # Usar hash SHA-256 para obtener un valor único basado en la patente
     hashed_patente = hashlib.sha256(patente.encode('utf-8')).hexdigest()
     

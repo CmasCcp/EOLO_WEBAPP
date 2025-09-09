@@ -42,9 +42,10 @@ const InputWithImagePopover = ({ label, id, placeholder, value, onChange, img_ur
             >
                 <PopoverBody>
                     <img
+                        className='mx-auto d-block'
                         src={img_url} // Reemplaza por la URL de tu imagen
                         alt={id}
-                        style={{ width: '100%', height: 'auto' }}
+                        style={{ width: '50%', height: 'auto' }}
                     />
                     <p className='text-center'>{instruccion}</p>
                 </PopoverBody>

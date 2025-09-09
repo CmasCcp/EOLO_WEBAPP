@@ -3,6 +3,8 @@ import { Navbar } from '../components/Navbar'
 import { Link, useNavigate } from 'react-router-dom'
 import { Breadcrumb } from '../components/Breadcrumb'
 import tarjetaImg from "../assets/tarjeta.png"
+import patenteImg from "../assets/patente.png"
+import pinImg from "../assets/pin.png"
 import InputWithImagePopover from '../components/InputWithImagePopover'
 
 export const AddDevicesPage = () => {
@@ -141,7 +143,7 @@ export const AddDevicesPage = () => {
               placeholder="Ingrese la patente"
               value={patente}
               onChange={(e) => { setPatente(e.target.value.trim()); setValid(false); setDeviceModel("") }} // Actualiza el estado con la patente ingresada
-              img_url={"tarjeta.png"}
+              img_url={"patente.png"}
               instruccion={"La patente está en la parte trasera del dispositivo."}
             />
 
@@ -151,7 +153,7 @@ export const AddDevicesPage = () => {
               placeholder="Ingrese el pin"
               value={pin}
               onChange={(e) => { setPin(e.target.value.trim()); setValid(false); setDeviceModel("") }} // Actualiza el estado con el PIN ingresado
-              img_url={"tarjeta.png"}
+              img_url={"pin.png"}
               instruccion={"El pin está en la parte trasera del dispositivo."}
             />
 

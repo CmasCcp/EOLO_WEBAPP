@@ -232,6 +232,9 @@ def geocode_reverse_location():
 def validate_pin():
     # Obtener los parámetros 'text' y 'pin' de la URL
     text = request.args.get('text')
+    if text and "-" in text:
+        text = text.replace("-", "")
+        
     pin = request.args.get('pin')
 
     # Verificar que ambos parámetros existen
