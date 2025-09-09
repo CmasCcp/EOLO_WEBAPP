@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area } from 'recharts';
 
-export const BiAxialLineChartComponent = ({datos, title, lineDataKeyOne, lineDataKeyTwo, lineXDataKey="date"}) => {
+export const BiAxialLineChartComponent = ({datos, title, labelOne="Flujo (l/min)", labelTwo="Volumen (m³)", lineDataKeyOne, lineDataKeyTwo, lineXDataKey="date"}) => {
 
   const [data, setData] = useState(datos);
   
@@ -34,10 +34,11 @@ export const BiAxialLineChartComponent = ({datos, title, lineDataKeyOne, lineDat
               >
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey={lineXDataKey} />
-                <YAxis yAxisId="left" label={{ value: lineDataKeyOne, angle: -90, position: 'insideLeft', fontSize: 16, fill: '#333', fontWeight: 'bold' }}/>
-                <YAxis yAxisId="right" orientation="right" label={{ value: lineDataKeyTwo, angle: 90, position: 'insideRight', fontSize: 16, fill: '#333', fontWeight: 'bold' }} />
+                
+                <YAxis yAxisId="left" label={{ value: labelOne, angle: -90, position: 'insideLeft', fontSize: 16, fill: '#333', fontWeight: 'bold' }}/>
+                <YAxis yAxisId="right" orientation="right" label={{ value: labelTwo, angle: 90, position: 'insideRight', fontSize: 16, fill: '#333', fontWeight: 'bold' }} />
                 <Tooltip />
-                <Legend />
+                {/* <Legend /> */}
                 <Line yAxisId="left" type="monotone" dataKey={lineDataKeyOne} stroke="#8884d8" activeDot={{ r: 8 }} />
                 {/* <Line yAxisId="right" type="monotone" dataKey={lineDataKeyTwo} stroke="#82ca9d" /> */}
                 <Area yAxisId="right" type="monotone" dataKey={lineDataKeyTwo} fill="#82ca9d" stroke="#82ca9d" />

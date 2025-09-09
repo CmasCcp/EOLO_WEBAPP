@@ -20,8 +20,8 @@ export const Brujula = ({
     const factor = 0.6;
 
     return (
-        <div className='d-flex flex-row justify-content-end align-items-center w-50 px-5'>
-            <div className='w-25 text-center fw-bold mt-0 mb-2 fs-1' style={{ marginTop: 8 }}>
+        <div className='d-flex flex-row justify-content-end align-items-center col-12 px-2'>
+            <div className='col-6 text-center fw-bold mt-0 mb-2 fs-1' style={{ marginTop: 8 }}>
                 {degrees.toFixed(1)}°
             </div>
             <div className=' d-flex justify-content-end align-items-center' style={{ width: 200*factor, height: 200*factor }}>

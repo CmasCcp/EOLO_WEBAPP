@@ -7,7 +7,7 @@ function App() {
 
   return (
     <>
-      <div style={{ minHeight: "100vh" }}>
+      <div className='bg-light' style={{ minHeight: "100vh" }}>
         <AppRoute />
       </div>
 

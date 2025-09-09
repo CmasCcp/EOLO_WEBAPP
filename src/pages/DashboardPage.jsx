@@ -9,6 +9,7 @@ import { CardGraphic } from "../components/graphics/CardGraphic";
 import {BiAxialLineChart} from "../components/graphics/BiAxialLineChart";
 import { BiAxialLineChartComponent } from "../components/BiAxialLineChartComponent";
 import { Anemografo } from "../components/dummys/Anemografo";
+import { Statistics } from "../utils/dataFunctions";
 // import datos from "../../api/db/sesiones/json/sesion_3001.json";
 
 export const DashboardPage = () => {
@@ -202,48 +203,57 @@ export const DashboardPage = () => {
   }
 
   // Supongamos que ya tienes el arreglo humedadArr con los datos de humedads
-  const promedioFlujo = Math.round(
-    flujoArr.reduce((sum, d) => sum + d.flujo, 0) / flujoArr.length
-  );
-  const promedioVolumen = Math.round(
-    volumenArr.reduce((sum, d) => sum + d.volumen, 0) / volumenArr.length
-  );
-  const promedioPM25 = Math.round(
-    pm25Arr.reduce((sum, d) => sum + d.pm25, 0) / pm25Arr.length
-  );
-  const promedioPM10 = Math.round(
-    pm10Arr.reduce((sum, d) => sum + d.pm10, 0) / pm10Arr.length
-  );
-  const promedioTemperatura = Math.round(
-    temperaturaArr.reduce((sum, d) => sum + d.temperatura, 0) / temperaturaArr.length
-  );
-  const promedioHumedad = Math.round(
-    humedadArr.reduce((sum, d) => sum + d.porcentaje_humedad, 0) / humedadArr.length
-  );
-  const promedioPresion = Math.round(
-    presionArr.reduce((sum, d) => sum + d.presion, 0) / presionArr.length
-  );
-  const promedioDireccion = Math.round(
-    direccionArr.reduce((sum, d) => sum + d.grados, 0) / direccionArr.length
-  );
-  const promedioVelocidad = Math.round(
-    velocidadArr.reduce((sum, d) => sum + d.velocidad, 0) / velocidadArr.length
-  );
+  const lastPressure = Statistics.last(presionArr.map(d => d.presion));
+
+  // calculos flujo
+  let avgFlow = Statistics.mean(flujoArr.map(d => d.flujo));
+  avgFlow = Statistics.round(avgFlow, 1);
+  const minFlow = Statistics.min(flujoArr.map(d => d.flujo));
+  const maxFlow = Statistics.max(flujoArr.map(d => d.flujo));
+  
+  
+  // calculos volumen
+  const lastVolume = Statistics.last(volumenArr.map(d => d.volumen));
+  const minVolume = Statistics.min(volumenArr.map(d => d.volumen));
+  const maxVolume = Statistics.max(volumenArr.map(d => d.volumen));
+
+  // pm2.5 y pm10
+  const promedioPM25 = Statistics.round(Statistics.mean(pm25Arr.map(d => d.pm25)));
+  const promedioPM10 = Statistics.round(Statistics.mean(pm10Arr.map(d => d.pm10)));
+  const minPM25 = Statistics.round(Statistics.min(pm25Arr.map(d => d.pm25)));
+  const maxPM25 = Statistics.round(Statistics.max(pm25Arr.map(d => d.pm25)));
+  const minPM10 = Statistics.round(Statistics.min(pm10Arr.map(d => d.pm10)));
+  const maxPM10 = Statistics.round(Statistics.max(pm10Arr.map(d => d.pm10)));
+
+  // temperatura
+  let promedioTemperatura = Statistics.round(Statistics.mean(temperaturaArr.map(d => d.temperatura)));
+  let minTemperatura = Statistics.round(Statistics.min(temperaturaArr.map(d => d.temperatura)));
+  let maxTemperatura = Statistics.round(Statistics.max(temperaturaArr.map(d => d.temperatura)));
+
+  const promedioHumedad = Statistics.round(Statistics.mean(humedadArr.map(d => d.porcentaje_humedad)));
+  const minHumedad = Statistics.round(Statistics.min(humedadArr.map(d => d.porcentaje_humedad)));
+  const maxHumedad = Statistics.round(Statistics.max(humedadArr.map(d => d.porcentaje_humedad)));
+  const promedioPresion = Statistics.round(Statistics.mean(presionArr.map(d => d.presion)));
+
+  const minPressure = Statistics.round(Statistics.min(presionArr.map(d => d.presion)));
+  const maxPressure = Statistics.round(Statistics.max(presionArr.map(d => d.presion)));
+  const promedioDireccion = Statistics.round(Statistics.mean(direccionArr.map(d => d.grados)));
+  const minDireccion = Statistics.round(Statistics.min(direccionArr.map(d => d.grados)));
+  const maxDireccion = Statistics.round(Statistics.max(direccionArr.map(d => d.grados)));
+  const promedioVelocidad = Statistics.round(Statistics.mean(velocidadArr.map(d => d.velocidad)));
 
   const [selectedChart, setSelectedChart] = useState("mapa");
 
   // Opciones de gráficos
   const chartOptions = [
     { key: "mapa", label: "Mapa" }, // <-- Nuevo tab
-    // { key: "flujo", label: "Flujo (LPM)", data: flujoArr },
-    // { key: "volumen", label: "Volumen (m³)", data: volumenArr },
     { key: "flujoVolumen", label: "Flujo / Volumen", data: flujoVolumenArr },
-    { key: "pm2_5", label: "PM 2.5 (µg/m³)", data: pm25Arr },
-    { key: "pm10", label: "PM 10 (µg/m³)", data: pm10Arr },
+    { key: "pm2_5", label: "MP 2.5 (µg/m³)", data: pm25Arr },
+    { key: "pm10", label: "MP 10 (µg/m³)", data: pm10Arr },
     { key: "temperatura", label: "Temperatura (°C)", data: temperaturaArr },
     { key: "humedad", label: "Humedad (%)", data: humedadArr },
     { key: "presion", label: "Presión (hPa)", data: presionArr },
-    { key: "anemografo", label: "Anemógrafo", data: direccionArr },
+    { key: "viento", label: "Viento", data: direccionArr },
   ];
 
   // Encuentra la opción seleccionada
@@ -259,10 +269,10 @@ export const DashboardPage = () => {
       <div className="row mx-auto">
         <div className="col-md-10 mx-auto">
           <div className="container mx-auto m-0">
-            {/* <div className="d-flex flex-row justify-content-end">
+            <div className="d-flex flex-row justify-content-end">
               <button className="btn btn-dark mx-1"><small> Descargar Reporte</small></button>
               <button className="btn btn-dark mx-0"><small>Descargar Datos</small></button>
-            </div> */}
+            </div>
 
             <DashboardHeaderComponent pathSegments={pathSegments} sesionData={sesionData} />
             <hr className="col-12 mx-auto" />
@@ -273,13 +283,13 @@ export const DashboardPage = () => {
               {/* Tarjetas de resumen ... */}
 
               <div className="d-flex flex-row mb-4 justify-content-center">
-                <CardGraphic titulo="Flujo Promediado" valor={promedioFlujo || promedioFlujo} unidad="LPM" />
-                <CardGraphic titulo="Volumen Acumulado" valor={promedioVolumen || sesionData[0]?.volumen} unidad="m³" />
-                <CardGraphic titulo="PM 2.5" valor={isNaN(promedioPM25) ? '-' : promedioPM25} unidad="µg/m³" />
-                <CardGraphic titulo="PM 10" valor={isNaN(promedioPM10) ? '-' : promedioPM10} unidad="µg/m³" />
-                <CardGraphic titulo="Temperatura Promediado" valor={isNaN(promedioTemperatura) ? '-' : promedioTemperatura} unidad="°C" />
-                <CardGraphic titulo="Humedad Promediado" valor={isNaN(promedioHumedad) ? '-' : promedioHumedad} unidad="%" />
-                <CardGraphic titulo="Presión Atmosférica Promediado" valor={isNaN(promedioPresion) ? '-' : promedioPresion} unidad="hPa" />
+                <CardGraphic onClick={() => setSelectedChart("flujo")} showStats={selectedChart === "flujo"} titulo="Flujo Promediado" min={minFlow} max={maxFlow} valor={avgFlow || "-"} unidad="l/min" />
+                <CardGraphic onClick={() => setSelectedChart("volumen")} showStats={selectedChart === "volumen"} titulo="Volumen Acumulado" min={minVolume} max={maxVolume} valor={lastVolume || "-"} unidad="m³" />
+                <CardGraphic onClick={() => setSelectedChart("pm2_5")} showStats={selectedChart === "pm2_5"} titulo="MP 2.5 Promediado" min={minPM25} max={maxPM25} valor={isNaN(promedioPM25) ? '-' : promedioPM25} unidad="µg/m³" />
+                <CardGraphic onClick={() => setSelectedChart("pm10")} showStats={selectedChart === "pm10"} titulo="MP 10 Promediado" min={minPM10} max={maxPM10} valor={isNaN(promedioPM10) ? '-' : promedioPM10} unidad="µg/m³" />
+                <CardGraphic onClick={() => setSelectedChart("temperatura")} showStats={selectedChart === "temperatura"} titulo="Temperatura Promediado" min={minTemperatura} max={maxTemperatura} valor={isNaN(promedioTemperatura) ? '-' : promedioTemperatura} unidad="°C" />
+                <CardGraphic onClick={() => setSelectedChart("humedad")} showStats={selectedChart === "humedad"} titulo="Humedad Relativa Promediada" min={minHumedad} max={maxHumedad} valor={isNaN(promedioHumedad) ? '-' : promedioHumedad} unidad="%" />
+                <CardGraphic onClick={() => setSelectedChart("presion")} showStats={selectedChart === "presion"} titulo="Presión Atmosférica final" min={minPressure} max={maxPressure} valor={isNaN(lastPressure) ? '-' : lastPressure} unidad="hPa" />
 
               </div>
               {/* <div className="d-flex flex-row justify-content-end">
@@ -308,33 +318,33 @@ export const DashboardPage = () => {
 
               {/* Gráficos y mapa: solo uno visible según selección */}
               <div className="col-12">
-                <div className="card col-12 col-md-12 mb-2">
-                  <div style={{ display: selectedChart === "flujo" ? "block" : "none" }}>
-                    <ChartComponent title="Flujo (LPM)" datos={flujoArr} />
+                <div className=" col-12 col-md-12 mb-2">
+                  <div className="card" style={{ display: selectedChart === "flujo" ? "block" : "none" }}>
+                    <ChartComponent title="Flujo (l/min)" datos={flujoArr} />
                   </div>
-                  <div style={{ display: selectedChart === "volumen" ? "block" : "none" }}>
+                  <div className="card" style={{ display: selectedChart === "volumen" ? "block" : "none" }}>
                     <ChartComponent title="Volumen (m³)" datos={volumenArr} />
                   </div>
-                  <div style={{ display: selectedChart === "flujoVolumen" ? "block" : "none" }}>
-                    <BiAxialLineChartComponent datos={flujoVolumenArr} lineDataKeyOne={"flujo"} lineDataKeyTwo={"volumen"} title="Flujo (L/min) / Volumen (m³)" />
+                  <div className="card" style={{ display: selectedChart === "flujoVolumen" ? "block" : "none" }}>
+                    <BiAxialLineChartComponent datos={flujoVolumenArr} lineDataKeyOne={"flujo"} lineDataKeyTwo={"volumen"} title="Flujo (l/min) / Volumen (m³)" />
                   </div>
-                  <div style={{ display: selectedChart === "pm2_5" ? "block" : "none" }}>
-                    <ChartComponent title="PM 2.5 (µg/m³)" datos={pm25Arr} />
+                  <div className="card" style={{ display: selectedChart === "pm2_5" ? "block" : "none" }}>
+                    <ChartComponent title="MP 2.5 (µg/m³)" datos={pm25Arr} />
                   </div>
-                  <div style={{ display: selectedChart === "pm10" ? "block" : "none" }}>
-                    <ChartComponent title="PM 10 (µg/m³)" datos={pm10Arr} />
+                  <div className="card" style={{ display: selectedChart === "pm10" ? "block" : "none" }}>
+                    <ChartComponent title="MP 10 (µg/m³)" datos={pm10Arr} />
                   </div>
-                  <div style={{ display: selectedChart === "temperatura" ? "block" : "none" }}>
+                  <div className="card" style={{ display: selectedChart === "temperatura" ? "block" : "none" }}>
                     <ChartComponent title="Temperatura (°C)" datos={temperaturaArr} />
                   </div>
-                  <div style={{ display: selectedChart === "humedad" ? "block" : "none" }}>
-                    <ChartComponent title="Humedad Ambiental (%)" datos={humedadArr} />
+                  <div className="card" style={{ display: selectedChart === "humedad" ? "block" : "none" }}>
+                    <ChartComponent title="Humedad Ambiental Relativa (%)" datos={humedadArr} />
                   </div>
-                  <div style={{ display: selectedChart === "presion" ? "block" : "none" }}>
+                  <div className="card" style={{ display: selectedChart === "presion" ? "block" : "none" }}>
                     <ChartComponent title="Presión (hPa)" datos={presionArr} />
                   </div>
-                  <div style={{ display: selectedChart === "anemografo" ? "block" : "none" }}>
-                    <Anemografo title="Anemógrafo" promedio={promedioDireccion} datosVelocidad={velocidadArr} promedioVelocidad={promedioVelocidad} datos={direccionArr} />
+                  <div className="" style={{ display: selectedChart === "viento" ? "block" : "none" }}>
+                    <Anemografo title="Viento" promedio={promedioDireccion} datosVelocidad={velocidadArr} promedioVelocidad={promedioVelocidad} datos={direccionArr} />
                   </div>
                   <div style={{ display: selectedChart === "mapa" ? "block" : "none" }}>
                     

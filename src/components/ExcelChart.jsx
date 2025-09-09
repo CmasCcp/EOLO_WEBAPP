@@ -12,7 +12,7 @@ export const ChartComponent = ({datos, title}) => {
   );
   const remainingProperty = filteredProperties.length > 0 ? filteredProperties[0] : null;
   return (
-    <div>
+    <div className='card'>
       {data.length > 0 && (<div className='' >
         <p className='text-center mt-4 mb-0'>
           <span className="fw-bolder">{title || "Gráfico de Datos"}</span>
@@ -25,7 +25,7 @@ export const ChartComponent = ({datos, title}) => {
             <XAxis dataKey="date" />
             <YAxis label={{ value: title, angle: -90, position: 'insideLeft', fontSize: 16, fill: '#333', fontWeight: 'bold' }} />
             <Tooltip />
-            <Legend />
+            {/* <Legend /> */}
             <Line type="monotone" dataKey={remainingProperty} stroke="#8884d8" />
             {/* <Line type="monotone" dataKey="value" stroke="#8884d8" /> */}
           </LineChart>
