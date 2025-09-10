@@ -26,7 +26,7 @@ export const AddDevicesPage = () => {
       
       // Validar que los campos no estén vacíos
       if (!patente || !modelo || !valido) {
-        console.log(!patente, !modelo, !valid)
+        console.log(!!patente, !!modelo, !!valid)
         setError('Por favor, completa todos los campos');
         return;
       }

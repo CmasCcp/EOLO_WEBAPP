@@ -86,11 +86,10 @@ def get_device():
 
         # Buscar el dispositivo que tenga la patente proporcionada
         device = next((device for device in data["data"]["tableData"] if device['codigo_interno'] == patente), False)
-
-        device["modelo"] = "Eolo MP Express"
-
         # Si encontramos el dispositivo, devolverlo, de lo contrario, enviar un error
         if device:
+            print("device", device)
+            device["modelo"] = "Eolo MP Express"
             return jsonify(device), 200
         else:
             return jsonify({"error": "Dispositivo no encontrado"}), 404        
@@ -115,10 +114,11 @@ def get_my_device():
             data = json.load(file)  # Leer el archivo JSON
 
         # Buscar el dispositivo que tenga la patente proporcionada
-        device = next((device for device in data if device['patente'] == patente), None)
+        device = next((device for device in data["data"]["tableData"] if device['codigo_interno'] == patente), None)
 
-        # Si encontramos el dispositivo, devolverlo, de lo contrario, enviar un error
-        if device:
+        if device.len() > 0:
+            print("device", device)
+            device["modelo"] = "Eolo MP Express"
             return jsonify(device), 200
         else:
             return jsonify({"error": "Dispositivo no encontrado"}), 404
