@@ -275,13 +275,15 @@ def validate_pin():
 def get_pin():
     # Obtener los parámetros 'text' URL
     text = request.args.get('text')
-
     if not text:
         return jsonify({"error": "Faltan parámetros 'text' o 'pin'"}), 400
 
     # Generamos el PIN a partir del texto (patente)
-    generated_pin = generate_pin(text)
+    textClean =""
+    if text and "-" in text:
+        textClean = text.replace("-", "")
 
+    generated_pin = generate_pin(textClean)
     print(generated_pin)
     
     # Validar si el PIN proporcionado coincide con el PIN generado

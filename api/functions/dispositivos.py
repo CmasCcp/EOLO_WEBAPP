@@ -61,7 +61,6 @@ def get_my_devices():
 def get_device():
     # Obtener la patente desde los parámetros de la URL
     patente = request.args.get('patente')
-
     # Verificar si se proporcionó la patente
     if not patente:
         return jsonify({"error": "Falta el parámetro 'patente'"}), 400

@@ -50,48 +50,50 @@ export const DashboardHeaderComponent = ({ pathSegments, sesionData }) => {
 
             {sesionData[0] && (
 
-            <div className="d-flex justify-content-around mb-2">
-                <div>
-                    <span className="fw-bold">Inicio:</span>
-                    <input
-                        type="text"
-                        className="form-control"
-                        value={sesionData[0]?.timestamp_inicial}
-                        disabled
-                        readOnly
-                    />
-                </div>
-                <div className="d-flex justify-content-center align-items-center mb-2 gap-4">
-                    <div className="text-center">
-                        <span className="fw-bold">
-                            Ubicación:
-                        </span>
-                        <div className='fw-bold'>
-                            <i className="fas fa-map-marker-alt m-2"></i>
-                            {sesionData[0]?.ubicacion_corto}
+                <div className="d-flex flex-column flex-md-row justify-content-around mb-2 align-items-around">
+                    {/* Ubicación y batería arriba en móvil, al centro en desktop */}
+                    <div className="d-flex flex-row justify-content-around align-items-center gap-4 order-1 order-md-2 mb-2 mb-md-0">
+                        <div className="text-center">
+                            <span className="fw-bold">
+                                Ubicación:
+                            </span>
+                            <div className='fw-bold'>
+                                <i className="fas fa-map-marker-alt m-2"></i>
+                                {sesionData[0]?.ubicacion_corto}
+                            </div>
+                        </div>
+                        <div className="text-center">
+                            <span className="fw-bold">
+                                Batería:
+                            </span>
+                            <div className="fw-bold">
+                                <i className={`fas ${batteryIcon} ${batteryColor} m-2`}></i>
+                                {sesionData[0]?.bateria + '%'}
+                            </div>
                         </div>
                     </div>
-                    <div className="text-center">
-                        <span className="fw-bold">
-                            Batería:
-                        </span>
-                        <div className="fw-bold">
-                            <i className={`fas ${batteryIcon} ${batteryColor} m-2`}></i>
-                            {sesionData[0]?.bateria + '%'}
-                        </div>
+                    {/* Inicio y Fin abajo en móvil, a los lados en desktop */}
+                    <div className="order-2 order-md-1 mb-2 mb-md-0">
+                        <span className="fw-bold">Inicio:</span>
+                        <input
+                            type="text"
+                            className="form-control"
+                            value={sesionData[0]?.timestamp_inicial}
+                            disabled
+                            readOnly
+                        />
+                    </div>
+                    <div className="order-3 order-md-3">
+                        <span className="fw-bold">Fin:</span>
+                        <input
+                            type="text"
+                            className="form-control"
+                            value={sesionData[0]?.timestamp_final}
+                            disabled
+                            readOnly
+                        />
                     </div>
                 </div>
-                <div>
-                    <span className="fw-bold">Fin:</span>
-                    <input
-                        type="text"
-                        className="form-control"
-                        value={sesionData[0]?.timestamp_final}
-                        disabled
-                        readOnly
-                    />
-                </div>
-            </div>
             )}
 
 

@@ -6,10 +6,11 @@ import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import MapComponent from "../components/MapComponent";
 import { CardGraphic } from "../components/graphics/CardGraphic";
-import {BiAxialLineChart} from "../components/graphics/BiAxialLineChart";
+import { BiAxialLineChart } from "../components/graphics/BiAxialLineChart";
 import { BiAxialLineChartComponent } from "../components/BiAxialLineChartComponent";
 import { Anemografo } from "../components/dummys/Anemografo";
 import { Statistics } from "../utils/dataFunctions";
+import { MovilCardGraphic } from "../components/graphics/MovilCardGraphic";
 // import datos from "../../api/db/sesiones/json/sesion_3001.json";
 
 export const DashboardPage = () => {
@@ -210,8 +211,8 @@ export const DashboardPage = () => {
   avgFlow = Statistics.round(avgFlow, 1);
   const minFlow = Statistics.min(flujoArr.map(d => d.flujo));
   const maxFlow = Statistics.max(flujoArr.map(d => d.flujo));
-  
-  
+
+
   // calculos volumen
   const lastVolume = Statistics.last(volumenArr.map(d => d.volumen));
   const minVolume = Statistics.min(volumenArr.map(d => d.volumen));
@@ -281,16 +282,30 @@ export const DashboardPage = () => {
           {!!datos && (
             <div className="container">
               {/* Tarjetas de resumen ... */}
+              {/* d-none d-md-block  */}
 
-              <div className="d-flex flex-row mb-4 justify-content-center">
+              {/* <div className="d-md-block block-inline d-flex flex-row flex-wrap mb-4 justify-content-around"> */}
+              <div className="d-none d-lg-flex flex-row col-12 mb-4 justify-content-between">
                 <CardGraphic onClick={() => setSelectedChart("flujo")} showStats={selectedChart === "flujo"} titulo="Flujo Promediado" min={minFlow} max={maxFlow} valor={avgFlow || "-"} unidad="l/min" />
                 <CardGraphic onClick={() => setSelectedChart("volumen")} showStats={selectedChart === "volumen"} titulo="Volumen Acumulado" min={minVolume} max={maxVolume} valor={lastVolume || "-"} unidad="m³" />
                 <CardGraphic onClick={() => setSelectedChart("pm2_5")} showStats={selectedChart === "pm2_5"} titulo="MP 2.5 Promediado" min={minPM25} max={maxPM25} valor={isNaN(promedioPM25) ? '-' : promedioPM25} unidad="µg/m³" />
                 <CardGraphic onClick={() => setSelectedChart("pm10")} showStats={selectedChart === "pm10"} titulo="MP 10 Promediado" min={minPM10} max={maxPM10} valor={isNaN(promedioPM10) ? '-' : promedioPM10} unidad="µg/m³" />
-                <CardGraphic onClick={() => setSelectedChart("temperatura")} showStats={selectedChart === "temperatura"} titulo="Temperatura Promediado" min={minTemperatura} max={maxTemperatura} valor={isNaN(promedioTemperatura) ? '-' : promedioTemperatura} unidad="°C" />
+                <CardGraphic onClick={() => setSelectedChart("temperatura")} showStats={selectedChart === "temperatura"} titulo="Temperatura Promediada" min={minTemperatura} max={maxTemperatura} valor={isNaN(promedioTemperatura) ? '-' : promedioTemperatura} unidad="°C" />
                 <CardGraphic onClick={() => setSelectedChart("humedad")} showStats={selectedChart === "humedad"} titulo="Humedad Relativa Promediada" min={minHumedad} max={maxHumedad} valor={isNaN(promedioHumedad) ? '-' : promedioHumedad} unidad="%" />
-                <CardGraphic onClick={() => setSelectedChart("presion")} showStats={selectedChart === "presion"} titulo="Presión Atmosférica final" min={minPressure} max={maxPressure} valor={isNaN(lastPressure) ? '-' : lastPressure} unidad="hPa" />
+                <CardGraphic onClick={() => setSelectedChart("presion")} showStats={selectedChart === "presion"} titulo="Presión Atmosférica Final" min={minPressure} max={maxPressure} valor={isNaN(lastPressure) ? '-' : lastPressure} unidad="hPa" />
+              </div>
 
+              {/* Resumen móvil: visible solo en pantallas pequeñas */}
+              <div className="d-lg-none mb-3">
+                <div className="row text-center">
+                  <MovilCardGraphic titulo="Flujo Promediado" min={minFlow} max={maxFlow} valor={avgFlow || "-"} unidad="l/min" />
+                  <MovilCardGraphic titulo="Volumen Acumulado" min={minVolume} max={maxVolume} valor={lastVolume || "-"} unidad="m³" />
+                  <MovilCardGraphic titulo="MP 2.5 Promediado" min={minPM25} max={maxPM25} valor={isNaN(promedioPM25) ? '-' : promedioPM25} unidad="µg/m³" />
+                  <MovilCardGraphic titulo="MP 10 Promediado" min={minPM10} max={maxPM10} valor={isNaN(promedioPM10) ? '-' : promedioPM10} unidad="µg/m³" />
+                  <MovilCardGraphic titulo="Temperatura Promediada" min={minTemperatura} max={maxTemperatura} valor={isNaN(promedioTemperatura) ? '-' : promedioTemperatura} unidad="°C" />
+                  <MovilCardGraphic titulo="Humedad Promediada" min={minHumedad} max={maxHumedad} valor={isNaN(promedioHumedad) ? '-' : promedioHumedad} unidad="%" />
+                  <MovilCardGraphic titulo="Presión Final" min={minPressure} max={maxPressure} valor={isNaN(lastPressure) ? '-' : lastPressure} unidad="hPa" />
+                </div>
               </div>
               {/* <div className="d-flex flex-row justify-content-end">
                 <button className="btn btn-dark mx-1"><small> Descargar Reporte</small></button>
@@ -299,12 +314,15 @@ export const DashboardPage = () => {
               <hr className="col-12 mx-auto" />
 
               {/* Navegador de gráficos tipo tabs */}
-              <ul className="nav nav-pills fs-6 d-row justify-content-center flex-nowrap mb-3">
+              <ul
+                className="nav nav-pills fs-6 flex-nowrap justify-content-start mb-3 w-100 overflow-auto custom-tab-scroll"
+                style={{ whiteSpace: "nowrap" }}
+              >
                 {chartOptions.map(opt => (
-                  <li className="nav-item" key={opt.key}>
+                  <li className="nav-item d-inline-block" key={opt.key}>
                     <button
                       className={`nav-link ${selectedChart === opt.key ? "active bg-dark text-white" : "text-dark"}`}
-                      style={{ cursor: "pointer" }}
+                      style={{ cursor: "pointer", minWidth: 120 }}
                       onClick={() => setSelectedChart(opt.key)}
                     >
                       {opt.label}
@@ -347,7 +365,7 @@ export const DashboardPage = () => {
                     <Anemografo title="Viento" promedio={promedioDireccion} datosVelocidad={velocidadArr} promedioVelocidad={promedioVelocidad} datos={direccionArr} />
                   </div>
                   <div style={{ display: selectedChart === "mapa" ? "block" : "none" }}>
-                    
+
                     <iframe
                       title="Google Map"
                       width="100%"

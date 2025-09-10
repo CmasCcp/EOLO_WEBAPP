@@ -179,6 +179,7 @@ export const Anemografo = ({ promedio, datos, datosVelocidad }) => {
     console.log("velocidad: ", datosVelocidad)
     const [points, setPoints] = useState([]);
     const [selectedPoint, setSelectedPoint] = useState(null);
+    const [vientoSelectedChart,setVientoSelectedChart] = useState("velocidad");
 
     const handleSetSelectedPoint = (point) => {
         const filteredPoint = points.filter(p => p.x === point.x)[0]?.payload;
@@ -191,12 +192,39 @@ export const Anemografo = ({ promedio, datos, datosVelocidad }) => {
         console.log("Punto seleccionado:", selectedPoint);
     }, [selectedPoint]);
 
+    // Opciones de gráficos
+    const chartOptions = [
+        { key: "velocidad", label: "Velocidad" }, // <-- Nuevo tab
+        { key: "direccion", label: "Dirección"},
+    ];
     return (
         <>
-            <div className="card p-3 text-dark col-md-3 ms-auto d-flex flex-row justify-content-end my-3 me-5">
-                <Brujula degrees={selectedPoint?.grados || promedio} />
+            <div className="p-0 mb-0  pe-0 text-dark col-md-11 mx-auto d-flex flex-row justify-content-center align-items-end flex-wrap-reverse my-2">
+                <div className="d-flex mt-auto flex-row mb-0 pb-0 justify-content-end align-items-end me-auto">
+                    {/* Navegador de gráficos tipo tabs */}
+                    <ul
+                        className="mb-0 pb-0 nav nav-pills fs-6 flex-nowrap justify-content-start overflow-auto custom-tab-scroll"
+                        style={{ whiteSpace: "nowrap" }}
+                    >
+                        {chartOptions.map(opt => (
+                            <li className="nav-item d-inline-block m-0" key={opt.key}>
+                                <button
+                                    className={`m-0 nav-link ${vientoSelectedChart === opt.key ? "active bg-dark text-white" : "text-dark"}`}
+                                    style={{ cursor: "pointer", minWidth: 120 }}
+                                    onClick={() => setVientoSelectedChart(opt.key)}
+                                >
+                                    {opt.label}
+                                </button>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+                <div className="card ps-3 me-0">
+                    <Brujula degrees={selectedPoint?.grados || promedio} />
+                </div>
             </div>
-            <div className="card col-11 mx-auto my-3">
+            <hr className='col-11 mx-auto my-0 p-0' />
+            <div style={{ display: vientoSelectedChart === "direccion" ? "block" : "none" }} className="card col-11 mx-auto my-3">
 
                 <div className="d-flex flex-row justify-content-center pt-3">
                     <p className='text-center mt-4 mb-0'>
@@ -257,7 +285,7 @@ export const Anemografo = ({ promedio, datos, datosVelocidad }) => {
                 </div>
 
             </div>
-            <div className="card col-11 mx-auto my-3">
+            <div style={{ display: vientoSelectedChart === "velocidad" ? "block" : "none" }} className="card col-11 mx-auto my-3">
                 <ChartComponent datos={datosVelocidad} title={"Velocidad del Viento (m/s)"} />
             </div>
 
