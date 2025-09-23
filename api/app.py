@@ -14,6 +14,7 @@ from functions.users import users_bp
 from functions.dispositivos import dispositivos_bp
 from functions.sesiones import sesiones_bp
 from functions.datos import datos_bp
+from flask import send_from_directory
 
 
 app = Flask(__name__)
@@ -150,6 +151,19 @@ def upload_file():
     else:
         return jsonify({"error": "Archivo no permitido. Solo se permiten archivos .xls y .xlsx"}), 400
 
+@app.route('/descargarCsv', methods=['GET'])
+def download_file():
+    filename = request.args.get('filename')
+    if not filename:
+        return jsonify({"error": "No filename provided"}), 400
+
+    folder_path = os.path.join(os.getcwd(), 'db', 'sesiones')
+    file_path = os.path.join(folder_path, filename + ".xlsx")
+    print(file_path)
+    if os.path.isfile(file_path) and filename.lower().endswith('.xlsx'):
+        return send_from_directory(folder_path, filename + ".xlsx", as_attachment=True)
+    else:
+        return jsonify({"message": "no hay archivos"}), 404
 
 
 # Endpoint para obtener coordenadas de una ubicación

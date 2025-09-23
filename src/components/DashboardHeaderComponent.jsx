@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-export const DashboardHeaderComponent = ({ pathSegments, sesionData }) => {
+export const DashboardHeaderComponent = ({ pathSegments, sesionData, historic=false }) => {
     const battery = sesionData[0]?.bateria;
     console.log("sesionData.bateria", sesionData[0]?.bateria)
     console.log("sesionData.bateria", sesionData[0])
@@ -32,7 +32,7 @@ export const DashboardHeaderComponent = ({ pathSegments, sesionData }) => {
     return (
         <div className="card p-3">
 
-            {sesionData[0]?.id_sesion ? (
+            {!historic ? (
 
                 <h5 className="text-center mb-4">
                     Sesión {sesionData[0]?.id_sesion} <br />

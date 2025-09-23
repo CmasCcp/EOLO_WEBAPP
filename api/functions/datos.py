@@ -2,6 +2,9 @@ from flask import Blueprint, request, jsonify
 import pymysql
 import os
 from datetime import datetime
+import io
+import pandas as pd
+from flask import send_file
 # from dotenv import load_dotenv
 
 # load_dotenv(dotenv_path="/var/www/api-eolo/.env")
@@ -10,10 +13,11 @@ datos_bp = Blueprint('datos', __name__)
 
 @datos_bp.route('/datos', methods=['GET'])
 def get_datos():
-    # Aquí iría la lógica para obtener los datos
     id_sesion = request.args.get('id_sesion')
-    if not id_sesion:
-        return jsonify({"error": "Falta el id_sesion"}), 400
+    patente = request.args.get('patente')
+    formato = request.args.get('formato')
+    if not id_sesion and not patente:
+        return jsonify({"error": "Falta el id_sesion o patente"}), 400
     try:
         connection = pymysql.connect(
             host=os.getenv("MYSQL_HOST"),
@@ -24,15 +28,36 @@ def get_datos():
             cursorclass=pymysql.cursors.DictCursor
         )
         with connection.cursor() as cursor:
-            sql = "SELECT * FROM datos WHERE id_sesion = %s"
-            cursor.execute(sql, (id_sesion,))
+            if id_sesion:
+                sql = "SELECT * FROM datos WHERE id_sesion = %s"
+                cursor.execute(sql, (id_sesion,))
+            else:
+                sql = "SELECT * FROM datos WHERE patente = %s"
+                cursor.execute(sql, (patente,))
             datos = cursor.fetchall()
         connection.close()
 
-        if datos:
-            return jsonify(datos), 200
-        else:
-            return jsonify({"error": "No se encontraron datos para el id_sesion proporcionado"}), 404
+        if not datos:
+            return jsonify({"error": "No se encontraron datos para el criterio proporcionado"}), 404
+
+        # Si el formato es xlsx, devolver archivo Excel
+        if formato and formato.lower() == "xlsx":
+            df = pd.DataFrame(datos)
+            output = io.BytesIO()
+            with pd.ExcelWriter(output, engine='openpyxl') as writer:
+                df.to_excel(writer, index=False)
+            output.seek(0)
+            filename = f"datos_{id_sesion or patente}.xlsx"
+            return send_file(
+                output,
+                mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                as_attachment=True,
+                download_name=filename
+            )
+
+        # Si no, devolver JSON
+        return jsonify(datos), 200
+
     except Exception as e:
         return jsonify({"error": f"Error al obtener los datos: {str(e)}"}), 500
     

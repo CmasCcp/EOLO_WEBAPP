@@ -12,6 +12,7 @@ import ExcelChart from "../components/ExcelChart.jsx";
 import { isLoggedIn } from "../controllers/loginControl.js";
 import { BiAxialLineChart } from "../components/graphics/BiAxialLineChart.jsx";
 import { Anemografo } from "../components/dummys/Anemografo.jsx";
+import { HistoricDashboardPage } from "../pages/HistoricDashboardPage.jsx";
 
 export const AppRoute = () => {
   const [isLogged, setIsLogged] = useState(false);
@@ -43,6 +44,9 @@ export const AppRoute = () => {
           <Route path="login" element={isLogged ? <Navigate to="/dispositivos" /> : <LoginPage />} />
           <Route path="dispositivos" >
             <Route path="" element={<DevicesPage />} />
+            <Route path=":device" >
+              <Route path="historico" element={<HistoricDashboardPage />} />
+            </Route>
             <Route path=":deviceSessions" >
               <Route path="" element={<SessionsPage />} />
               <Route path="agregar-sesion" element={<UploadDataSessionPage />} />
