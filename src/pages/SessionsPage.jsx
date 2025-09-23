@@ -50,7 +50,7 @@ export const SessionsPage = () => {
     <div className='container-fluid p-0'>
       {/* NAVEGADOR */}
       <Navbar />
-      <div className="container mx-auto px-0 mt-5">
+      <div className="container mx-auto px-5 mt-5">
         <Breadcrumb />
 
         <div className="row">
