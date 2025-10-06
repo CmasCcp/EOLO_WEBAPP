@@ -2,8 +2,6 @@ import React, { useState } from 'react'
 
 export const DashboardHeaderComponent = ({ pathSegments, sesionData, historic=false }) => {
     const battery = sesionData[0]?.bateria;
-    console.log("sesionData.bateria", sesionData[0]?.bateria)
-    console.log("sesionData.bateria", sesionData[0])
 
     let batteryIcon = "fa-battery-full";
     let batteryColor = "";

@@ -25,8 +25,8 @@ export const AddDevicesPage = () => {
     try {
       
       // Validar que los campos no estén vacíos
-      if (!patente || !modelo || !valido) {
-        console.log(!!patente, !!modelo, !!valido)
+      if (!patente || !pin) {
+        console.log(!!patente, !!pin)
         setError('Por favor, completa todos los campos');
         return;
       }
@@ -103,7 +103,13 @@ export const AddDevicesPage = () => {
           setDeviceModel(deviceData.modelo)
           console.log("seteo modelo", deviceData.modelo)
 
+          if (!deviceData.modelo) {
+            setError("Dispositivo no encontrado");
+            return;
+          }
+
           console.log(deviceData)
+          
           try {
             
               console.log(deviceModel)

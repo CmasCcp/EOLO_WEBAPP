@@ -17,6 +17,13 @@
         "id_proyecto": 15
       },
       {
+        "codigo_interno": "MPE-001",
+        "descripcion": null,
+        "id_dispositivo": 81,
+        "id_estado": 5,
+        "id_proyecto": 15
+      },
+      {
         "codigo_interno": "MPE002",
         "descripcion": null,
         "id_dispositivo": 81,

@@ -1,23 +1,18 @@
 import { Breadcrumb } from "../components/Breadcrumb";
-import { DashboardHeaderComponent } from "../components/DashboardHeaderComponent";
 import { ChartComponent } from "../components/ExcelChart";
 import { Navbar } from "../components/Navbar";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import MapComponent from "../components/MapComponent";
 import { CardGraphic } from "../components/graphics/CardGraphic";
-import { BiAxialLineChart } from "../components/graphics/BiAxialLineChart";
 import { BiAxialLineChartComponent } from "../components/BiAxialLineChartComponent";
 import { Anemografo } from "../components/dummys/Anemografo";
 import { Statistics } from "../utils/dataFunctions";
 import { MovilCardGraphic } from "../components/graphics/MovilCardGraphic";
-// import datos from "../../api/db/sesiones/json/sesion_3001.json";
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 export const HistoricDashboardPage = () => {
   const [datos, setDatos] = useState(null);
-  const [idSesion, setIdSesion] = useState(); // Puedes cambiar esto dinámicamente según tu lógica
-  const [sesionData, setSesionData] = useState([]); // Puedes cambiar esto dinámicamente según tu lógica
-  const [filteredSessions, setFilteredSessions] = useState([]);
   const [patente, setPatente] = useState(null);
 
   // Arrays separados
@@ -44,43 +39,14 @@ export const HistoricDashboardPage = () => {
   // Dividir la ruta actual en segmentos
   const pathSegments = location.pathname.split('/').filter(Boolean);
 
-  console.log(pathSegments)
-
   useEffect(() => {
-    // Aquí puedes obtener el id de la sesión desde la URL o desde donde lo necesites
-    const params = new URLSearchParams(window.location.search);
-    const id = params.get('id_session');
-    console.log("pathSegments", pathSegments[1])
-    if (id) {
-      setIdSesion(id);
-    } else {
-      setPatente(pathSegments[1]);
-      const fetchSessions = async () => {
-        try {
-          const response = await fetch(import.meta.env.VITE_REACT_APP_API_URL + '/mis-sesiones?patente=' + patente);  // Endpoint para obtener las sesiones
-          if (!response.ok) {
-            throw new Error('Error al obtener las sesiones');
-          }
-          const data = await response.json();  // Parsear la respuesta JSON
-          console.log("data",data)
-          // Filtrar las sesiones por el dispositivo actual
-          const sessionsForDevice = data.filter(session => session.patente === patente);
-          setFilteredSessions(sessionsForDevice);  // Guardar las sesiones filtradas en el estado
-        } catch (err) {
-          setError(err.message);  // Si ocurre un error, almacenamos el mensaje de error
-        } finally {
-          // setLoading(false);  // Cuando termine la carga, cambiamos el estado de loading
-        }
-      };
-
-      // fetchSessions();  // Llamar a la función de carga de datos
-    }
+    // Obtener patente desde la URL: /dispositivos/MPE-004/historico
+    setPatente(pathSegments[1]);
   }, []);
 
   useEffect(() => {
-    if (idSesion || patente) {
-      console.log(idSesion)
-      fetch(`${import.meta.env.VITE_REACT_APP_API_URL}/datos${idSesion ? `?id_sesion=${idSesion}` : `?patente=${patente}`}`)
+    if (patente) {
+      fetch(`${import.meta.env.VITE_REACT_APP_API_URL}/datos?patente=${patente}`)
         .then(res => res.json())
         .then(data => {
           setDatos(data);
@@ -169,42 +135,11 @@ export const HistoricDashboardPage = () => {
           console.error("No se pudo cargar los datos de la API:", err);
           setDatos(null);
         });
-
-
-      fetch(`${import.meta.env.VITE_REACT_APP_API_URL}/sesion?id_sesion=${idSesion}`)
-        .then(res => res.json())
-        .then(data => {
-          setSesionData(data);
-          console.log("sesion data", data)
-        }).catch(err => {
-          console.error("No se pudo cargar los datos de la sesión:", err);
-          setSesionData(null);
-        }
-        );
     }
-  }, [idSesion,patente]);
+  }, [patente]);
 
 
-  const [deviceSelected, setDeviceSelected] = useState();
-  const [sesionSelected, setSesionSelected] = useState();
 
-  const handleClickDevice = (e) => {
-    console.log(e.target.value);
-    setDeviceSelected(e.target.value)
-    setSesionSelected("")
-
-    const filtered_sesions = sesiones_en_dispositivo.filter(x => x.patente === e.target.value);
-    setSesionsOpt(filtered_sesions)
-  }
-  const handleClickSesion = (e) => {
-    console.log(e.target.value);
-    setSesionSelected(e.target.value)
-  }
-
-  const handleClearFilters = () => {
-    setDeviceSelected("")
-    setSesionSelected("")
-  }
 
   // Supongamos que ya tienes el arreglo humedadArr con los datos de humedads
   const lastPressure = Statistics.last(presionArr.map(d => d.presion));
@@ -246,11 +181,10 @@ export const HistoricDashboardPage = () => {
   const maxDireccion = Statistics.round(Statistics.max(direccionArr.map(d => d.grados)));
   const promedioVelocidad = Statistics.round(Statistics.mean(velocidadArr.map(d => d.velocidad)));
 
-  const [selectedChart, setSelectedChart] = useState("mapa");
+  const [selectedChart, setSelectedChart] = useState("flujoVolumen");
 
   // Opciones de gráficos
   const chartOptions = [
-    { key: "mapa", label: "Mapa" }, // <-- Nuevo tab
     { key: "flujoVolumen", label: "Flujo / Volumen", data: flujoVolumenArr },
     { key: "pm2_5", label: "MP 2.5 (µg/m³)", data: pm25Arr },
     { key: "pm10", label: "MP 10 (µg/m³)", data: pm10Arr },
@@ -262,6 +196,115 @@ export const HistoricDashboardPage = () => {
 
   // Encuentra la opción seleccionada
   const selectedOption = chartOptions.find(opt => opt.key === selectedChart);
+
+  // Función para generar el PDF
+  const generatePDFReport = async () => {
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    let yPosition = 20;
+
+    // Título del reporte
+    pdf.setFontSize(18);
+    pdf.text('Reporte Histórico EOLO', pageWidth / 2, yPosition, { align: 'center' });
+    yPosition += 15;
+
+    // Información del dispositivo
+    pdf.setFontSize(12);
+    pdf.text(`Dispositivo: ${patente || 'N/A'}`, 20, yPosition);
+    yPosition += 8;
+    pdf.text(`Tipo de reporte: Dashboard Histórico (Todas las sesiones)`, 20, yPosition);
+    yPosition += 8;
+    pdf.text(`Total de mediciones: ${datos?.length || 0}`, 20, yPosition);
+    yPosition += 15;
+
+    // Resumen estadístico
+    pdf.setFontSize(14);
+    pdf.text('Resumen Estadístico General', 20, yPosition);
+    yPosition += 10;
+
+    pdf.setFontSize(10);
+    const estadisticas = [
+      [`Flujo Promedio: ${avgFlow || 'N/A'} l/min`, `Min: ${minFlow || 'N/A'}`, `Max: ${maxFlow || 'N/A'}`],
+      [`Volumen Final: ${lastVolume || 'N/A'} m³`, `Min: ${minVolume || 'N/A'}`, `Max: ${maxVolume || 'N/A'}`],
+      [`Temperatura Prom.: ${promedioTemperatura || 'N/A'} °C`, `Min: ${minTemperatura || 'N/A'}`, `Max: ${maxTemperatura || 'N/A'}`],
+      [`Humedad Prom.: ${promedioHumedad || 'N/A'} %`, `Min: ${minHumedad || 'N/A'}`, `Max: ${maxHumedad || 'N/A'}`],
+      [`Presión Prom.: ${promedioPresion || 'N/A'} hPa`, `Min: ${minPressure || 'N/A'}`, `Max: ${maxPressure || 'N/A'}`],
+      [`MP 2.5 Prom.: ${promedioPM25 || 'N/A'} µg/m³`, `Min: ${minPM25 || 'N/A'}`, `Max: ${maxPM25 || 'N/A'}`],
+      [`MP 10 Prom.: ${promedioPM10 || 'N/A'} µg/m³`, `Min: ${minPM10 || 'N/A'}`, `Max: ${maxPM10 || 'N/A'}`]
+    ];
+
+    estadisticas.forEach(stat => {
+      pdf.text(stat[0], 20, yPosition);
+      pdf.text(stat[1], 80, yPosition);
+      pdf.text(stat[2], 140, yPosition);
+      yPosition += 6;
+    });
+
+    yPosition += 10;
+
+    // Capturar gráficos
+    const graficos = [
+      { key: 'flujoVolumen', titulo: 'Flujo / Volumen' },
+      { key: 'temperatura', titulo: 'Temperatura' },
+      { key: 'humedad', titulo: 'Humedad' },
+      { key: 'presion', titulo: 'Presión' },
+      { key: 'pm2_5', titulo: 'MP 2.5' },
+      { key: 'pm10', titulo: 'MP 10' },
+      { key: 'viento', titulo: 'Viento' }
+    ];
+
+    for (const grafico of graficos) {
+      // Cambiar al gráfico
+      setSelectedChart(grafico.key);
+      
+      // Esperar un momento para que se renderice
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Buscar el elemento del gráfico
+      const chartElement = document.querySelector('.recharts-wrapper') || 
+                          document.querySelector('canvas') || 
+                          document.querySelector('.card:not([style*="display: none"]) .recharts-wrapper');
+      
+      if (chartElement) {
+        try {
+          const canvas = await html2canvas(chartElement, {
+            scale: 1,
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: '#ffffff'
+          });
+          
+          const imgData = canvas.toDataURL('image/png');
+          const imgWidth = pageWidth - 40;
+          const imgHeight = (canvas.height * imgWidth) / canvas.width;
+          
+          // Nueva página si es necesario
+          if (yPosition + imgHeight > pageHeight - 20) {
+            pdf.addPage();
+            yPosition = 20;
+          }
+          
+          pdf.setFontSize(12);
+          pdf.text(grafico.titulo, 20, yPosition);
+          yPosition += 10;
+          
+          pdf.addImage(imgData, 'PNG', 20, yPosition, imgWidth, imgHeight);
+          yPosition += imgHeight + 15;
+          
+        } catch (error) {
+          console.error(`Error capturando gráfico ${grafico.titulo}:`, error);
+        }
+      }
+    }
+
+    // Guardar el PDF
+    pdf.save(`reporte_historico_${patente || 'datos'}.pdf`);
+    
+    // Volver al gráfico original
+    setSelectedChart("flujoVolumen");
+  };
+
   return (
     <>
       <Navbar />
@@ -273,12 +316,23 @@ export const HistoricDashboardPage = () => {
       <div className="row mx-auto">
         <div className="col-md-10 mx-auto">
           <div className="container mx-auto m-0">
-            <div className="d-flex flex-row justify-content-end">
-              <button className="btn btn-dark mx-1"><small> Descargar Reporte</small></button>
-              <button className="btn btn-dark mx-0"><small>Descargar Datos</small></button>
+            <div className="d-flex flex-row justify-content-between align-items-center">
+              <h2 className="mb-0">Dashboard Histórico - {patente}</h2>
+              <div>
+                <button 
+                  className="btn btn-dark mx-1"
+                  onClick={() => window.open(`${import.meta.env.VITE_REACT_APP_API_URL}/datos?patente=${patente}&formato=xlsx`, '_blank')}
+                >
+                  <small>Descargar Datos</small>
+                </button>
+                <button 
+                  className="btn btn-danger mx-1"
+                  onClick={generatePDFReport}
+                >
+                  <small>Descargar PDF</small>
+                </button>
+              </div>
             </div>
-
-            <DashboardHeaderComponent historic={true} pathSegments={pathSegments} sesionData={sesionData} />
             <hr className="col-12 mx-auto" />
           </div>
 
@@ -366,19 +420,6 @@ export const HistoricDashboardPage = () => {
                   </div>
                   <div className="" style={{ display: selectedChart === "viento" ? "block" : "none" }}>
                     <Anemografo title="Viento" promedio={promedioDireccion} datosVelocidad={velocidadArr} promedioVelocidad={promedioVelocidad} datos={direccionArr} />
-                  </div>
-                  <div style={{ display: selectedChart === "mapa" ? "block" : "none" }}>
-
-                    <iframe
-                      title="Google Map"
-                      width="100%"
-                      height="350"
-                      style={{ border: 0, marginBottom: "1rem" }}
-                      loading="lazy"
-                      allowFullScreen
-                      src={`https://www.google.com/maps?q=${parseFloat(sesionData[0]?.lat) || -36.8270698},${parseFloat(sesionData[0]?.lon) || -73.0502064}&z=15&output=embed`}
-                    />
-                    {/* <MapComponent lat={parseFloat(sesionData[0]?.lat) || -36.8270698} lon={parseFloat(sesionData[0]?.lon) || -73.0502064} handleChangeLocation={() => console.log("first")} /> */}
                   </div>
                 </div>
               </div>

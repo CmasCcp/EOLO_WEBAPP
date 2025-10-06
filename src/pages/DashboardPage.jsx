@@ -1,22 +1,23 @@
+import { useEffect, useState } from "react";
 import { Breadcrumb } from "../components/Breadcrumb";
 import { DashboardHeaderComponent } from "../components/DashboardHeaderComponent";
 import { ChartComponent } from "../components/ExcelChart";
 import { Navbar } from "../components/Navbar";
-import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import MapComponent from "../components/MapComponent";
 import { CardGraphic } from "../components/graphics/CardGraphic";
-import { BiAxialLineChart } from "../components/graphics/BiAxialLineChart";
 import { BiAxialLineChartComponent } from "../components/BiAxialLineChartComponent";
 import { Anemografo } from "../components/dummys/Anemografo";
 import { Statistics } from "../utils/dataFunctions";
 import { MovilCardGraphic } from "../components/graphics/MovilCardGraphic";
-// import datos from "../../api/db/sesiones/json/sesion_3001.json";
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 export const DashboardPage = () => {
-  const [datos, setDatos] = useState(null);
   const [idSesion, setIdSesion] = useState(); // Puedes cambiar esto dinámicamente según tu lógica
+  const [datos, setDatos] = useState(null);
+  const [patente, setPatente] = useState(null);
   const [sesionData, setSesionData] = useState([]); // Puedes cambiar esto dinámicamente según tu lógica
+
   const [filteredSessions, setFilteredSessions] = useState([]);
 
   // Arrays separados
@@ -32,41 +33,35 @@ export const DashboardPage = () => {
   const [direccionArr, setDireccionArr] = useState([]);
   const [velocidadArr, setVelocidadArr] = useState([]);
 
-
-  // // Calculados
-  // const [humedadArr, setHumedadArr] = useState([]);
-  // const [presionArr, setPresionArr] = useState([]);
-  // const [temperaturaArr, setTemperaturaArr] = useState([]);
-
   const location = useLocation();
 
   // Dividir la ruta actual en segmentos
   const pathSegments = location.pathname.split('/').filter(Boolean);
 
-  console.log(datos)
-
   useEffect(() => {
     // Aquí puedes obtener el id de la sesión desde la URL o desde donde lo necesites
     const params = new URLSearchParams(window.location.search);
     const id = params.get('id_sesion');
+    setPatente(pathSegments[1]);
     if (id) {
       setIdSesion(id);
     } else {
+      console.log("no hay sesion", pathSegments[1])
       const fetchSessions = async () => {
         try {
-          const response = await fetch(import.meta.env.VITE_REACT_APP_API_URL + '/mis-sesiones?patente=' + titulo);  // Endpoint para obtener las sesiones
+          const url = `${`?patente=${pathSegments[1]}`}`
+          const response = await fetch(import.meta.env.VITE_REACT_APP_API_URL + '/mis-sesiones' + url);  // Endpoint para obtener las sesiones
           if (!response.ok) {
             throw new Error('Error al obtener las sesiones');
           }
           const data = await response.json();  // Parsear la respuesta JSON
-          console.log(data)
+          console.log("data historic", data)
           // Filtrar las sesiones por el dispositivo actual
           const sessionsForDevice = data.filter(session => session.patente === titulo);
           setFilteredSessions(sessionsForDevice);  // Guardar las sesiones filtradas en el estado
         } catch (err) {
-          setError(err.message);  // Si ocurre un error, almacenamos el mensaje de error
+          console.log(err)
         } finally {
-          setLoading(false);  // Cuando termine la carga, cambiamos el estado de loading
         }
       };
 
@@ -182,6 +177,7 @@ export const DashboardPage = () => {
   }, [idSesion]);
 
 
+
   const [deviceSelected, setDeviceSelected] = useState();
   const [sesionSelected, setSesionSelected] = useState();
 
@@ -257,8 +253,119 @@ export const DashboardPage = () => {
     { key: "viento", label: "Viento", data: direccionArr },
   ];
 
+
   // Encuentra la opción seleccionada
   const selectedOption = chartOptions.find(opt => opt.key === selectedChart);
+
+  // Función para generar el PDF
+  const generatePDFReport = async () => {
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    let yPosition = 20;
+
+    // Título del reporte
+    pdf.setFontSize(18);
+    pdf.text('Reporte de Sesión EOLO', pageWidth / 2, yPosition, { align: 'center' });
+    yPosition += 15;
+
+    // Información de la sesión
+    pdf.setFontSize(12);
+    pdf.text(`Patente: ${sesionData[0]?.patente || 'N/A'}`, 20, yPosition);
+    yPosition += 8;
+    pdf.text(`Ubicación: ${sesionData[0]?.ubicacion_corto || 'N/A'}`, 20, yPosition);
+    yPosition += 8;
+    pdf.text(`Inicio: ${sesionData[0]?.timestamp_inicial || 'N/A'}`, 20, yPosition);
+    yPosition += 8;
+    pdf.text(`Fin: ${sesionData[0]?.timestamp_final || 'N/A'}`, 20, yPosition);
+    yPosition += 15;
+
+    // Resumen estadístico
+    pdf.setFontSize(14);
+    pdf.text('Resumen Estadístico', 20, yPosition);
+    yPosition += 10;
+
+    pdf.setFontSize(10);
+    const estadisticas = [
+      [`Flujo Promedio: ${avgFlow || 'N/A'} l/min`, `Min: ${minFlow || 'N/A'}`, `Max: ${maxFlow || 'N/A'}`],
+      [`Volumen Final: ${lastVolume || 'N/A'} m³`, `Min: ${minVolume || 'N/A'}`, `Max: ${maxVolume || 'N/A'}`],
+      [`Temperatura Prom.: ${promedioTemperatura || 'N/A'} °C`, `Min: ${minTemperatura || 'N/A'}`, `Max: ${maxTemperatura || 'N/A'}`],
+      [`Humedad Prom.: ${promedioHumedad || 'N/A'} %`, `Min: ${minHumedad || 'N/A'}`, `Max: ${maxHumedad || 'N/A'}`],
+      [`Presión Final: ${lastPressure || 'N/A'} hPa`, `Min: ${minPressure || 'N/A'}`, `Max: ${maxPressure || 'N/A'}`],
+      [`MP 2.5 Prom.: ${promedioPM25 || 'N/A'} µg/m³`, `Min: ${minPM25 || 'N/A'}`, `Max: ${maxPM25 || 'N/A'}`],
+      [`MP 10 Prom.: ${promedioPM10 || 'N/A'} µg/m³`, `Min: ${minPM10 || 'N/A'}`, `Max: ${maxPM10 || 'N/A'}`]
+    ];
+
+    estadisticas.forEach(stat => {
+      pdf.text(stat[0], 20, yPosition);
+      pdf.text(stat[1], 80, yPosition);
+      pdf.text(stat[2], 140, yPosition);
+      yPosition += 6;
+    });
+
+    yPosition += 10;
+
+    // Capturar gráficos
+    const graficos = [
+      { key: 'flujoVolumen', titulo: 'Flujo / Volumen' },
+      { key: 'temperatura', titulo: 'Temperatura' },
+      { key: 'humedad', titulo: 'Humedad' },
+      { key: 'presion', titulo: 'Presión' },
+      { key: 'pm2_5', titulo: 'MP 2.5' },
+      { key: 'pm10', titulo: 'MP 10' }
+    ];
+
+    for (const grafico of graficos) {
+      // Cambiar al gráfico
+      setSelectedChart(grafico.key);
+      
+      // Esperar un momento para que se renderice
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Buscar el elemento del gráfico
+      const chartElement = document.querySelector('.recharts-wrapper') || 
+                          document.querySelector('canvas') || 
+                          document.querySelector('.card:not([style*="display: none"]) .recharts-wrapper');
+      
+      if (chartElement) {
+        try {
+          const canvas = await html2canvas(chartElement, {
+            scale: 1,
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: '#ffffff'
+          });
+          
+          const imgData = canvas.toDataURL('image/png');
+          const imgWidth = pageWidth - 40;
+          const imgHeight = (canvas.height * imgWidth) / canvas.width;
+          
+          // Nueva página si es necesario
+          if (yPosition + imgHeight > pageHeight - 20) {
+            pdf.addPage();
+            yPosition = 20;
+          }
+          
+          pdf.setFontSize(12);
+          pdf.text(grafico.titulo, 20, yPosition);
+          yPosition += 10;
+          
+          pdf.addImage(imgData, 'PNG', 20, yPosition, imgWidth, imgHeight);
+          yPosition += imgHeight + 15;
+          
+        } catch (error) {
+          console.error(`Error capturando gráfico ${grafico.titulo}:`, error);
+        }
+      }
+    }
+
+    // Guardar el PDF
+    pdf.save(`reporte_sesion_${idSesion || 'datos'}.pdf`);
+    
+    // Volver al gráfico original
+    setSelectedChart("mapa");
+  };
+
   return (
     <>
       <Navbar />
@@ -271,8 +378,18 @@ export const DashboardPage = () => {
         <div className="col-md-10 mx-auto">
           <div className="container mx-auto m-0">
             <div className="d-flex flex-row justify-content-end">
-              <button className="btn btn-dark mx-1"><small> Descargar Reporte</small></button>
-              <button className="btn btn-dark mx-0"><small>Descargar Datos</small></button>
+              <button
+                className="btn btn-dark mx-1"
+                onClick={generatePDFReport}
+              >
+                <small>Descargar Reporte</small>
+              </button>
+              <button 
+                className="btn btn-dark mx-0"
+                onClick={() => window.open(`${import.meta.env.VITE_REACT_APP_API_URL}/datos?id_sesion=${idSesion}&formato=xlsx`, '_blank')}
+              >
+                <small>Descargar Datos</small>
+              </button>
             </div>
 
             <DashboardHeaderComponent pathSegments={pathSegments} sesionData={sesionData} />
@@ -365,17 +482,18 @@ export const DashboardPage = () => {
                     <Anemografo title="Viento" promedio={promedioDireccion} datosVelocidad={velocidadArr} promedioVelocidad={promedioVelocidad} datos={direccionArr} />
                   </div>
                   <div style={{ display: selectedChart === "mapa" ? "block" : "none" }}>
-
-                    <iframe
-                      title="Google Map"
-                      width="100%"
-                      height="350"
-                      style={{ border: 0, marginBottom: "1rem" }}
+                    {!parseFloat(sesionData[0]?.lat) && !parseFloat(sesionData[0]?.lon) ? (
+                      <p>No hay coordenadas disponibles para mostrar el mapa.</p>
+                    ) : (
+                      <iframe
+                        title="Google Map"
+                        width="100%"
+                        height="350"
+                        style={{ border: 0, marginBottom: "1rem" }}
                       loading="lazy"
                       allowFullScreen
                       src={`https://www.google.com/maps?q=${parseFloat(sesionData[0]?.lat) || -36.8270698},${parseFloat(sesionData[0]?.lon) || -73.0502064}&z=15&output=embed`}
-                    />
-                    {/* <MapComponent lat={parseFloat(sesionData[0]?.lat) || -36.8270698} lon={parseFloat(sesionData[0]?.lon) || -73.0502064} handleChangeLocation={() => console.log("first")} /> */}
+                    />)}
                   </div>
                 </div>
               </div>

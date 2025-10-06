@@ -51,8 +51,6 @@ app.register_blueprint(sesiones_bp)
 app.register_blueprint(datos_bp)
 
 
-
-
 # Función para verificar la extensión del archivo
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -301,7 +299,7 @@ def get_pin():
     print(generated_pin)
     
     # Validar si el PIN proporcionado coincide con el PIN generado
-    return jsonify({"input": text, "pin": generated_pin}), 200
+    return jsonify({"input": textClean, "pin": generated_pin}), 200
     
 
 if __name__ == '__main__':

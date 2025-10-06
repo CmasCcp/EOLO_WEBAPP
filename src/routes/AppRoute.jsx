@@ -45,6 +45,7 @@ export const AppRoute = () => {
           <Route path="dispositivos" >
             <Route path="" element={<DevicesPage />} />
             <Route path=":device" >
+              {/* <Route path="historico" element={<DashboardPage />} /> */}
               <Route path="historico" element={<HistoricDashboardPage />} />
             </Route>
             <Route path=":deviceSessions" >
