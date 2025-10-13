@@ -72,97 +72,7 @@ export const DashboardPage = () => {
   useEffect(() => {
     if (idSesion) {
       console.log(idSesion)
-      fetch(`${import.meta.env.VITE_REACT_APP_API_URL}/datos${idSesion && `?id_sesion=${idSesion}`}`)
-        .then(res => res.json())
-        .then(data => {
-          setDatos(data);
-
-          // Separar arrays
-          setHumedadArr(
-            data.map(d => ({
-              date: d.timestamp,
-              id_dato: d.id_dato,
-              porcentaje_humedad: parseFloat(d.humedad)
-            }))
-          );
-          setFlujoArr(
-            data.map(d => ({
-              date: d.timestamp,
-              id_dato: d.id_dato,
-              flujo: parseFloat(d.flujo)
-            }))
-          );
-          setVolumenArr(
-            data.map(d => ({
-              date: d.timestamp,
-              id_dato: d.id_dato,
-              volumen: parseFloat(d.volumen)
-            }))
-          );
-          setFlujoVolumenArr(
-            data.map(d => ({
-              date: d.timestamp,
-              id_dato: d.id_dato,
-              flujo: parseFloat(d.flujo),
-              volumen: parseFloat(d.volumen)
-            }))
-          );
-          setPresionArr(
-            data.map(d => ({
-              date: d.timestamp,
-              id_dato: d.id_dato,
-              presion: parseFloat(d.presion)
-            }))
-          );
-          setTemperaturaArr(
-            data.map(d => ({
-              date: d.timestamp,
-              id_dato: d.id_dato,
-              temperatura: parseFloat(d.temperatura)
-            }))
-          );
-          setPm25Arr(
-            data.map(d => ({
-              date: d.timestamp,
-              id_dato: d.id_dato,
-              pm25: parseFloat(d.pm2_5)
-            }))
-          );
-          setPm10Arr(
-            data.map(d => ({
-              date: d.timestamp,
-              id_dato: d.id_dato,
-              pm10: parseFloat(d.pm10)
-            }))
-          );
-          setBateriaArr(
-            data.map(d => ({
-              date: d.timestamp,
-              id_dato: d.id_dato,
-              bateria: parseFloat(d.bateria)
-            }))
-          );
-          setVelocidadArr(
-            data.map(d => ({
-              date: d.timestamp,
-              id_dato: d.id_dato,
-              velocidad: parseFloat(d.velocidad)
-            }))
-          );
-          setDireccionArr(
-            data.map(d => ({
-              date: d.timestamp,
-              id_dato: d.id_dato,
-              grados: parseFloat(d.direccion)
-            }))
-          );
-        })
-        .catch(err => {
-          console.error("No se pudo cargar los datos de la API:", err);
-          setDatos(null);
-        });
-
-
+    
       fetch(`${import.meta.env.VITE_REACT_APP_API_URL}/sesion?id_sesion=${idSesion}`)
         .then(res => res.json())
         .then(data => {
@@ -177,6 +87,100 @@ export const DashboardPage = () => {
   }, [idSesion]);
 
 
+  useEffect(() => {
+    if (idSesion) {
+      console.log(idSesion)
+      fetch(`${import.meta.env.VITE_REACT_APP_API_URL}/datos${idSesion && `?id_sesion=${idSesion}`}${sesionData[0]?.filename && `&filename=${sesionData[0]?.filename}`}`)
+        .then(res => res.json())
+        .then(data => {
+          setDatos(data);
+          console.log("datos", data);
+          // Separar arrays
+          setHumedadArr(
+            data.map(d => ({
+              date: d.timestamp_formated,
+              id_dato: d.id_dato,
+              porcentaje_humedad: parseFloat(d.humedad_valor)
+            }))
+          );
+          setFlujoArr(
+            data.map(d => ({
+              date: d.timestamp_formated,
+              id_dato: d.id_dato,
+              flujo: parseFloat(d.flujo_valor)
+            }))
+          );
+          setVolumenArr(
+            data.map(d => ({
+              date: d.timestamp_formated,
+              id_dato: d.id_dato,
+              volumen: parseFloat(d.volumen_valor)
+            }))
+          );
+          setFlujoVolumenArr(
+            data.map(d => ({
+              date: d.timestamp_formated,
+              id_dato: d.id_dato,
+              flujo: parseFloat(d.flujo_valor),
+              volumen: parseFloat(d.volumen_valor)
+            }))
+          );
+          setPresionArr(
+            data.map(d => ({
+              date: d.timestamp_formated,
+              id_dato: d.id_dato,
+              presion: parseFloat(d.presion_valor)
+            }))
+          );
+          setTemperaturaArr(
+            data.map(d => ({
+              date: d.timestamp_formated,
+              id_dato: d.id_dato,
+              temperatura: parseFloat(d.temperatura_valor)
+            }))
+          );
+          setPm25Arr(
+            data.map(d => ({
+              date: d.timestamp_formated,
+              id_dato: d.id_dato,
+              pm25: parseFloat(d["pm2.5_valor"])
+            }))
+          );
+          setPm10Arr(
+            data.map(d => ({
+              date: d.timestamp_formated,
+              id_dato: d.id_dato,
+              pm10: parseFloat(d.pm10_valor)
+            }))
+          );
+          setBateriaArr(
+            data.map(d => ({
+              date: d.timestamp_formated,
+              id_dato: d.id_dato,
+              bateria: parseFloat(d.bateria_valor)
+            }))
+          );
+          setVelocidadArr(
+            data.map(d => ({
+              date: d.timestamp_formated,
+              id_dato: d.id_dato,
+              velocidad: parseFloat(d.velocidad_valor)
+            }))
+          );
+          setDireccionArr(
+            data.map(d => ({
+              date: d.timestamp_formated,
+              id_dato: d.id_dato,
+              grados: parseFloat(d.direccion_valor)
+            }))
+          );
+        })
+        .catch(err => {
+          console.error("No se pudo cargar los datos de la API:", err);
+          setDatos(null);
+        });
+    }
+  }, [idSesion, sesionData]);
 
   const [deviceSelected, setDeviceSelected] = useState();
   const [sesionSelected, setSesionSelected] = useState();
@@ -386,7 +390,7 @@ export const DashboardPage = () => {
               </button>
               <button 
                 className="btn btn-dark mx-0"
-                onClick={() => window.open(`${import.meta.env.VITE_REACT_APP_API_URL}/datos?id_sesion=${idSesion}&formato=xlsx`, '_blank')}
+                onClick={() => window.open(`${import.meta.env.VITE_REACT_APP_API_URL}/datos?id_sesion=${idSesion}&filename=${sesionData[0].filename}&formato=xlsx`, '_blank')}
               >
                 <small>Descargar Datos</small>
               </button>

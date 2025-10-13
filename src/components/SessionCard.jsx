@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom';
 export const SessionCard = ({index, titulo, filename, session,color, day, month, year, hourStart,final_day, final_month, final_year, hourFinal, ubicacion}) => {
   const meses = [" ", "Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]  
   
+  const intMonth = parseInt(month, 10);
+  console.log(parseInt(month, 10))
   return (
     <div className="card col-lg-3 col-md-5 col-sm-5 col-10 p-0 shadow-sm mt-3 pb-0 px-0 mx-2">
       <Link key={index} to={`/dispositivos/${titulo}/sesion_${session.id_sesion}?id_sesion=${session.id_sesion}`} >
@@ -18,7 +20,7 @@ export const SessionCard = ({index, titulo, filename, session,color, day, month,
         {/* Comienzo  */}
         <div className='d-flex flex-column flex-nowrap col-6 m-0 p-4 text-dark'>
           <p>Desde: </p>
-          <h5 className="fw-bold mb-1">{day} {meses[month]}</h5>
+          <h5 className="fw-bold mb-1">{day} {meses[parseInt(month, 10)]}</h5>
           <p className="" 
 
           >{hourStart}</p>
@@ -27,7 +29,7 @@ export const SessionCard = ({index, titulo, filename, session,color, day, month,
         {/* Final  */}
         <div className='bg-dark text-white d-flex flex-column flex-nowrap col-6 m-0 p-4 border-radius rounded-bottom'>
           <p>Hasta: </p>
-          <h5 className="fw-bold mb-1">{final_day} {meses[final_month]}</h5>
+          <h5 className="fw-bold mb-1">{final_day} {meses[parseInt(final_month, 10)]}</h5>
           <p className="" 
           >{hourFinal}</p>
           <small>{final_year}</small>

@@ -10,10 +10,13 @@ import { Statistics } from "../utils/dataFunctions";
 import { MovilCardGraphic } from "../components/graphics/MovilCardGraphic";
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { generatePDFReport } from "../utils/generatePDFReport";
 
 export const HistoricDashboardPage = () => {
   const [datos, setDatos] = useState(null);
   const [patente, setPatente] = useState(null);
+  const [sesionsData, setSesionsData] = useState(null);
+
 
   // Arrays separados
   const [flujoArr, setFlujoArr] = useState([]);
@@ -42,11 +45,26 @@ export const HistoricDashboardPage = () => {
   useEffect(() => {
     // Obtener patente desde la URL: /dispositivos/MPE-004/historico
     setPatente(pathSegments[1]);
+
   }, []);
 
   useEffect(() => {
-    if (patente) {
-      fetch(`${import.meta.env.VITE_REACT_APP_API_URL}/datos?patente=${patente}`)
+    fetch(`${import.meta.env.VITE_REACT_APP_API_URL}/mis-sesiones?patente=${patente}`)
+      .then(res => res.json())
+      .then(data => {
+        setSesionsData(data);
+      })
+      .catch(err => {
+        console.error("No se pudo cargar las sesiones de la API:", err);
+        setSesionsData(null);
+      });
+  }, [patente]);
+
+  useEffect(() => {
+    if (patente && sesionsData && sesionsData.length > 0) {
+      // Obtener todos los filenames y unirlos por coma
+      const filenames = sesionsData.map(s => s.filename).join(',');
+      fetch(`${import.meta.env.VITE_REACT_APP_API_URL}/datos?patente=${patente}&filename=${filenames}`)
         .then(res => res.json())
         .then(data => {
           setDatos(data);
@@ -54,80 +72,80 @@ export const HistoricDashboardPage = () => {
           // Separar arrays
           setHumedadArr(
             data.map(d => ({
-              date: d.timestamp,
+              date: d.timestamp_formated,
               id_dato: d.id_dato,
-              porcentaje_humedad: parseFloat(d.humedad)
+              porcentaje_humedad: parseFloat(d.humedad_valor)
             }))
           );
           setFlujoArr(
             data.map(d => ({
-              date: d.timestamp,
+              date: d.timestamp_formated,
               id_dato: d.id_dato,
-              flujo: parseFloat(d.flujo)
+              flujo: parseFloat(d.flujo_valor)
             }))
           );
           setVolumenArr(
             data.map(d => ({
-              date: d.timestamp,
+              date: d.timestamp_formated,
               id_dato: d.id_dato,
-              volumen: parseFloat(d.volumen)
+              volumen: parseFloat(d.volumen_valor)
             }))
           );
           setFlujoVolumenArr(
             data.map(d => ({
-              date: d.timestamp,
+              date: d.timestamp_formated,
               id_dato: d.id_dato,
-              flujo: parseFloat(d.flujo),
-              volumen: parseFloat(d.volumen)
+              flujo: parseFloat(d.flujo_valor),
+              volumen: parseFloat(d.volumen_valor)
             }))
           );
           setPresionArr(
             data.map(d => ({
-              date: d.timestamp,
+              date: d.timestamp_formated,
               id_dato: d.id_dato,
-              presion: parseFloat(d.presion)
+              presion: parseFloat(d.presion_valor)
             }))
           );
           setTemperaturaArr(
             data.map(d => ({
-              date: d.timestamp,
+              date: d.timestamp_formated,
               id_dato: d.id_dato,
-              temperatura: parseFloat(d.temperatura)
+              temperatura: parseFloat(d.temperatura_valor)
             }))
           );
           setPm25Arr(
             data.map(d => ({
-              date: d.timestamp,
+              date: d.timestamp_formated,
               id_dato: d.id_dato,
-              pm25: parseFloat(d.pm2_5)
+              pm25: parseFloat(d["pm2.5_valor"])
             }))
           );
           setPm10Arr(
             data.map(d => ({
-              date: d.timestamp,
+              date: d.timestamp_formated,
               id_dato: d.id_dato,
-              pm10: parseFloat(d.pm10)
+              pm10: parseFloat(d.pm10_valor)
             }))
           );
           setBateriaArr(
             data.map(d => ({
-              date: d.timestamp,
+              date: d.timestamp_formated,
               id_dato: d.id_dato,
-              bateria: parseFloat(d.bateria)
+              bateria: parseFloat(d.bateria_valor)
             }))
           );
           setVelocidadArr(
             data.map(d => ({
-              date: d.timestamp,
+              date: d.timestamp_formated,
               id_dato: d.id_dato,
-              velocidad: parseFloat(d.velocidad)
+              velocidad: parseFloat(d.velocidad_valor)
             }))
           );
           setDireccionArr(
             data.map(d => ({
-              date: d.timestamp,
+              date: d.timestamp_formated,
               id_dato: d.id_dato,
-              grados: parseFloat(d.direccion)
+              grados: parseFloat(d.direccion_valor)
             }))
           );
         })
@@ -136,7 +154,7 @@ export const HistoricDashboardPage = () => {
           setDatos(null);
         });
     }
-  }, [patente]);
+  }, [sesionsData]);
 
 
 
@@ -198,112 +216,112 @@ export const HistoricDashboardPage = () => {
   const selectedOption = chartOptions.find(opt => opt.key === selectedChart);
 
   // Función para generar el PDF
-  const generatePDFReport = async () => {
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    let yPosition = 20;
+  // const generatePDFReport = async () => {
+  //   const pdf = new jsPDF('p', 'mm', 'a4');
+  //   const pageWidth = pdf.internal.pageSize.getWidth();
+  //   const pageHeight = pdf.internal.pageSize.getHeight();
+  //   let yPosition = 20;
 
-    // Título del reporte
-    pdf.setFontSize(18);
-    pdf.text('Reporte Histórico EOLO', pageWidth / 2, yPosition, { align: 'center' });
-    yPosition += 15;
+  //   // Título del reporte
+  //   pdf.setFontSize(18);
+  //   pdf.text('Reporte Histórico EOLO', pageWidth / 2, yPosition, { align: 'center' });
+  //   yPosition += 15;
 
-    // Información del dispositivo
-    pdf.setFontSize(12);
-    pdf.text(`Dispositivo: ${patente || 'N/A'}`, 20, yPosition);
-    yPosition += 8;
-    pdf.text(`Tipo de reporte: Dashboard Histórico (Todas las sesiones)`, 20, yPosition);
-    yPosition += 8;
-    pdf.text(`Total de mediciones: ${datos?.length || 0}`, 20, yPosition);
-    yPosition += 15;
+  //   // Información del dispositivo
+  //   pdf.setFontSize(12);
+  //   pdf.text(`Dispositivo: ${patente || 'N/A'}`, 20, yPosition);
+  //   yPosition += 8;
+  //   pdf.text(`Tipo de reporte: Dashboard Histórico (Todas las sesiones)`, 20, yPosition);
+  //   yPosition += 8;
+  //   pdf.text(`Total de mediciones: ${datos?.length || 0}`, 20, yPosition);
+  //   yPosition += 15;
 
-    // Resumen estadístico
-    pdf.setFontSize(14);
-    pdf.text('Resumen Estadístico General', 20, yPosition);
-    yPosition += 10;
+  //   // Resumen estadístico
+  //   pdf.setFontSize(14);
+  //   pdf.text('Resumen Estadístico General', 20, yPosition);
+  //   yPosition += 10;
 
-    pdf.setFontSize(10);
-    const estadisticas = [
-      [`Flujo Promedio: ${avgFlow || 'N/A'} l/min`, `Min: ${minFlow || 'N/A'}`, `Max: ${maxFlow || 'N/A'}`],
-      [`Volumen Final: ${lastVolume || 'N/A'} m³`, `Min: ${minVolume || 'N/A'}`, `Max: ${maxVolume || 'N/A'}`],
-      [`Temperatura Prom.: ${promedioTemperatura || 'N/A'} °C`, `Min: ${minTemperatura || 'N/A'}`, `Max: ${maxTemperatura || 'N/A'}`],
-      [`Humedad Prom.: ${promedioHumedad || 'N/A'} %`, `Min: ${minHumedad || 'N/A'}`, `Max: ${maxHumedad || 'N/A'}`],
-      [`Presión Prom.: ${promedioPresion || 'N/A'} hPa`, `Min: ${minPressure || 'N/A'}`, `Max: ${maxPressure || 'N/A'}`],
-      [`MP 2.5 Prom.: ${promedioPM25 || 'N/A'} µg/m³`, `Min: ${minPM25 || 'N/A'}`, `Max: ${maxPM25 || 'N/A'}`],
-      [`MP 10 Prom.: ${promedioPM10 || 'N/A'} µg/m³`, `Min: ${minPM10 || 'N/A'}`, `Max: ${maxPM10 || 'N/A'}`]
-    ];
+  //   pdf.setFontSize(10);
+  //   const estadisticas = [
+  //     [`Flujo Promedio: ${avgFlow || 'N/A'} l/min`, `Min: ${minFlow || 'N/A'}`, `Max: ${maxFlow || 'N/A'}`],
+  //     [`Volumen Final: ${lastVolume || 'N/A'} m³`, `Min: ${minVolume || 'N/A'}`, `Max: ${maxVolume || 'N/A'}`],
+  //     [`Temperatura Prom.: ${promedioTemperatura || 'N/A'} °C`, `Min: ${minTemperatura || 'N/A'}`, `Max: ${maxTemperatura || 'N/A'}`],
+  //     [`Humedad Prom.: ${promedioHumedad || 'N/A'} %`, `Min: ${minHumedad || 'N/A'}`, `Max: ${maxHumedad || 'N/A'}`],
+  //     [`Presión Prom.: ${promedioPresion || 'N/A'} hPa`, `Min: ${minPressure || 'N/A'}`, `Max: ${maxPressure || 'N/A'}`],
+  //     [`MP 2.5 Prom.: ${promedioPM25 || 'N/A'} µg/m³`, `Min: ${minPM25 || 'N/A'}`, `Max: ${maxPM25 || 'N/A'}`],
+  //     [`MP 10 Prom.: ${promedioPM10 || 'N/A'} µg/m³`, `Min: ${minPM10 || 'N/A'}`, `Max: ${maxPM10 || 'N/A'}`]
+  //   ];
 
-    estadisticas.forEach(stat => {
-      pdf.text(stat[0], 20, yPosition);
-      pdf.text(stat[1], 80, yPosition);
-      pdf.text(stat[2], 140, yPosition);
-      yPosition += 6;
-    });
+  //   estadisticas.forEach(stat => {
+  //     pdf.text(stat[0], 20, yPosition);
+  //     pdf.text(stat[1], 80, yPosition);
+  //     pdf.text(stat[2], 140, yPosition);
+  //     yPosition += 6;
+  //   });
 
-    yPosition += 10;
+  //   yPosition += 10;
 
-    // Capturar gráficos
-    const graficos = [
-      { key: 'flujoVolumen', titulo: 'Flujo / Volumen' },
-      { key: 'temperatura', titulo: 'Temperatura' },
-      { key: 'humedad', titulo: 'Humedad' },
-      { key: 'presion', titulo: 'Presión' },
-      { key: 'pm2_5', titulo: 'MP 2.5' },
-      { key: 'pm10', titulo: 'MP 10' },
-      { key: 'viento', titulo: 'Viento' }
-    ];
+  //   // Capturar gráficos
+  //   const graficos = [
+  //     { key: 'flujoVolumen', titulo: 'Flujo / Volumen' },
+  //     { key: 'temperatura', titulo: 'Temperatura' },
+  //     { key: 'humedad', titulo: 'Humedad' },
+  //     { key: 'presion', titulo: 'Presión' },
+  //     { key: 'pm2_5', titulo: 'MP 2.5' },
+  //     { key: 'pm10', titulo: 'MP 10' },
+  //     { key: 'viento', titulo: 'Viento' }
+  //   ];
 
-    for (const grafico of graficos) {
-      // Cambiar al gráfico
-      setSelectedChart(grafico.key);
-      
-      // Esperar un momento para que se renderice
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Buscar el elemento del gráfico
-      const chartElement = document.querySelector('.recharts-wrapper') || 
-                          document.querySelector('canvas') || 
-                          document.querySelector('.card:not([style*="display: none"]) .recharts-wrapper');
-      
-      if (chartElement) {
-        try {
-          const canvas = await html2canvas(chartElement, {
-            scale: 1,
-            useCORS: true,
-            allowTaint: true,
-            backgroundColor: '#ffffff'
-          });
-          
-          const imgData = canvas.toDataURL('image/png');
-          const imgWidth = pageWidth - 40;
-          const imgHeight = (canvas.height * imgWidth) / canvas.width;
-          
-          // Nueva página si es necesario
-          if (yPosition + imgHeight > pageHeight - 20) {
-            pdf.addPage();
-            yPosition = 20;
-          }
-          
-          pdf.setFontSize(12);
-          pdf.text(grafico.titulo, 20, yPosition);
-          yPosition += 10;
-          
-          pdf.addImage(imgData, 'PNG', 20, yPosition, imgWidth, imgHeight);
-          yPosition += imgHeight + 15;
-          
-        } catch (error) {
-          console.error(`Error capturando gráfico ${grafico.titulo}:`, error);
-        }
-      }
-    }
+  //   for (const grafico of graficos) {
+  //     // Cambiar al gráfico
+  //     setSelectedChart(grafico.key);
 
-    // Guardar el PDF
-    pdf.save(`reporte_historico_${patente || 'datos'}.pdf`);
-    
-    // Volver al gráfico original
-    setSelectedChart("flujoVolumen");
-  };
+  //     // Esperar un momento para que se renderice
+  //     await new Promise(resolve => setTimeout(resolve, 1000));
+
+  //     // Buscar el elemento del gráfico
+  //     const chartElement = document.querySelector('.recharts-wrapper') ||
+  //       document.querySelector('canvas') ||
+  //       document.querySelector('.card:not([style*="display: none"]) .recharts-wrapper');
+
+  //     if (chartElement) {
+  //       try {
+  //         const canvas = await html2canvas(chartElement, {
+  //           scale: 1,
+  //           useCORS: true,
+  //           allowTaint: true,
+  //           backgroundColor: '#ffffff'
+  //         });
+
+  //         const imgData = canvas.toDataURL('image/png');
+  //         const imgWidth = pageWidth - 40;
+  //         const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+  //         // Nueva página si es necesario
+  //         if (yPosition + imgHeight > pageHeight - 20) {
+  //           pdf.addPage();
+  //           yPosition = 20;
+  //         }
+
+  //         pdf.setFontSize(12);
+  //         pdf.text(grafico.titulo, 20, yPosition);
+  //         yPosition += 10;
+
+  //         pdf.addImage(imgData, 'PNG', 20, yPosition, imgWidth, imgHeight);
+  //         yPosition += imgHeight + 15;
+
+  //       } catch (error) {
+  //         console.error(`Error capturando gráfico ${grafico.titulo}:`, error);
+  //       }
+  //     }
+  //   }
+
+  //   // Guardar el PDF
+  //   pdf.save(`reporte_historico_${patente || 'datos'}.pdf`);
+
+  //   // Volver al gráfico original
+  //   setSelectedChart("flujoVolumen");
+  // };
 
   return (
     <>
@@ -319,15 +337,40 @@ export const HistoricDashboardPage = () => {
             <div className="d-flex flex-row justify-content-between align-items-center">
               <h2 className="mb-0">Dashboard Histórico - {patente}</h2>
               <div>
-                <button 
+                <button
                   className="btn btn-dark mx-1"
                   onClick={() => window.open(`${import.meta.env.VITE_REACT_APP_API_URL}/datos?patente=${patente}&formato=xlsx`, '_blank')}
                 >
                   <small>Descargar Datos</small>
                 </button>
-                <button 
+                <button
                   className="btn btn-danger mx-1"
-                  onClick={generatePDFReport}
+                  onClick={() => generatePDFReport({
+                    patente,
+                    datos,
+                    avgFlow,
+                    minFlow,
+                    maxFlow,
+                    lastVolume,
+                    minVolume,
+                    maxVolume,
+                    promedioTemperatura,
+                    minTemperatura,
+                    maxTemperatura,
+                    promedioHumedad,
+                    minHumedad,
+                    maxHumedad,
+                    promedioPresion,
+                    minPressure,
+                    maxPressure,
+                    promedioPM25,
+                    minPM25,
+                    maxPM25,
+                    promedioPM10,
+                    minPM10,
+                    maxPM10,
+                    setSelectedChart
+                  })}
                 >
                   <small>Descargar PDF</small>
                 </button>

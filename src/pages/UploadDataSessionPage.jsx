@@ -22,6 +22,7 @@ export const UploadDataSessionPage = () => {
   const [error, setError] = useState(null); // Estado para manejar errores
   const [successMessage, setSuccessMessage] = useState(null); // Estado para manejar errores
 
+  const [isLoading, setIsLoading] = useState(false); // Estado para manejar la carga de datos
 
   //cargar csv
   const fileInputRef = useRef(null); // Ref para el input de archivo
@@ -188,6 +189,8 @@ export const UploadDataSessionPage = () => {
       return;
     }
 
+    setIsLoading(true); // Mostrar spinner
+
     const newSession = {
       filename: fileName,
       patente: patente,
@@ -215,6 +218,7 @@ export const UploadDataSessionPage = () => {
 
       // Verificar si la respuesta es exitosa
       if (response.ok) {
+        setIsLoading(false); // Ocultar spinner
         const data = await response.json();
         setSuccessMessage(data.message || 'Sesión agregada exitosamente');
         setError('');
@@ -224,10 +228,13 @@ export const UploadDataSessionPage = () => {
         navigate(-1);
         // Redirigir a /devices después de agregar la sesión
       } else {
+
+        setIsLoading(false); // Ocultar spinner
         const data = await response.json();
         throw new Error(data.error || 'Error al agregar la sesión');
       }
     } catch (error) {
+      setIsLoading(false); // Ocultar spinner
       setError(error.message); // Capturar cualquier error y mostrarlo
     }
   };
@@ -348,15 +355,29 @@ export const UploadDataSessionPage = () => {
           {error && <div className="text-danger mb-3">{error}</div>}
           {uploading && <div>Subiendo archivo...</div>}
 
+          
 
           {/* Botón para agregar sesión */}
           <div className="row mb-4">
             <button
               type="submit"
-              className="btn btn-dark w-25 text-center ms-auto"
-              disabled={uploading}  // Deshabilitar el botón mientras se carga el archivo
+              className="btn btn-dark col-5 text-center ms-auto d-flex flex-row justify-content-center align-items-center mt-2"
+              disabled={uploading || isLoading}  // Deshabilitar el botón mientras se carga el archivo
             >
-              Agregar Sesión
+              {/* Spinner para envío de sesión */}
+              {isLoading ? (
+                // <div className="d-flex justify-content-center align-items-center mb-3">
+                  <>
+                  <div className="spinner-border text-primary" role="status">
+                    <span className="visually-hidden">Enviando sesión...</span>
+                  </div>
+                  <span className="ms-2">Enviando sesión...</span>
+                  </>
+                // </div>
+              ) : (
+                <>Agregar Sesión</>
+              )
+              }
             </button>
           </div>
         </form>

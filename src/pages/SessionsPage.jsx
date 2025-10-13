@@ -4,6 +4,8 @@ import { Navbar } from '../components/Navbar';
 import { Link, useParams } from 'react-router-dom';
 import { Breadcrumb } from '../components/Breadcrumb';
 import { SessionCard } from '../components/SessionCard';
+import { HistoricDashboardPage } from './HistoricDashboardPage';
+import { DashboardRemotePage } from './DashboardRemotePage';
 
 export const SessionsPage = () => {
   let params = useParams();
@@ -17,7 +19,7 @@ export const SessionsPage = () => {
     // Hacer la solicitud GET para obtener las sesiones
     const fetchSessions = async () => {
       try {
-        const response = await fetch(import.meta.env.VITE_REACT_APP_API_URL+'/mis-sesiones?patente='+titulo);  // Endpoint para obtener las sesiones
+        const response = await fetch(import.meta.env.VITE_REACT_APP_API_URL + '/mis-sesiones?patente=' + titulo);  // Endpoint para obtener las sesiones
         if (!response.ok) {
           throw new Error('Error al obtener las sesiones');
         }
@@ -47,47 +49,56 @@ export const SessionsPage = () => {
   }
 
   return (
-    <div className='container-fluid p-0'>
-      {/* NAVEGADOR */}
-      <Navbar />
-      <div className="container mx-auto px-5 mt-5">
-        <Breadcrumb />
+      titulo.includes("MPE") ? (
 
-        <div className="row">
-          <h2 className='col-md-3 m-0 p-0'>{titulo}</h2>
+        <div className='container-fluid p-0'>
+          {/* NAVEGADOR */}
+          <Navbar />
+          <div className="container mx-auto px-5 mt-5">
+            <Breadcrumb />
 
-          <div className="col-md-9 m-0 p-0 d-grid gap-3 d-md-flex justify-content-md-end">
+            <div className="row">
+              <h2 className='col-md-3 m-0 p-0'>{titulo}</h2>
 
-            {/* TODO: DEBE DEPENDER DEL MODELO DEL DISPOSITIVO */}
-            <Link to={`/dispositivos/${titulo}/historico`} className='btn btn-dark'>Histórico</Link>
-            <Link to={"agregar-sesion"} className='btn btn-dark'>Cargar CSV</Link>
-            {/* <Link to={"/dashboard"} className='btn btn-dark'>Ver Datos Online</Link> */}
+              <div className="col-md-9 m-0 p-0 d-grid gap-3 d-md-flex justify-content-md-end">
+
+                {/* TODO: DEBE DEPENDER DEL MODELO DEL DISPOSITIVO */}
+                <Link to={`/dispositivos/${titulo}/historico`} className='btn btn-dark'>Histórico</Link>
+                <Link to={"agregar-sesion"} className='btn btn-dark'>Cargar CSV</Link>
+                {/* <Link to={"/dashboard"} className='btn btn-dark'>Ver Datos Online</Link> */}
+              </div>
+            </div>
+            <div className="d-flex flex-row flex-wrap justify-content-between">
+
+              {/* Mostrar las sesiones filtradas */}
+              {filteredSessions.map((session, index) => (
+                <SessionCard
+                  index={index}
+                  titulo={titulo}
+                  session={session}
+                  filename={session.filename}
+                  // color={index % 2 === 0 ? "white" : "secondary"}
+                  color={"white"}
+                  day={session.timestamp_inicial.split('T')[0].split('-')[2]}
+                  month={session.timestamp_inicial.split('T')[0].split('-')[1]}
+                  year={session.timestamp_inicial.split('T')[0].split('-')[0]}
+                  hourStart={session.timestamp_inicial.split('T')[1]}
+                  ubicacion={session.ubicacion_corto}
+                  final_day={session.timestamp_final.split('T')[0].split('-')[2]}
+                  final_month={session.timestamp_final.split('T')[0].split('-')[1]}
+                  final_year={session.timestamp_final.split('T')[0].split('-')[0]}
+                  hourFinal={session.timestamp_final.split('T')[1]}
+                />
+              ))}
+            </div>
           </div>
-        </div>
-        <div className="d-flex flex-row flex-wrap justify-content-between">
 
-        {/* Mostrar las sesiones filtradas */}
-        {filteredSessions.map((session, index) => (
-          <SessionCard
-            index={index}
-            titulo={titulo}
-            session={session}
-            filename={session.filename}
-            // color={index % 2 === 0 ? "white" : "secondary"}
-            color={"white"}
-            day={session.timestamp_inicial.split('T')[0].split('-')[2]} 
-            month={session.timestamp_inicial.split('T')[0].split('-')[1]} 
-            year={session.timestamp_inicial.split('T')[0].split('-')[0]} 
-            hourStart={session.timestamp_inicial.split('T')[1]} 
-            ubicacion={session.ubicacion_corto}
-            final_day={session.timestamp_final.split('T')[0].split('-')[2]}
-            final_month={session.timestamp_final.split('T')[0].split('-')[1]}
-            final_year={session.timestamp_final.split('T')[0].split('-')[0]}
-            hourFinal={session.timestamp_final.split('T')[1]}
-            />
-        ))}
+
         </div>
-      </div> 
-    </div>
+      ) : (
+        <DashboardRemotePage />
+      )
+
+
   );
 };
