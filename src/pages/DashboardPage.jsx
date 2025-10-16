@@ -32,6 +32,7 @@ export const DashboardPage = () => {
   const [bateriaArr, setBateriaArr] = useState([]);
   const [direccionArr, setDireccionArr] = useState([]);
   const [velocidadArr, setVelocidadArr] = useState([]);
+  const [generatingPDF, setGeneratingPDF] = useState(false);
 
   const location = useLocation();
 
@@ -263,7 +264,9 @@ export const DashboardPage = () => {
 
   // Función para generar el PDF
   const generatePDFReport = async () => {
-    const pdf = new jsPDF('p', 'mm', 'a4');
+    setGeneratingPDF(true);
+    try {
+      const pdf = new jsPDF('p', 'mm', 'a4');
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
     let yPosition = 20;
@@ -363,11 +366,17 @@ export const DashboardPage = () => {
       }
     }
 
-    // Guardar el PDF
-    pdf.save(`reporte_sesion_${idSesion || 'datos'}.pdf`);
-    
-    // Volver al gráfico original
-    setSelectedChart("mapa");
+      // Guardar el PDF
+      pdf.save(`reporte_sesion_${idSesion || 'datos'}.pdf`);
+      
+      // Volver al gráfico original
+      setSelectedChart("mapa");
+    } catch (error) {
+      console.error('Error generando PDF:', error);
+      alert('Error al generar el reporte PDF. Por favor, intente nuevamente.');
+    } finally {
+      setGeneratingPDF(false);
+    }
   };
 
   return (
@@ -385,8 +394,18 @@ export const DashboardPage = () => {
               <button
                 className="btn btn-dark mx-1"
                 onClick={generatePDFReport}
+                disabled={generatingPDF}
               >
-                <small>Descargar Reporte</small>
+                {generatingPDF ? (
+                  <>
+                    <div className="spinner-border spinner-border-sm me-2" role="status">
+                      <span className="visually-hidden">Generando...</span>
+                    </div>
+                    <small>Generando PDF...</small>
+                  </>
+                ) : (
+                  <small>Descargar Reporte</small>
+                )}
               </button>
               <button 
                 className="btn btn-dark mx-0"

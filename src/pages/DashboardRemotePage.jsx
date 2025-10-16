@@ -18,9 +18,13 @@ export const DashboardRemotePage = () => {
     const [fechaInicio, setFechaInicio] = useState(null);
     const [fechaFin, setFechaFin] = useState(null);
     const [bateria, setBateria] = useState(null);
+    const [lat, setLat] = useState(null);
+    const [lon, setLon] = useState(null);
     const [ubicacion, setUbicacion] = useState(null);
     const [isUpdating, setIsUpdating] = useState(false);
     const [lastUpdate, setLastUpdate] = useState(null);
+    const [ubicacionConsultada, setUbicacionConsultada] = useState(false);
+    const [generatingPDF, setGeneratingPDF] = useState(false);
 
     // Arrays separados
     const [flujoArr, setFlujoArr] = useState([]);
@@ -102,32 +106,40 @@ export const DashboardRemotePage = () => {
 
             // const lat= datos[0]?.["SIM7600G [Latitud (°)]"] || "-36.82699";
             // const lon= datos[0]?.["SIM7600G [Longitud (°)]"] || "-73.04977";
-            const lat= -36.82699;
-            const lon= -73.04977;
+            const lat = -36.82699;
+            const lon = -73.04977;
+            setLat(lat);
+            setLon(lon);
 
-            // Obtener ubicación desde el servicio de geocodificación inversa y guardar display_name en el estado 'ubicacion'
-            fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`)
-                .then(res => {
-                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                    return res.json();
-                })
-                .then(data => {
-                    const displayName = data?.display_name || null;
-                    if (typeof setUbicacion === 'function') {
+            // Solo consultar ubicación la primera vez
+            if (!ubicacionConsultada) {
+                console.log('🗺️ Consultando ubicación por primera vez...');
+                setUbicacionConsultada(true);
+                
+                // Usar nuestra API local como proxy para evitar problemas de CORS
+                fetch(`${import.meta.env.VITE_REACT_APP_API_URL}/geocode-reverse?lat=${lat}&lon=${lon}`)
+                    .then(res => {
+                        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                        return res.json();
+                    })
+                    .then(data => {
+                        const displayName = data?.display_name || null;
                         setUbicacion(displayName);
-                    } else {
-                        console.warn('setUbicacion no está definido en este componente.');
-                    }
-                })
-                .catch(err => {
-                    console.error('Error al obtener la ubicación:', err);
-                    if (typeof setUbicacion === 'function') setUbicacion(null);
-                });
+                        console.log('🗺️ Ubicación obtenida:', displayName);
+                    })
+                    .catch(err => {
+                        console.error('❌ Error al obtener la ubicación:', err);
+                        // Fallback a una ubicación estática si falla la API
+                        setUbicacion('Concepción, Región del Biobío, Chile');
+                    });
+            } else {
+                console.log('🗺️ Ubicación ya consultada anteriormente, omitiendo consulta');
+            }
 
             // Separar arrays con validación
             console.log("Datos disponibles para mapear:", datos.length);
             console.log("Primer dato:", datos[0]);
-            
+
             setHumedadArr(
                 datos.map(d => ({
                     date: d.fecha,
@@ -208,7 +220,7 @@ export const DashboardRemotePage = () => {
     // useEffect para console log de todos los arrays de parámetros separados
     useEffect(() => {
         console.log("=== ARRAYS DE PARÁMETROS ===");
-        
+
         console.log("📊 FLUJO ARRAY:", flujoArr);
         console.log("📊 VOLUMEN ARRAY:", volumenArr);
         console.log("📊 FLUJO-VOLUMEN ARRAY:", flujoVolumenArr);
@@ -221,7 +233,7 @@ export const DashboardRemotePage = () => {
         console.log("🔋 BATERÍA ARRAY:", bateriaArr);
         console.log("🧭 DIRECCIÓN VIENTO ARRAY:", direccionArr);
         console.log("💨 VELOCIDAD VIENTO ARRAY:", velocidadArr);
-        
+
         console.log("=== LONGITUDES DE ARRAYS ===");
         console.log("Flujo:", flujoArr.length);
         console.log("Volumen:", volumenArr.length);
@@ -235,7 +247,7 @@ export const DashboardRemotePage = () => {
         console.log("Batería:", bateriaArr.length);
         console.log("Dirección:", direccionArr.length);
         console.log("Velocidad:", velocidadArr.length);
-        
+
     }, [flujoArr, volumenArr, flujoVolumenArr, humedadArr, presionArr, temperaturaArr, pm25Arr, pm10Arr, pm1Arr, bateriaArr, direccionArr, velocidadArr]);
 
 
@@ -282,7 +294,7 @@ export const DashboardRemotePage = () => {
     const maxDireccion = Statistics.round(Statistics.max(direccionArr.map(d => d.grados)));
     const promedioVelocidad = Statistics.round(Statistics.mean(velocidadArr.map(d => d.velocidad)));
 
-    const [selectedChart, setSelectedChart] = useState("flujoVolumen");
+    const [selectedChart, setSelectedChart] = useState("mapa");
 
     // Debug: Log cuando cambia el gráfico seleccionado
     useEffect(() => {
@@ -303,6 +315,7 @@ export const DashboardRemotePage = () => {
 
     // Opciones de gráficos
     const chartOptions = [
+        { key: "mapa", label: "Mapa" }, // <-- Nuevo tab
         { key: "flujoVolumen", label: "Flujo / Volumen", data: flujoVolumenArr },
         { key: "flujo", label: "Flujo (l/min)", data: flujoArr },
         { key: "volumen", label: "Volumen (m³)", data: volumenArr },
@@ -319,110 +332,120 @@ export const DashboardRemotePage = () => {
 
     // Función para generar el PDF
     const generatePDFReport = async () => {
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        const pageWidth = pdf.internal.pageSize.getWidth();
-        const pageHeight = pdf.internal.pageSize.getHeight();
-        let yPosition = 20;
+        try {
+            setGeneratingPDF(true);
+            
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const pageWidth = pdf.internal.pageSize.getWidth();
+            const pageHeight = pdf.internal.pageSize.getHeight();
+            let yPosition = 20;
 
-        // Título del reporte
-        pdf.setFontSize(18);
-        pdf.text('Reporte Histórico EOLO', pageWidth / 2, yPosition, { align: 'center' });
-        yPosition += 15;
+            // Título del reporte
+            pdf.setFontSize(18);
+            pdf.text('Reporte Histórico EOLO', pageWidth / 2, yPosition, { align: 'center' });
+            yPosition += 15;
 
-        // Información del dispositivo
-        pdf.setFontSize(12);
-        pdf.text(`Dispositivo: ${patente || 'N/A'}`, 20, yPosition);
-        yPosition += 8;
-        pdf.text(`Tipo de reporte: Dashboard Histórico (Todas las sesiones)`, 20, yPosition);
-        yPosition += 8;
-        pdf.text(`Total de mediciones: ${datos?.length || 0}`, 20, yPosition);
-        yPosition += 15;
+            // Información del dispositivo
+            pdf.setFontSize(12);
+            pdf.text(`Dispositivo: ${patente || 'N/A'}`, 20, yPosition);
+            yPosition += 8;
+            pdf.text(`Tipo de reporte: Dashboard Histórico (Todas las sesiones)`, 20, yPosition);
+            yPosition += 8;
+            pdf.text(`Total de mediciones: ${datos?.length || 0}`, 20, yPosition);
+            yPosition += 15;
 
-        // Resumen estadístico
-        pdf.setFontSize(14);
-        pdf.text('Resumen Estadístico General', 20, yPosition);
-        yPosition += 10;
+            // Resumen estadístico
+            pdf.setFontSize(14);
+            pdf.text('Resumen Estadístico General', 20, yPosition);
+            yPosition += 10;
 
-        pdf.setFontSize(10);
-        const estadisticas = [
-            [`Flujo Promedio: ${avgFlow || 'N/A'} l/min`, `Min: ${minFlow || 'N/A'}`, `Max: ${maxFlow || 'N/A'}`],
-            [`Volumen Final: ${lastVolume || 'N/A'} m³`, `Min: ${minVolume || 'N/A'}`, `Max: ${maxVolume || 'N/A'}`],
-            [`Temperatura Prom.: ${promedioTemperatura || 'N/A'} °C`, `Min: ${minTemperatura || 'N/A'}`, `Max: ${maxTemperatura || 'N/A'}`],
-            [`Humedad Prom.: ${promedioHumedad || 'N/A'} %`, `Min: ${minHumedad || 'N/A'}`, `Max: ${maxHumedad || 'N/A'}`],
-            [`Presión Prom.: ${promedioPresion || 'N/A'} hPa`, `Min: ${minPressure || 'N/A'}`, `Max: ${maxPressure || 'N/A'}`],
-            [`MP 2.5 Prom.: ${promedioPM25 || 'N/A'} µg/m³`, `Min: ${minPM25 || 'N/A'}`, `Max: ${maxPM25 || 'N/A'}`],
-            [`MP 10 Prom.: ${promedioPM10 || 'N/A'} µg/m³`, `Min: ${minPM10 || 'N/A'}`, `Max: ${maxPM10 || 'N/A'}`]
-        ];
+            pdf.setFontSize(10);
+            const estadisticas = [
+                [`Flujo Promedio: ${avgFlow || 'N/A'} l/min`, `Min: ${minFlow || 'N/A'}`, `Max: ${maxFlow || 'N/A'}`],
+                [`Volumen Final: ${lastVolume || 'N/A'} m³`, `Min: ${minVolume || 'N/A'}`, `Max: ${maxVolume || 'N/A'}`],
+                [`Temperatura Prom.: ${promedioTemperatura || 'N/A'} °C`, `Min: ${minTemperatura || 'N/A'}`, `Max: ${maxTemperatura || 'N/A'}`],
+                [`Humedad Prom.: ${promedioHumedad || 'N/A'} %`, `Min: ${minHumedad || 'N/A'}`, `Max: ${maxHumedad || 'N/A'}`],
+                [`Presión Prom.: ${promedioPresion || 'N/A'} hPa`, `Min: ${minPressure || 'N/A'}`, `Max: ${maxPressure || 'N/A'}`],
+                [`MP 2.5 Prom.: ${promedioPM25 || 'N/A'} µg/m³`, `Min: ${minPM25 || 'N/A'}`, `Max: ${maxPM25 || 'N/A'}`],
+                [`MP 10 Prom.: ${promedioPM10 || 'N/A'} µg/m³`, `Min: ${minPM10 || 'N/A'}`, `Max: ${maxPM10 || 'N/A'}`]
+            ];
 
-        estadisticas.forEach(stat => {
-            pdf.text(stat[0], 20, yPosition);
-            pdf.text(stat[1], 80, yPosition);
-            pdf.text(stat[2], 140, yPosition);
-            yPosition += 6;
-        });
+            estadisticas.forEach(stat => {
+                pdf.text(stat[0], 20, yPosition);
+                pdf.text(stat[1], 80, yPosition);
+                pdf.text(stat[2], 140, yPosition);
+                yPosition += 6;
+            });
 
-        yPosition += 10;
+            yPosition += 10;
 
-        // Capturar gráficos
-        const graficos = [
-            { key: 'flujoVolumen', titulo: 'Flujo / Volumen' },
-            { key: 'temperatura', titulo: 'Temperatura' },
-            { key: 'humedad', titulo: 'Humedad' },
-            { key: 'presion', titulo: 'Presión' },
-            { key: 'pm2_5', titulo: 'MP 2.5' },
-            { key: 'pm10', titulo: 'MP 10' },
-            { key: 'viento', titulo: 'Viento' }
-        ];
+            // Capturar gráficos
+            const graficos = [
+                { key: 'mapa', titulo: 'Mapa' },
+                { key: 'flujoVolumen', titulo: 'Flujo / Volumen' },
+                { key: 'temperatura', titulo: 'Temperatura' },
+                { key: 'humedad', titulo: 'Humedad' },
+                { key: 'presion', titulo: 'Presión' },
+                { key: 'pm2_5', titulo: 'MP 2.5' },
+                { key: 'pm10', titulo: 'MP 10' },
+                { key: 'viento', titulo: 'Viento' }
+            ];
 
-        for (const grafico of graficos) {
-            // Cambiar al gráfico
-            setSelectedChart(grafico.key);
+            for (const grafico of graficos) {
+                // Cambiar al gráfico
+                setSelectedChart(grafico.key);
 
-            // Esperar un momento para que se renderice
-            await new Promise(resolve => setTimeout(resolve, 1000));
+                // Esperar un momento para que se renderice
+                await new Promise(resolve => setTimeout(resolve, 1000));
 
-            // Buscar el elemento del gráfico
-            const chartElement = document.querySelector('.recharts-wrapper') ||
-                document.querySelector('canvas') ||
-                document.querySelector('.card:not([style*="display: none"]) .recharts-wrapper');
+                // Buscar el elemento del gráfico
+                const chartElement = document.querySelector('.recharts-wrapper') ||
+                    document.querySelector('canvas') ||
+                    document.querySelector('.card:not([style*="display: none"]) .recharts-wrapper');
 
-            if (chartElement) {
-                try {
-                    const canvas = await html2canvas(chartElement, {
-                        scale: 1,
-                        useCORS: true,
-                        allowTaint: true,
-                        backgroundColor: '#ffffff'
-                    });
+                if (chartElement) {
+                    try {
+                        const canvas = await html2canvas(chartElement, {
+                            scale: 1,
+                            useCORS: true,
+                            allowTaint: true,
+                            backgroundColor: '#ffffff'
+                        });
 
-                    const imgData = canvas.toDataURL('image/png');
-                    const imgWidth = pageWidth - 40;
-                    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                        const imgData = canvas.toDataURL('image/png');
+                        const imgWidth = pageWidth - 40;
+                        const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-                    // Nueva página si es necesario
-                    if (yPosition + imgHeight > pageHeight - 20) {
-                        pdf.addPage();
-                        yPosition = 20;
+                        // Nueva página si es necesario
+                        if (yPosition + imgHeight > pageHeight - 20) {
+                            pdf.addPage();
+                            yPosition = 20;
+                        }
+
+                        pdf.setFontSize(12);
+                        pdf.text(grafico.titulo, 20, yPosition);
+                        yPosition += 10;
+
+                        pdf.addImage(imgData, 'PNG', 20, yPosition, imgWidth, imgHeight);
+                        yPosition += imgHeight + 15;
+
+                    } catch (error) {
+                        console.error(`Error capturando gráfico ${grafico.titulo}:`, error);
                     }
-
-                    pdf.setFontSize(12);
-                    pdf.text(grafico.titulo, 20, yPosition);
-                    yPosition += 10;
-
-                    pdf.addImage(imgData, 'PNG', 20, yPosition, imgWidth, imgHeight);
-                    yPosition += imgHeight + 15;
-
-                } catch (error) {
-                    console.error(`Error capturando gráfico ${grafico.titulo}:`, error);
                 }
             }
+
+            // Guardar el PDF
+            pdf.save(`reporte_historico_${patente || 'datos'}.pdf`);
+
+            // Volver al gráfico original
+            setSelectedChart("mapa");
+        } catch (error) {
+            console.error('Error generando PDF:', error);
+            alert('Error al generar el PDF. Por favor, intente nuevamente.');
+        } finally {
+            setGeneratingPDF(false);
         }
-
-        // Guardar el PDF
-        pdf.save(`reporte_historico_${patente || 'datos'}.pdf`);
-
-        // Volver al gráfico original
-        setSelectedChart("flujoVolumen");
     };
 
     return (
@@ -459,7 +482,7 @@ export const DashboardRemotePage = () => {
                                         </small>
                                     )}
                                 </div>
-                                
+
                                 <button
                                     className="btn btn-outline-secondary btn-sm mx-1"
                                     onClick={loadData}
@@ -468,7 +491,7 @@ export const DashboardRemotePage = () => {
                                 >
                                     <i className={`fas fa-sync-alt ${isUpdating ? 'fa-spin' : ''}`}></i>
                                 </button>
-                                
+
                                 <button
                                     className="btn btn-dark mx-1"
                                     onClick={() => window.open(`${import.meta.env.VITE_REACT_APP_API_URL}/datos?patente=${patente}&formato=xlsx`, '_blank')}
@@ -478,21 +501,29 @@ export const DashboardRemotePage = () => {
                                 <button
                                     className="btn btn-danger mx-1"
                                     onClick={generatePDFReport}
+                                    disabled={generatingPDF}
                                 >
-                                    <small>Descargar PDF</small>
+                                    {generatingPDF ? (
+                                        <>
+                                            <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                            <small>Generando...</small>
+                                        </>
+                                    ) : (
+                                        <small>Descargar PDF</small>
+                                    )}
                                 </button>
                             </div>
                         </div>
                         {console.log("📊 Datos para DashboardHeader:", {
-                            pathSegments, 
-                            bateria, 
-                            fechaInicio, 
-                            fechaFin, 
+                            pathSegments,
+                            bateria,
+                            fechaInicio,
+                            fechaFin,
                             ubicacion,
                             datosLength: datos?.length
                         })}
-                        <DashboardHeaderComponentMP 
-                            pathSegments={pathSegments} 
+                        <DashboardHeaderComponentMP
+                            pathSegments={pathSegments}
                             battery={bateria}
                             timestamp_inicial={fechaInicio}
                             timestamp_final={fechaFin}
@@ -510,7 +541,7 @@ export const DashboardRemotePage = () => {
                             {/* <div className="d-md-block block-inline d-flex flex-row flex-wrap mb-4 justify-content-around"> */}
                             <div className="d-none d-lg-flex flex-row col-12 mb-4 justify-content-between">
                                 <CardGraphic onClick={() => setSelectedChart("flujo")} showStats={selectedChart === "flujo"} titulo="Flujo Promediado" min={minFlow} max={maxFlow} valor={avgFlow || "-"} unidad="l/min" />
-                                <CardGraphic onClick={() => setSelectedChart("volumen")} showStats={selectedChart === "volumen"} titulo="Volumen Acumulado" min={minVolume} max={maxVolume} valor={lastVolume || "-"} unidad="m³" />
+                                <CardGraphic onClick={() => setSelectedChart("volumen")} showStats={selectedChart === "volumen"} titulo="Volumen Acumulado" min={minVolume} max={maxVolume} valor={maxVolume || "-"} unidad="m³" />
                                 <CardGraphic onClick={() => setSelectedChart("pm2_5")} showStats={selectedChart === "pm2_5"} titulo="MP 2.5 Promediado" min={minPM25} max={maxPM25} valor={isNaN(promedioPM25) ? '-' : promedioPM25} unidad="µg/m³" />
                                 <CardGraphic onClick={() => setSelectedChart("pm10")} showStats={selectedChart === "pm10"} titulo="MP 10 Promediado" min={minPM10} max={maxPM10} valor={isNaN(promedioPM10) ? '-' : promedioPM10} unidad="µg/m³" />
                                 <CardGraphic onClick={() => setSelectedChart("temperatura")} showStats={selectedChart === "temperatura"} titulo="Temperatura Promediada" min={minTemperatura} max={maxTemperatura} valor={isNaN(promedioTemperatura) ? '-' : promedioTemperatura} unidad="°C" />
@@ -522,7 +553,7 @@ export const DashboardRemotePage = () => {
                             <div className="d-lg-none mb-3">
                                 <div className="row text-center">
                                     <MovilCardGraphic titulo="Flujo Promediado" min={minFlow} max={maxFlow} valor={avgFlow || "-"} unidad="l/min" />
-                                    <MovilCardGraphic titulo="Volumen Acumulado" min={minVolume} max={maxVolume} valor={lastVolume || "-"} unidad="m³" />
+                                    <MovilCardGraphic titulo="Volumen Acumulado" min={minVolume} max={maxVolume} valor={maxVolume || "-"} unidad="m³" />
                                     <MovilCardGraphic titulo="MP 2.5 Promediado" min={minPM25} max={maxPM25} valor={isNaN(promedioPM25) ? '-' : promedioPM25} unidad="µg/m³" />
                                     <MovilCardGraphic titulo="MP 10 Promediado" min={minPM10} max={maxPM10} valor={isNaN(promedioPM10) ? '-' : promedioPM10} unidad="µg/m³" />
                                     <MovilCardGraphic titulo="Temperatura Promediada" min={minTemperatura} max={maxTemperatura} valor={isNaN(promedioTemperatura) ? '-' : promedioTemperatura} unidad="°C" />
@@ -562,73 +593,72 @@ export const DashboardRemotePage = () => {
 
                             {/* Gráficos y mapa: solo uno visible según selección */}
                             <div className="col-12">
-                                {/* Debug: Mostrar gráfico seleccionado */}
-                                <div className="alert alert-info d-flex align-items-center mb-3">
-                                    <i className="fas fa-info-circle me-2"></i>
-                                    <span>Mostrando: <strong>{selectedChart}</strong></span>
-                                    <span className="badge bg-secondary ms-2">
-                                        Render ID: {Math.random().toString(36).substr(2, 9)}
-                                    </span>
-                                    <button 
-                                        className="btn btn-sm btn-outline-secondary me-2"
-                                        onClick={() => console.log('Estado actual:', { selectedChart, chartOptions })}
-                                    >
-                                        Debug State
-                                    </button>
-                                    <button 
-                                        className="btn btn-sm btn-warning"
-                                        onClick={() => {
-                                            const charts = ["flujo", "volumen", "flujoVolumen", "temperatura", "humedad", "presion"];
-                                            const randomChart = charts[Math.floor(Math.random() * charts.length)];
-                                            console.log(`🎲 Cambiando a: ${randomChart}`);
-                                            setSelectedChart(randomChart);
-                                        }}
-                                    >
-                                        Test Random
-                                    </button>
-                                </div>
-                                
-                                {/* Test básico de renderizado condicional */}
-                                <div className="alert alert-warning mb-3">
-                                    <h6>Test de Renderizado:</h6>
-                                    {selectedChart === "flujo" && <span className="badge bg-success">✓ Flujo activo</span>}
-                                    {selectedChart === "volumen" && <span className="badge bg-success">✓ Volumen activo</span>}
-                                    {selectedChart === "flujoVolumen" && <span className="badge bg-success">✓ Flujo/Volumen activo</span>}
-                                    {selectedChart === "pm2_5" && <span className="badge bg-success">✓ PM2.5 activo</span>}
-                                    {selectedChart === "pm10" && <span className="badge bg-success">✓ PM10 activo</span>}
-                                    {selectedChart === "temperatura" && <span className="badge bg-success">✓ Temperatura activo</span>}
-                                    {selectedChart === "humedad" && <span className="badge bg-success">✓ Humedad activo</span>}
-                                    {selectedChart === "presion" && <span className="badge bg-success">✓ Presión activo</span>}
-                                    {selectedChart === "viento" && <span className="badge bg-success">✓ Viento activo</span>}
-                                </div>
-                                
-                                <div className="col-12 col-md-12 mb-2">
+                                {/* Debug components - hidden in production */}
+                                {false && (
+                                    <>
+                                        <div className="alert alert-info d-flex align-items-center mb-3">
+                                            <i className="fas fa-info-circle me-2"></i>
+                                            <span>Mostrando: <strong>{selectedChart}</strong></span>
+                                            <span className="badge bg-secondary ms-2">
+                                                Render ID: {Math.random().toString(36).substr(2, 9)}
+                                            </span>
+                                            <button 
+                                                className="btn btn-sm btn-outline-secondary me-2"
+                                                onClick={() => console.log('Estado actual:', { selectedChart, chartOptions })}
+                                            >
+                                                Debug State
+                                            </button>
+                                            <button 
+                                                className="btn btn-sm btn-warning"
+                                                onClick={() => {
+                                                    const charts = ["flujo", "volumen", "flujoVolumen", "temperatura", "humedad", "presion"];
+                                                    const randomChart = charts[Math.floor(Math.random() * charts.length)];
+                                                    console.log(`🎲 Cambiando a: ${randomChart}`);
+                                                    setSelectedChart(randomChart);
+                                                }}
+                                            >
+                                                Test Random
+                                            </button>
+                                        </div>
+                                        
+                                        <div className="alert alert-warning mb-3">
+                                            <h6>Test de Renderizado:</h6>
+                                            {selectedChart === "flujo" && <span className="badge bg-success">✓ Flujo activo</span>}
+                                            {selectedChart === "volumen" && <span className="badge bg-success">✓ Volumen activo</span>}
+                                            {selectedChart === "flujoVolumen" && <span className="badge bg-success">✓ Flujo/Volumen activo</span>}
+                                            {selectedChart === "pm2_5" && <span className="badge bg-success">✓ PM2.5 activo</span>}
+                                            {selectedChart === "pm10" && <span className="badge bg-success">✓ PM10 activo</span>}
+                                            {selectedChart === "temperatura" && <span className="badge bg-success">✓ Temperatura activo</span>}
+                                            {selectedChart === "humedad" && <span className="badge bg-success">✓ Humedad activo</span>}
+                                            {selectedChart === "presion" && <span className="badge bg-success">✓ Presión activo</span>}
+                                            {selectedChart === "viento" && <span className="badge bg-success">✓ Viento activo</span>}
+                                        </div>
+                                    </>
+                                )}                                <div className="col-12 col-md-12 mb-2">
                                     {selectedChart === "flujo" && (
                                         <div key="chart-flujo" className="card">
-                                            <div className="alert alert-success m-3">Renderizando gráfico de FLUJO</div>
                                             {flujoArr.length > 0 ? (
-                                                <ChartComponent key={`flujo-${flujoArr.length}`} title="Flujo (l/min)" datos={[...flujoArr].reverse()} />
+                                                <ChartComponent key={`flujo-${flujoArr.length}`} title="Flujo (l/min)" datos={flujoArr} />
                                             ) : (
                                                 <div className="card-body text-center">
-                                                    <p>No hay datos de flujo disponibles (Array length: {flujoArr.length})</p>
+                                                    <p>No hay datos de flujo disponibles</p>
                                                 </div>
                                             )}
                                         </div>
                                     )}
-                                    
+
                                     {selectedChart === "volumen" && (
                                         <div key="chart-volumen" className="card">
-                                            <div className="alert alert-success m-3">Renderizando gráfico de VOLUMEN</div>
                                             {volumenArr.length > 0 ? (
-                                                <ChartComponent key={`volumen-${volumenArr.length}`} title="Volumen (m³)" datos={[...volumenArr].reverse()} />
+                                                <ChartComponent key={`volumen-${volumenArr.length}`} title="Volumen (m³)" datos={volumenArr} />
                                             ) : (
                                                 <div className="card-body text-center">
-                                                    <p>No hay datos de volumen disponibles (Array length: {volumenArr.length})</p>
+                                                    <p>No hay datos de volumen disponibles</p>
                                                 </div>
                                             )}
                                         </div>
                                     )}
-                                    
+
                                     {selectedChart === "flujoVolumen" && (
                                         <div key="chart-flujovolumen" className="card">
                                             <div className="alert alert-success m-3">Renderizando gráfico de FLUJO/VOLUMEN</div>
@@ -641,7 +671,7 @@ export const DashboardRemotePage = () => {
                                             )}
                                         </div>
                                     )}
-                                    
+
                                     {selectedChart === "pm2_5" && (
                                         <div key="chart-pm25" className="card">
                                             <div className="alert alert-success m-3">Renderizando gráfico de PM2.5</div>
@@ -654,7 +684,7 @@ export const DashboardRemotePage = () => {
                                             )}
                                         </div>
                                     )}
-                                    
+
                                     {selectedChart === "pm10" && (
                                         <div key="chart-pm10" className="card">
                                             <div className="alert alert-success m-3">Renderizando gráfico de PM10</div>
@@ -667,7 +697,7 @@ export const DashboardRemotePage = () => {
                                             )}
                                         </div>
                                     )}
-                                    
+
                                     {selectedChart === "temperatura" && (
                                         <div key="chart-temperatura" className="card">
                                             <div className="alert alert-success m-3">Renderizando gráfico de TEMPERATURA</div>
@@ -680,7 +710,7 @@ export const DashboardRemotePage = () => {
                                             )}
                                         </div>
                                     )}
-                                    
+
                                     {selectedChart === "humedad" && (
                                         <div key="chart-humedad" className="card">
                                             <div className="alert alert-success m-3">Renderizando gráfico de HUMEDAD</div>
@@ -693,12 +723,12 @@ export const DashboardRemotePage = () => {
                                             )}
                                         </div>
                                     )}
-                                    
+
                                     {selectedChart === "presion" && (
                                         <div key="chart-presion" className="card">
                                             <div className="alert alert-success m-3">Renderizando gráfico de PRESIÓN</div>
                                             {presionArr.length > 0 ? (
-                                                <ChartComponent key={`presion-${presionArr.length}`} title="Presión (hPa)" datos={[presionArr].reverse()} />
+                                                <ChartComponent key={`presion-${presionArr.length}`} title="Presión (hPa)" datos={[...presionArr].reverse()} />
                                             ) : (
                                                 <div className="card-body text-center">
                                                     <p>No hay datos de presión disponibles (Array length: {presionArr.length})</p>
@@ -706,12 +736,12 @@ export const DashboardRemotePage = () => {
                                             )}
                                         </div>
                                     )}
-                                    
+
                                     {selectedChart === "viento" && (
                                         <div key="chart-viento" className="card">
                                             <div className="alert alert-success m-3">Renderizando gráfico de VIENTO</div>
                                             {direccionArr.length > 0 && velocidadArr.length > 0 ? (
-                                                <Anemografo key={`viento-${direccionArr.length}`} title="Viento" promedio={promedioDireccion} datosVelocidad={[...velocidadArr].reverse()} promedioVelocidad={[...promedioVelocidad].reverse()} datos={direccionArr} />
+                                                <Anemografo key={`viento-${direccionArr.length}`} title="Viento" promedio={promedioDireccion} datosVelocidad={[...velocidadArr].reverse()} promedioVelocidad={promedioVelocidad} datos={direccionArr} />
                                             ) : (
                                                 <div className="card-body text-center">
                                                     <p>No hay datos de viento disponibles (Dir: {direccionArr.length}, Vel: {velocidadArr.length})</p>
@@ -719,6 +749,21 @@ export const DashboardRemotePage = () => {
                                             )}
                                         </div>
                                     )}
+
+                                    <div style={{ display: selectedChart === "mapa" ? "block" : "none" }}>
+                                        {!parseFloat(lat) && !parseFloat(lon) ? (
+                                            <p>No hay coordenadas disponibles para mostrar el mapa.</p>
+                                        ) : (
+                                            <iframe
+                                                title="Google Map"
+                                                width="100%"
+                                                height="350"
+                                                style={{ border: 0, marginBottom: "1rem" }}
+                                                loading="lazy"
+                                                allowFullScreen
+                                                src={`https://www.google.com/maps?q=${parseFloat(lat) || -36.8270698},${parseFloat(lon) || -73.0502064}&z=15&output=embed`}
+                                            />)}
+                                    </div>
                                 </div>
                             </div>
 

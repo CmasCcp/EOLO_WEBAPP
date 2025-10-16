@@ -30,6 +30,7 @@ export const HistoricDashboardPage = () => {
   const [bateriaArr, setBateriaArr] = useState([]);
   const [direccionArr, setDireccionArr] = useState([]);
   const [velocidadArr, setVelocidadArr] = useState([]);
+  const [generatingPDF, setGeneratingPDF] = useState(false);
 
 
   // // Calculados
@@ -215,6 +216,44 @@ export const HistoricDashboardPage = () => {
   // Encuentra la opción seleccionada
   const selectedOption = chartOptions.find(opt => opt.key === selectedChart);
 
+  // Función wrapper para manejar el estado de loading del PDF
+  const handleGeneratePDF = async () => {
+    setGeneratingPDF(true);
+    try {
+      await generatePDFReport({
+        patente,
+        datos,
+        avgFlow,
+        minFlow,
+        maxFlow,
+        lastVolume,
+        minVolume,
+        maxVolume,
+        promedioTemperatura,
+        minTemperatura,
+        maxTemperatura,
+        promedioHumedad,
+        minHumedad,
+        maxHumedad,
+        promedioPresion,
+        minPressure,
+        maxPressure,
+        promedioPM25,
+        minPM25,
+        maxPM25,
+        promedioPM10,
+        minPM10,
+        maxPM10,
+        setSelectedChart
+      });
+    } catch (error) {
+      console.error('Error generando PDF:', error);
+      alert('Error al generar el reporte PDF. Por favor, intente nuevamente.');
+    } finally {
+      setGeneratingPDF(false);
+    }
+  };
+
   // Función para generar el PDF
   // const generatePDFReport = async () => {
   //   const pdf = new jsPDF('p', 'mm', 'a4');
@@ -345,34 +384,19 @@ export const HistoricDashboardPage = () => {
                 </button>
                 <button
                   className="btn btn-danger mx-1"
-                  onClick={() => generatePDFReport({
-                    patente,
-                    datos,
-                    avgFlow,
-                    minFlow,
-                    maxFlow,
-                    lastVolume,
-                    minVolume,
-                    maxVolume,
-                    promedioTemperatura,
-                    minTemperatura,
-                    maxTemperatura,
-                    promedioHumedad,
-                    minHumedad,
-                    maxHumedad,
-                    promedioPresion,
-                    minPressure,
-                    maxPressure,
-                    promedioPM25,
-                    minPM25,
-                    maxPM25,
-                    promedioPM10,
-                    minPM10,
-                    maxPM10,
-                    setSelectedChart
-                  })}
+                  onClick={handleGeneratePDF}
+                  disabled={generatingPDF}
                 >
-                  <small>Descargar PDF</small>
+                  {generatingPDF ? (
+                    <>
+                      <div className="spinner-border spinner-border-sm me-2" role="status">
+                        <span className="visually-hidden">Generando...</span>
+                      </div>
+                      <small>Generando PDF...</small>
+                    </>
+                  ) : (
+                    <small>Descargar PDF</small>
+                  )}
                 </button>
               </div>
             </div>

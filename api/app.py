@@ -201,13 +201,23 @@ def geocode_location():
         return jsonify({"error": str(e)}), 500
 
 # Endpoint para obtener coordenadas de una ubicación
-@app.route('/geocode-reverse', methods=['GET'])
+@app.route('/geocode-reverse', methods=['GET', 'OPTIONS'])
 def geocode_reverse_location():
+    # Manejar preflight OPTIONS request
+    if request.method == 'OPTIONS':
+        response = jsonify({"status": "OK"})
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add("Access-Control-Allow-Methods", "GET, OPTIONS")
+        response.headers.add("Access-Control-Allow-Headers", "Content-Type")
+        return response, 200
+    
     lat = request.args.get('lat')  # Obtener la ubicación desde los parámetros de la URL
     lon = request.args.get('lon')  # Obtener la ubicación desde los parámetros de la URL
 
     if not lat or not lon:
-        return jsonify({"error": "No location provided"}), 400
+        error_response = jsonify({"error": "No location provided"})
+        error_response.headers.add("Access-Control-Allow-Origin", "*")
+        return error_response, 400
 
     try:
 
@@ -231,12 +241,20 @@ def geocode_reverse_location():
             display_name = str(location_data['display_name'])
 
             # Decodificar cualquier secuencia Unicode en el texto
-            return jsonify(data), 200
+            response_data = jsonify(data)
+            response_data.headers.add("Access-Control-Allow-Origin", "*")
+            response_data.headers.add("Access-Control-Allow-Methods", "GET, OPTIONS")
+            response_data.headers.add("Access-Control-Allow-Headers", "Content-Type")
+            return response_data, 200
         else:
-            return jsonify({"error": "Location not found"}), 404
+            error_response = jsonify({"error": "Location not found"})
+            error_response.headers.add("Access-Control-Allow-Origin", "*")
+            return error_response, 404
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        error_response = jsonify({"error": str(e)})
+        error_response.headers.add("Access-Control-Allow-Origin", "*")
+        return error_response, 500
 
 
 # Ruta para validar el PIN
